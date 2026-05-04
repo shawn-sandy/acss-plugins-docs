@@ -135,7 +135,7 @@ If a command or skill is **removed** upstream, do NOT delete the MDX immediately
   # Step B — push the updated file to the docs-sync-state tracking branch.
   git fetch origin docs-sync-state || true
   git worktree add -B docs-sync-state /tmp/docs-sync-state origin/docs-sync-state 2>/dev/null \
-    || git worktree add --orphan -b docs-sync-state /tmp/docs-sync-state
+    || git worktree add --orphan docs-sync-state /tmp/docs-sync-state
   cp .claude/docs-sync-state.json /tmp/docs-sync-state/docs-sync-state.json
   git -C /tmp/docs-sync-state add docs-sync-state.json
   git -C /tmp/docs-sync-state commit -m "chore(docs-sync): no drift, bump state to <short-sha>"
