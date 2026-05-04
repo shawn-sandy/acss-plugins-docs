@@ -62,12 +62,20 @@ If a command or skill is **removed** upstream, do NOT delete the MDX immediately
    git clone https://github.com/shawn-sandy/agentic-acss-plugins "$tmpdir/upstream"
    ```
 
-2. **Determine the diff window.** Find the last sync commit recorded in `lastUpstreamSha`. Look in this order:
-   1. `docs-sync-state` branch on origin: `git show origin/docs-sync-state:docs-sync-state.json` (most recent, including no-drift bumps).
-   2. `.claude/docs-sync-state.json` on `main` (fallback).
-   3. If neither exists, treat the last 14 days of upstream commits as the window.
+2. **Determine the diff window.** Read both possible state sources, then pick the newest by `lastSyncedAt` (ISO timestamp). The `docs-sync-state` branch is the canonical source for no-drift bumps; `main` carries the state file forward when a drift PR is merged. Either may be ahead, depending on what ran last.
 
-   After a successful drift PR run, update `.claude/docs-sync-state.json` in this repo (committed as part of the PR). After a no-drift run, push the state-only update to the `docs-sync-state` branch (see Hard rules below).
+   ```bash
+   # Always fetch both refs first — neither is guaranteed to be local.
+   git fetch origin main docs-sync-state 2>/dev/null || git fetch origin main
+   git fetch origin docs-sync-state 2>/dev/null || true
+
+   state_branch=$(git show origin/docs-sync-state:docs-sync-state.json 2>/dev/null || echo '')
+   state_main=$(git show origin/main:.claude/docs-sync-state.json 2>/dev/null || echo '')
+   ```
+
+   Compare `lastSyncedAt` on each blob and use whichever is newer; if only one exists, use it; if neither exists, treat the last 14 days of upstream commits as the window.
+
+   After a successful drift PR run, update `.claude/docs-sync-state.json` in this repo (committed as part of the PR) **and** also push the same state to the `docs-sync-state` branch in the same run (see step 9), so the two sources stay in sync regardless of merge timing. After a no-drift run, only the `docs-sync-state` branch is updated (see Hard rules below).
 
 3. **Enumerate upstream changes.** For each changed file under the discovered plugin roots or top-level docs:
    - Read both upstream version and the mapped MDX (if any).
@@ -106,7 +114,9 @@ If a command or skill is **removed** upstream, do NOT delete the MDX immediately
      - A "Needs human decision" section for: removed upstream items, brand-new plugins, or anything ambiguous
      - Link to upstream compare URL: `https://github.com/shawn-sandy/agentic-acss-plugins/compare/<old>...<new>`
 
-9. **Update `.claude/docs-sync-state.json`** with the new `lastUpstreamSha` and ISO timestamp, include it in the same commit.
+9. **Update sync state in both places.**
+   - Update `.claude/docs-sync-state.json` with the new `lastUpstreamSha` and ISO timestamp; include it in the same PR commit.
+   - Also push the same state file to the `docs-sync-state` tracking branch (using the worktree pattern from the Hard rules below) so step 2 of the next run reads a current value regardless of whether the PR has merged yet.
 
 ## Hard rules
 
@@ -132,11 +142,19 @@ If a command or skill is **removed** upstream, do NOT delete the MDX immediately
   git -C /tmp/docs-sync-state push -u origin docs-sync-state
   git worktree remove /tmp/docs-sync-state
 
-  # Step C — restore .claude/docs-sync-state.json on the working branch so it
-  # matches origin (working tree should be clean before exit):
-  git checkout -- .claude/docs-sync-state.json 2>/dev/null || true
+  # Step C — restore .claude/docs-sync-state.json on the working branch so the
+  # working tree is clean before exit. The file may be tracked (revert with
+  # checkout) or untracked-on-this-branch (remove it), depending on history.
+  if git ls-files --error-unmatch .claude/docs-sync-state.json >/dev/null 2>&1; then
+    git checkout -- .claude/docs-sync-state.json
+  else
+    rm -f .claude/docs-sync-state.json
+  fi
+  # Verify cleanliness — any residue is a bug, fail loudly:
+  test -z "$(git status --porcelain -- .claude/docs-sync-state.json)" \
+    || { echo "no-drift cleanup left state file dirty" >&2; exit 1; }
   ```
-  Then report "no drift detected" and exit. The state file in `.claude/docs-sync-state.json` on `main` is only updated by merged drift PRs; the `docs-sync-state` branch is the source of truth for the next run's `lastUpstreamSha`.
+  Then report "no drift detected" and exit. The next run resolves `lastUpstreamSha` by reading both `origin/docs-sync-state` and `origin/main` and picking the newer `lastSyncedAt` (see step 2), so both paths can advance state independently without one going stale.
 
 ## Output format when reporting back
 
