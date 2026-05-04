@@ -1,11 +1,11 @@
 ---
 title: /style-tune
-description: Adjust theme roles or component tokens with natural-language modifiers — "softer", "warmer", "more spacious" — with WCAG validation built in.
+description: Adjust theme roles or component tokens with natural-language modifiers — "softer", "warmer", "more elevated" — with WCAG validation built in.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-`/style-tune` is the explicit slash-command form of the `style-tune` skill. The skill also auto-triggers on natural-language phrases ("warmer button", "calmer alert"), so you rarely need to type the slash command — but it's available when you want to be explicit about scope.
+`/style-tune` is the explicit slash-command form of the `style-tune` skill. The skill also auto-triggers on natural-language phrases ("warmer button", "more elevated cards"), so you rarely need to type the slash command — but it's available when you want to be explicit about scope.
 
 ## Syntax
 
@@ -17,16 +17,16 @@ import { Aside } from '@astrojs/starlight/components';
 
 ```text
 /style-tune button softer warmer
-/style-tune primary tone-down
-/style-tune alert calmer
-/style-tune card more-spacious
+/style-tune primary "tone down"
+/style-tune card "more elevated"
+/style-tune input sharper
 ```
 
 Or, equivalently, just write the intent in chat:
 
 > Make the button feel softer and warmer.
 > Tone down the primary color a touch.
-> More spacious cards.
+> More elevated cards.
 
 ## Scope
 
@@ -39,15 +39,20 @@ The skill edits one of two layers:
 
 ## Modifier vocabulary
 
-| Modifier | Meaning |
-|---|---|
-| softer | Lower chroma, gentler radius |
-| warmer | Hue shift toward red/orange |
-| cooler | Hue shift toward blue/teal |
-| calmer | Lower chroma, lower contrast accent |
-| tone-down | Reduce saturation while preserving role |
-| more-spacious | Larger paddings/gaps |
-| elevated | Stronger shadow + slight radius bump |
+These match the canonical mappings in the [`style-tune` skill](/acss-plugins-docs/acss-kit/skills/style-tune#intent-vocabulary):
+
+| Modifier | Target tokens | Effect |
+|---|---|---|
+| warmer | `--*-bg`, `--color-*` | Hue shift toward amber (≈ +15–30°) |
+| cooler | `--*-bg`, `--color-*` | Hue shift toward blue (≈ −15–30°) |
+| softer | `--*-radius` | Radius × 1.5 (min 4px) |
+| sharper | `--*-radius` | Radius × 0.5 (min 0) |
+| larger / bigger | `--*-font-size`, `--*-padding-*` | × 1.125 |
+| smaller | `--*-font-size`, `--*-padding-*` | × 0.875 |
+| bolder | `--*-bg` / `--color-*` chroma | Chroma × 1.2 |
+| subtler / muted / tone down | `--*-bg` / `--color-*` chroma | Chroma × 0.8 |
+| more elevated | `--*-shadow` | Next shadow step up |
+| flatter | `--*-shadow` | Next shadow step down (or removed) |
 
 ## Workflow
 
@@ -56,7 +61,7 @@ The skill edits one of two layers:
 3. Compute adjustments — colours via `oklch_shift.py`, spatial tokens via canonical multipliers.
 4. Apply edits with validation:
    - Theme changes are pre-validated for WCAG contrast in a temp directory; failures roll back the entire batch.
-   - Component edits preserve `var()` wrappers and fallbacks.
+   - Component edits also run a WCAG pre-check on the affected token against its typical background role, and preserve `var()` wrappers and fallbacks.
 5. Re-validate the file structure and surface drift hints.
 6. Print a summary table — modifier, token, old value, new value, status.
 

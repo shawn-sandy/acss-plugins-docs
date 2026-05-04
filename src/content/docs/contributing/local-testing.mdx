@@ -5,7 +5,13 @@ description: Run the structural, end-to-end, and sandbox tests bundled with agen
 
 import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
 
-The `agentic-acss-plugins` repo ships three complementary test paths under `tests/`. Run at least the structural pass before opening a PR — the e2e and sandbox flows are opt-in but recommended whenever you touch generation code.
+The `agentic-acss-plugins` repo ships three complementary test paths under `tests/`. Which ones you must run depends on what you changed:
+
+- **`tests/run.sh`** — required on **every** PR.
+- **`tests/e2e.sh`** — required when you change component generation, theming, or any skill that emits TSX/SCSS.
+- **`tests/setup.sh`** sandbox — required for at least one manual run when you change a slash command or a skill's user-facing flow.
+
+The e2e and sandbox flows are conditional requirements, not optional extras — skipping them on a relevant change is what the pre-submit checklist is checking for.
 
 ## Test paths at a glance
 
@@ -29,7 +35,7 @@ tests/run.sh
 
 ## End-to-end — `tests/e2e.sh`
 
-Opt-in deeper checks for generated artefacts:
+Required for any PR that touches component generation, theming, or skills that emit code. Deeper checks for generated artefacts:
 
 - Type-checks extracted components against React types
 - Compiles SCSS
