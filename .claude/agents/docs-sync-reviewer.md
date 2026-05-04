@@ -75,7 +75,7 @@ If a command or skill is **removed** upstream, do NOT delete the MDX immediately
 
    Compare `lastSyncedAt` on each blob and use whichever is newer; if only one exists, use it; if neither exists, treat the last 14 days of upstream commits as the window.
 
-   After a successful drift PR run, update `.claude/docs-sync-state.json` in this repo (committed as part of the PR) **and** also push the same state to the `docs-sync-state` branch in the same run (see step 9), so the two sources stay in sync regardless of merge timing. After a no-drift run, only the `docs-sync-state` branch is updated (see Hard rules below).
+   After a successful drift PR run, `.claude/docs-sync-state.json` is included in the PR commit and reaches `main` only when the PR is merged — the `docs-sync-state` branch is **not** advanced for drift runs (see step 9 for the rationale: advancing it before merge would let the agent silently skip unmerged drift). After a no-drift run, only the `docs-sync-state` branch is updated (see Hard rules below).
 
 3. **Enumerate upstream changes.** For each changed file under the discovered plugin roots or top-level docs:
    - Read both upstream version and the mapped MDX (if any).
@@ -104,19 +104,20 @@ If a command or skill is **removed** upstream, do NOT delete the MDX immediately
    ```
    If the build fails, fix the MDX. Do not push a broken build.
 
-8. **Commit, push, open PR.**
-   - Commit message: `docs: sync with agentic-acss-plugins@<short-sha>`
+8. **Update the sync state file.** Before any commit, write `.claude/docs-sync-state.json` with the new `lastUpstreamSha` and ISO timestamp so the file is included in the same commit as the docs changes. Do **not** push the state to the `docs-sync-state` tracking branch on drift runs — see the rationale in step 9. The state branch advances only on no-drift runs (Hard rules) or when the drift PR's merge brings the file forward on `main`.
+
+9. **Check for an existing open sync PR, then commit, push, open PR.**
+   - Before opening a new PR, list open PRs targeting `main` whose head branch matches `claude/docs-sync-*`. If one exists, push your commit to that PR's branch instead of creating a duplicate; update its title/body to reflect the new SHA range and skip PR creation. Otherwise:
+   - Commit (state file + doc changes together) with message: `docs: sync with agentic-acss-plugins@<short-sha>`
    - Push to the current branch with `git push -u origin <branch>`.
-   - Open a PR via the GitHub MCP server (`mcp__github__create_pull_request`) targeting `main`.
+   - Open a PR via `mcp__github__create_pull_request` targeting `main`.
    - PR body must include:
      - Upstream SHA range covered (`<old>..<new>`)
      - Bulleted list of changes per MDX file (**Updated**, **Added**, **Flagged for review**)
      - A "Needs human decision" section for: removed upstream items, brand-new plugins, or anything ambiguous
      - Link to upstream compare URL: `https://github.com/shawn-sandy/agentic-acss-plugins/compare/<old>...<new>`
 
-9. **Update sync state in both places.**
-   - Update `.claude/docs-sync-state.json` with the new `lastUpstreamSha` and ISO timestamp; include it in the same PR commit.
-   - Also push the same state file to the `docs-sync-state` tracking branch (using the worktree pattern from the Hard rules below) so step 2 of the next run reads a current value regardless of whether the PR has merged yet.
+   **Why state isn't pushed to `docs-sync-state` here:** if the drift PR is never merged, advancing the tracking branch would make the next run see "everything synced to <new-sha>" and silently skip drift that's still pending review on `main`. By only updating state on `main` (via merge) or on no-drift runs, the state can never lead reality.
 
 ## Hard rules
 
