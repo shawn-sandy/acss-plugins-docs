@@ -1,0 +1,76 @@
+---
+title: Local Plugin Testing
+description: Run the structural, end-to-end, and sandbox tests bundled with agentic-acss-plugins before opening a PR.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+The `agentic-acss-plugins` repo ships three complementary test paths under `tests/`. Run at least the structural pass before opening a PR — the e2e and sandbox flows are opt-in but recommended whenever you touch generation code.
+
+## Test paths at a glance
+
+| Script | Time | What it covers | When to run |
+|---|---|---|---|
+| `tests/run.sh` | ~30 s | TSX syntax, SCSS `var()` fallbacks, theme contrast, manifest integrity | Every PR |
+| `tests/e2e.sh` | ~2–4 min | TS type-check, SCSS compile, jsdom render, axe-core a11y | When changing component or theme generation |
+| `tests/setup.sh` | one-time | Sandbox project for interactive `/kit-add`, `/theme-create`, etc. | Manual smoke testing |
+
+## Structural validation — `tests/run.sh`
+
+The default check. Catches "banned imports, malformed TSX, missing `var()` fallbacks, theme contrast regressions, manifest/structure drift" without launching a browser.
+
+```sh
+npm --prefix tests ci
+pip3 install --user tinycss2
+tests/run.sh
+```
+
+`run.sh` excludes the `component-form` skill, which still requires manual verification.
+
+## End-to-end — `tests/e2e.sh`
+
+Opt-in deeper checks for generated artefacts:
+
+- Type-checks extracted components against React types
+- Compiles SCSS
+- Renders components into HTML via jsdom
+- Runs axe-core to fail on **serious** or **critical** accessibility violations
+
+```sh
+npm --prefix tests ci
+tests/e2e.sh
+```
+
+<Aside type="caution">
+The jsdom + axe-core harness catches structural a11y issues (missing alt text, ARIA mistakes) but **not** rendered colour contrast or `:focus-visible` styling. Pair e2e with a manual sandbox pass for visual regressions.
+</Aside>
+
+## Sandbox — `tests/setup.sh`
+
+Creates `tests/sandbox/` — a minimal React + TypeScript project — so you can exercise the slash commands the way a real user would.
+
+```sh
+tests/setup.sh
+cd tests/sandbox
+claude --plugin-dir ../../plugins/acss-kit
+```
+
+Inside the sandbox session you can run `/setup`, `/kit-add button card`, `/theme-create "#4f46e5"`, and so on. The `--plugin-dir` flag bypasses the marketplace and picks up local edits on every invocation, which makes for fast iteration.
+
+## Pre-submit checklist
+
+Before opening a PR:
+
+1. `tests/run.sh` passes.
+2. If you touched component generation or theming → `tests/e2e.sh` passes.
+3. If you touched a slash command → exercise it once in the sandbox.
+4. `plugin.json` version bumped (only there — never in `marketplace.json`).
+5. CHANGELOG entries updated for both the affected plugin and the repo root.
+6. fpkit/acss cross-references use full GitHub URLs pinned to a tag or SHA — never `blob/main`.
+
+## Related
+
+- [Plugin Architecture](/acss-plugins-docs/contributing/architecture)
+- [Authoring Commands](/acss-plugins-docs/contributing/authoring-commands)
+- [Authoring Skills](/acss-plugins-docs/contributing/authoring-skills)
+- [Python Script Contracts](/acss-plugins-docs/contributing/python-scripts)

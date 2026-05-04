@@ -1,0 +1,89 @@
+---
+title: /kit-create
+description: Generate a single fpkit component from a natural-language description, with prop vocabulary resolution and accessibility validation.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+`/kit-create` turns a short natural-language description into a ready-to-paste TSX snippet (or a standalone component file). It is the "creator-mode" companion to `/kit-add` — instead of generating the catalogue source, it composes a specific instance of a component with the props you described.
+
+## Syntax
+
+```text
+/kit-create <description>
+```
+
+## Examples
+
+```text
+/kit-create primary pill button saying "Add to cart"
+/kit-create danger alert with title "Payment failed" and a retry action
+/kit-create outlined card titled "Pricing" with a primary CTA
+/kit-create checkbox labelled "I agree to the terms"
+```
+
+## Supported components
+
+Any component with a dedicated reference doc under `references/components/`:
+
+| Group | Components |
+|---|---|
+| Interactive | Button, IconButton, Checkbox |
+| Feedback | Alert |
+| Surfaces | Card, Dialog, Popover |
+| Content | Link, Img, Icon |
+| Form | Input, Field |
+| Collections | List, Table, Nav |
+
+<Aside type="caution">
+Badge, Tag, Heading, Text/Paragraph, Details, and Progress are catalogue-only and not yet supported by `/kit-create`. Use `/kit-add` for those.
+</Aside>
+
+## How it works
+
+The skill follows a nine-step pipeline (Steps A–I):
+
+1. **Parse the description** against the component's reference doc and prop vocabulary.
+2. **Resolve the components directory** via `detect_target.py` and bootstrap missing dependencies through `/kit-add` if needed.
+3. **Choose output mode** — print a JSX snippet, or write a standalone component file.
+4. **Validate** with H1 generic rules and any H2 component-specific rules.
+5. **Generate** single-element or compound JSX with the correct imports.
+6. **Accessibility check** — confirms required props (`aria-label`, `alt`, `labelFor`) are present.
+7. **Refine on follow-ups** — "make it larger", "swap to secondary", etc., adjust the in-memory spec.
+8. **Halt or confirm** for unresolved required props, out-of-union values, or same-axis conflicts.
+9. **Worked examples** double as parser test fixtures.
+
+## Vocabulary the skill recognises
+
+**Colour family** — maps to `color`, `severity`, or `kind`:
+
+> primary, secondary, tertiary, info, success, warning, danger, neutral/default
+
+**Size family** — maps to `size`, `scale`, or `density`:
+
+> xs, sm, md, lg, xl, 2xl
+
+**Variant synonyms:**
+
+| You say | Resolves to |
+|---|---|
+| pill, rounded, capsule | `pill` |
+| outline, outlined, bordered, ghost | `outline` / `outlined` |
+| filled, solid | `filled` |
+| soft, subtle, tonal | `soft` |
+
+## Anti-patterns
+
+The skill explicitly refuses to:
+
+1. Silently default a colour prop — it asks instead.
+2. Substitute a value not in the prop's union.
+3. Hard-code component import paths (always uses `detect_target.py`).
+4. Generate empty compound slots.
+5. Write files without confirmation when an H1 halt is triggered.
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — generates the catalogue source files
+- [`component-creator` skill](/acss-plugins-docs/acss-kit/skills/component-creator)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

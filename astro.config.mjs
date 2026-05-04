@@ -40,18 +40,23 @@ export default defineConfig({
             {
               label: 'Commands',
               items: [
+                { label: '/setup', slug: 'acss-kit/commands/setup' },
                 { label: '/kit-add', slug: 'acss-kit/commands/kit-add' },
+                { label: '/kit-create', slug: 'acss-kit/commands/kit-create' },
                 { label: '/kit-list', slug: 'acss-kit/commands/kit-list' },
                 { label: '/theme-create', slug: 'acss-kit/commands/theme-create' },
                 { label: '/theme-brand', slug: 'acss-kit/commands/theme-brand' },
                 { label: '/theme-extract', slug: 'acss-kit/commands/theme-extract' },
                 { label: '/theme-update', slug: 'acss-kit/commands/theme-update' },
+                { label: '/style-tune', slug: 'acss-kit/commands/style-tune' },
               ],
             },
             {
               label: 'Skills',
               items: [
+                { label: 'setup skill', slug: 'acss-kit/skills/setup' },
                 { label: 'components skill', slug: 'acss-kit/skills/components' },
+                { label: 'component-creator skill', slug: 'acss-kit/skills/component-creator' },
                 { label: 'styles skill', slug: 'acss-kit/skills/styles' },
                 { label: 'component-form (pilot)', slug: 'acss-kit/skills/component-form' },
                 { label: 'style-tune (pilot)', slug: 'acss-kit/skills/style-tune' },
@@ -107,6 +112,7 @@ export default defineConfig({
             { label: 'Authoring Commands', slug: 'contributing/authoring-commands' },
             { label: 'Authoring Skills', slug: 'contributing/authoring-skills' },
             { label: 'Python Script Contracts', slug: 'contributing/python-scripts' },
+            { label: 'Local Plugin Testing', slug: 'contributing/local-testing' },
           ],
         },
       ],

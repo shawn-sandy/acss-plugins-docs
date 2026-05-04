@@ -1,0 +1,82 @@
+---
+title: /setup
+description: Bootstrap a React + TypeScript project for acss-kit — installs ui.tsx, configures the components target, and seeds an optional starter theme.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+`/setup` is the one-shot bootstrap command. It front-loads everything acss-kit needs so subsequent commands like `/kit-add` and `/theme-create` work without prompting for project conventions every time.
+
+Run it once after installing the plugin in a new (or existing) React + TypeScript project.
+
+## Syntax
+
+```text
+/setup [--no-theme] [--target=<dir>]
+```
+
+## Flags
+
+| Flag | Description |
+|---|---|
+| `--no-theme` | Skip the starter light/dark theme step. Useful when you already have a theme or plan to run `/theme-create` separately. |
+| `--target=<dir>` | Override the components directory. Defaults to `src/components/fpkit/` (or whatever is recorded in `.acss-target.json`). |
+
+## What it does
+
+The skill executes eight sequential steps. Every step is **idempotent** — re-running `/setup` is safe and never overwrites existing files.
+
+<Steps>
+
+1. **Verify React + TypeScript** — Halts if either is missing from `dependencies`/`devDependencies`.
+2. **Check the React major version** — Warns if React 19+ is detected, since `ui.tsx` may need adjustments.
+3. **Detect the package manager** — Reads `packageManager` and lockfiles to choose `npm`, `pnpm`, `yarn`, or `bun`.
+4. **Verify Sass** — Halts with copy-paste install instructions if neither `sass` nor `sass-embedded` is present.
+5. **Set the components target** — Prompts for the directory or reuses `.acss-target.json` if it exists.
+6. **Copy `ui.tsx`** — Writes the foundation file from plugin assets to the target.
+7. **Seed a starter theme** — Generates `light.css` and `dark.css` from a hex seed (skipped with `--no-theme`).
+8. **Wire theme imports** — Detects the CSS/SCSS entry point and adds idempotent `@import` statements.
+
+</Steps>
+
+A summary table at the end lists what was created versus what was kept, so you always know which files the command touched.
+
+## Examples
+
+Run the standard bootstrap:
+
+```text
+/setup
+```
+
+Bootstrap a project that already has its own theme:
+
+```text
+/setup --no-theme
+```
+
+Use a non-default components directory:
+
+```text
+/setup --target=src/ui/fpkit/
+```
+
+## After setup
+
+Once `/setup` completes, the typical next moves are:
+
+```text
+/kit-add button card             # generate your first components
+/theme-create "#4f46e5"          # generate a full WCAG-validated theme
+/utility-add                     # if acss-utilities is also installed
+```
+
+<Aside type="note">
+`.acss-target.json` is committed to your repo. It records the components directory so every teammate's Claude Code session writes to the same place.
+</Aside>
+
+## Related
+
+- [Your First Component](/acss-plugins-docs/getting-started/first-component)
+- [Your First Theme](/acss-plugins-docs/getting-started/first-theme)
+- [`setup` skill](/acss-plugins-docs/acss-kit/skills/setup)

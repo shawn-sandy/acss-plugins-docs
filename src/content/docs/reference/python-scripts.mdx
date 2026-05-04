@@ -1,6 +1,6 @@
 ---
 title: Python Scripts Reference
-description: API reference for all 8 Python scripts in acss-kit and acss-utilities — inputs, outputs, exit codes, and contract families.
+description: API reference for every Python script in acss-kit and acss-utilities — inputs, outputs, exit codes, and contract families.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
@@ -27,6 +27,113 @@ Used for pipeline transformers and human-readable validators. The script:
 ---
 
 ## acss-kit scripts
+
+### acss-kit detection scripts
+
+The `/setup`, `/kit-add`, and `/kit-create` workflows lean on four small detector scripts. All four follow the **Detector contract** (JSON to stdout, `reasons` array, exit 0 on match / 1 on no-match).
+
+#### `detect_stack.py`
+
+**Location:** `plugins/acss-kit/scripts/detect_stack.py`
+
+Inspects `package.json` to confirm the project is a viable React + TypeScript target and surfaces the React major version.
+
+**Inputs:**
+```bash
+python3 detect_stack.py [--project-root=<path>]
+```
+
+**Output (stdout):**
+```json
+{
+  "react": { "present": true, "version": "18.3.1", "major": 18 },
+  "typescript": { "present": true, "version": "5.4.5" },
+  "sass": { "present": true, "package": "sass" },
+  "reasons": ["Detected React 18 + TypeScript 5 + sass"]
+}
+```
+
+**Exit codes:** 0 = stack viable, 1 = required dep missing.
+
+#### `detect_package_manager.py`
+
+**Location:** `plugins/acss-kit/scripts/detect_package_manager.py`
+
+Identifies the project's package manager from the `packageManager` field, lockfile presence, and (as a fallback) the `engines` field.
+
+**Inputs:**
+```bash
+python3 detect_package_manager.py [--project-root=<path>]
+```
+
+**Output (stdout):**
+```json
+{
+  "manager": "pnpm",
+  "version": "9.4.0",
+  "source": "packageManager",
+  "addCommand": "pnpm add -D",
+  "reasons": ["Read packageManager field: pnpm@9.4.0"]
+}
+```
+
+`source` values: `"packageManager"`, `"lockfile"`, `"engines"`, `"default"`.
+
+**Exit codes:** 0 = detected, 1 = no signal (defaults to npm).
+
+#### `detect_target.py`
+
+**Location:** `plugins/acss-kit/scripts/detect_target.py`
+
+Resolves the components output directory. Reads `.acss-target.json` first, then falls back to `src/components/fpkit/`, then to a heuristic on `src/`.
+
+**Inputs:**
+```bash
+python3 detect_target.py [--project-root=<path>]
+```
+
+**Output (stdout):**
+```json
+{
+  "source": "configured",
+  "componentsDir": "src/components/fpkit/",
+  "exists": true,
+  "reasons": ["Found .acss-target.json with componentsDir"]
+}
+```
+
+`source` values: `"configured"`, `"default"`, `"heuristic"`, `"none"`.
+
+**Exit codes:** 0 = directory resolved, 1 = no usable target.
+
+#### `verify_integration.py`
+
+**Location:** `plugins/acss-kit/scripts/verify_integration.py`
+
+Run after `/setup` (and any time afterwards) to confirm the project still wires acss-kit correctly: `ui.tsx` is present, theme files exist, theme imports are reachable from the entry stylesheet, and `.acss-target.json` matches reality.
+
+**Inputs:**
+```bash
+python3 verify_integration.py [--project-root=<path>] [--strict]
+```
+
+**Output (stdout):**
+```json
+{
+  "ok": true,
+  "checks": {
+    "uiTsx": "ok",
+    "themeFiles": "ok",
+    "themeImports": "ok",
+    "acssTarget": "ok"
+  },
+  "reasons": ["All integration points verified"]
+}
+```
+
+**Exit codes:** 0 = all checks pass, 1 = one or more checks fail (`--strict` also fails on warnings).
+
+---
 
 ### `generate_palette.py`
 
