@@ -65,6 +65,18 @@ All content is MDX. Add new pages by creating a `.mdx` file with `title:` and `d
 
 The site uses a custom OKLCH-based color palette defined in `src/styles/custom.css`, mirroring the same color system that acss-kit generates for user projects.
 
+## For maintainers
+
+If you're editing the docs, adding pages, updating the theme, or troubleshooting the build/deploy pipeline, see **[MAINTAINING.md](./MAINTAINING.md)**. It covers:
+
+- Repository layout and architecture
+- Authoring conventions and the canonical page templates
+- Adding pages, sections, and sidebar entries
+- The OKLCH theme system in `src/styles/custom.css`
+- The GitHub Actions deploy pipeline
+- The `docs-sync-reviewer` agent that keeps these docs in sync with upstream
+- Common maintenance tasks, troubleshooting, and dependency upgrades
+
 ## Related
 
 - [Plugin repo](https://github.com/shawn-sandy/agentic-acss-plugins) — source for both plugins
