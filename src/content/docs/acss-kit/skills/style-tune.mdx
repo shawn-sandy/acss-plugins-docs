@@ -1,0 +1,151 @@
+---
+title: style-tune skill (pilot)
+description: Adjust your app's visual feel with natural language adjectives — the skill routes to the right CSS tokens and validates WCAG before writing.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+`style-tune` is a pilot skill that maps natural language visual intent to CSS token changes, with WCAG pre-validation and atomic rollback.
+
+<Aside type="note">
+This is a **pilot skill** validating a per-feel routing pattern. The intent vocabulary and routing logic are actively refined.
+</Aside>
+
+## Trigger phrases
+
+The skill activates on adjective + component (or theme-layer) combinations:
+
+| Phrase | Routes to |
+|---|---|
+| "warmer button" | `--btn-bg` hue shift toward amber |
+| "cooler card" | `--card-bg` hue shift toward blue |
+| "softer dialog" | `--dlg-radius` increase |
+| "sharper inputs" | `--input-radius` set to 0 or near-0 |
+| "larger button text" | `--btn-font-size` increase |
+| "smaller badge" | `--badge-padding-x/y` decrease |
+| "bolder primary" | `--color-primary` chroma increase |
+| "tone down the primary" | `--color-primary` chroma decrease |
+| "more elevated cards" | `--card-shadow` increase |
+| "flatter surfaces" | Component + theme shadow tokens decrease |
+
+## Two-layer routing
+
+`style-tune` distinguishes between **theme-layer** and **component-layer** changes:
+
+### Theme layer
+
+Changes that affect `--color-*` roles (shared across all components):
+
+- "bolder primary" → adjusts `--color-primary` chroma via `oklch_shift.py`
+- "warmer palette" → shifts all hues toward amber
+- "cooler info color" → adjusts `--color-info` hue toward blue
+
+Theme-layer changes route through `/theme-update` with pre-validation in a temp directory.
+
+### Component layer
+
+Changes that affect component-specific tokens (scoped to one component):
+
+- "warmer button" → adjusts `--btn-bg` using `oklch_shift.py`
+- "softer card" → adjusts `--card-radius`
+- "more elevated dialog" → adjusts `--dlg-shadow`
+
+Component-layer changes edit the component's `.scss` file directly.
+
+## Intent vocabulary
+
+| Modifier | Target tokens | Delta |
+|---|---|---|
+| warmer | `--*-bg`, `--color-*` | H° + 15–30° toward amber (H80°) |
+| cooler | `--*-bg`, `--color-*` | H° - 15–30° toward blue (H240°) |
+| softer | `--*-radius` | radius × 1.5 (min 4px) |
+| sharper | `--*-radius` | radius × 0.5 (min 0) |
+| larger / bigger | `--*-font-size`, `--*-padding-*` | × 1.125 |
+| smaller | `--*-font-size`, `--*-padding-*` | × 0.875 |
+| bolder | `--*-bg`, `--color-*` chroma | C × 1.2 |
+| subtler / muted | `--*-bg`, `--color-*` chroma | C × 0.8 |
+| more elevated | `--*-shadow` | next shadow step up |
+| flatter | `--*-shadow` | next shadow step down or removed |
+
+## OKLCH delta application
+
+Deltas are applied via `oklch_shift.py`:
+
+```python
+# oklch_shift.py usage:
+# Input: hex + delta flags
+# Output: new hex after OKLCH delta applied
+
+oklch_shift("#4f46e5", hue_delta=+20, chroma_mult=1.0, lightness_delta=0.0)
+# → "#5a4bd4"  (shifted 20° toward warmer hue in OKLCH space)
+```
+
+The script clamps output to the sRGB gamut and warns if significant clamping occurs (> 5% channel change).
+
+## Atomicity
+
+`style-tune` uses the same atomic contract as `/theme-update`:
+
+1. Compute the delta in memory
+2. Apply it to a temp copy of the file
+3. Run WCAG validation on the temp copy
+4. If all checks pass → write temp to real file
+5. If any fail → discard temp, report failure, suggest an alternative delta
+
+For **component-layer** changes, WCAG contrast is checked on the affected token against its typical background role.
+
+## Example session
+
+```
+User: make the button a bit warmer
+
+style-tune: Routing to component layer → --btn-bg
+
+  Current:  oklch(55% 0.22 270)  (#4f46e5)
+  Delta:    hue +20° → oklch(55% 0.22 290)  (#6040e5)
+
+  Pre-validating WCAG:
+    text-inverse / btn-bg:  4.8:1  ✓
+
+  Writing src/components/fpkit/Button.scss  ✓
+
+  --btn-bg:  oklch(55% 0.22 270)  →  oklch(55% 0.22 290)
+  The button background is now 20° warmer (shifted toward purple-warm).
+
+User: actually a bit more
+
+style-tune: Another +20° step?  (current: H°290)
+
+  Current:  oklch(55% 0.22 290)
+  Delta:    hue +20° → oklch(55% 0.22 310)
+
+  Pre-validating WCAG:
+    text-inverse / btn-bg:  4.5:1  ✓  (borderline — ratio is exactly at AA threshold)
+
+  Writing Button.scss  ✓
+```
+
+<Aside type="tip">
+If `style-tune` adjusts a theme-layer token (like `--color-primary`), it also re-validates the paired hover state (`--color-primary-hover`) to ensure both stay in sync.
+</Aside>
+
+## Rollback example
+
+```
+User: bolder primary
+
+style-tune: Increasing --color-primary chroma by 20%
+
+  Current:  oklch(55% 0.22 270)  (C: 0.22)
+  Delta:    C × 1.20 → C 0.264
+  Result:   oklch(55% 0.264 270)
+
+  Pre-validating WCAG in temp dir:
+    primary / background:  4.1:1  ✗  (minimum 4.5:1)
+
+  Rollback — no files written.
+
+  The higher chroma reduces contrast to 4.1:1 (below 4.5:1 minimum).
+  Suggested: increase chroma to C 0.24 (ratio: 4.6:1) — smaller step.
+  Run: "bolder primary (small step)" to apply the safe increment.
+```

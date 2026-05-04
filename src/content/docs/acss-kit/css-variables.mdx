@@ -1,0 +1,40 @@
+---
+title: CSS Variables Reference
+description: Naming conventions, approved abbreviations, and override patterns for acss-kit component tokens.
+---
+
+## Naming convention
+
+All component tokens follow: `--{comp}-{role}[-{descriptor}]`
+
+| Segment | Purpose | Examples |
+|---|---|---|
+| `comp` | Component abbreviation | `btn`, `card`, `dlg`, `inp`, `fld` |
+| `role` | Semantic role | `bg`, `color`, `border`, `radius`, `shadow` |
+| `descriptor` | Optional modifier | `hover`, `focus`, `active`, `sm`, `lg` |
+
+## Approved abbreviations
+
+| Abbreviation | Meaning |
+|---|---|
+| `bg` | background |
+| `bd` / `border` | border |
+| `rad` / `radius` | border-radius |
+| `clr` / `color` | text color |
+| `sz` / `size` | font-size |
+| `fw` | font-weight |
+| `px`, `py` | horizontal / vertical padding |
+| `mx`, `my` | horizontal / vertical margin |
+| `el` | elevation / box-shadow |
+
+## Overriding tokens
+
+Override in your own CSS — never edit the generated file:
+
+```css
+/* Global override — applies to all buttons */
+.btn { --btn-radius: 9999px; }
+
+/* Scoped override — applies only inside .hero */
+.hero .btn { --btn-bg: var(--color-accent); }
+```

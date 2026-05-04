@@ -1,0 +1,41 @@
+---
+title: Authoring Skills
+description: How to write a new skill or extend an existing one.
+---
+
+Skills are Markdown files at `plugins/<plugin>/skills/<name>/SKILL.md`.
+
+## Required front-matter
+
+```yaml
+---
+name: my-skill
+description: One-sentence description of what this skill does.
+---
+```
+
+Both `name` and `description` are required. The PostToolUse hook validates these on every save.
+
+## Skill body structure
+
+A well-structured skill body has:
+
+1. **Trigger** — what command or natural language pattern activates this skill
+2. **Pre-conditions** — what must be true before the skill runs (e.g., sass installed)
+3. **Steps** — numbered workflow with clear inputs and outputs at each step
+4. **Output contract** — exactly what files will be created, where, and in what format
+5. **Failure handling** — what happens when a step fails (rollback, error message, retry)
+6. **Examples** — sample inputs and outputs
+
+## Reference docs
+
+Skills read from `skills/<name>/references/` to get domain knowledge. Keep reference docs factual and structured — they're loaded into context on every skill invocation.
+
+## Atomic write contract
+
+Any skill that writes files must follow the atomic write contract:
+1. Build output in memory
+2. Write to temp file
+3. Validate temp file
+4. Copy to real destination on pass
+5. Discard temp on failure

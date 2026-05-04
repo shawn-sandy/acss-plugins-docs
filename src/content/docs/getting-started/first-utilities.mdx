@@ -1,0 +1,128 @@
+---
+title: Your First Utilities
+description: Drop in atomic CSS utility classes and wire them to your acss-kit theme with /utility-add.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+This tutorial shows you how to add the acss-utilities bundle to your project and use utility classes in your components.
+
+## What gets added
+
+Running `/utility-add` copies two files into `src/styles/`:
+
+| File | Purpose |
+|---|---|
+| `utilities.css` | ~12 families of atomic utility classes (spacing, flex, grid, color, etc.) |
+| `token-bridge.css` | Maps acss-utilities' class names to your acss-kit `--color-*` tokens |
+
+The token bridge is what connects `.bg-primary` → `var(--color-primary)` from your theme.
+
+## Add the bundle
+
+<Steps>
+
+1. Run `/utility-add` from a Claude Code session at your project root:
+
+   ```text
+   /utility-add
+   ```
+
+   Claude auto-detects your styles directory. If it can't find one, it uses `src/styles/` as the default.
+
+2. You'll see a summary:
+
+   ```
+   Detected styles dir: src/styles/
+   
+   Writing src/styles/token-bridge.css  ✓
+   Writing src/styles/utilities.css     ✓
+   
+   Bundle: 8.4 KB · 312 classes · 12 families
+   
+   Import order (add to your entry point):
+     import './styles/token-bridge.css';   // first
+     import './styles/utilities.css';
+   ```
+
+3. Add the imports to your entry file **in the order shown** — the bridge must load before the utilities:
+
+   ```tsx
+   // src/main.tsx
+   import './styles/theme/light.css';
+   import './styles/theme/dark.css';
+   import './styles/token-bridge.css';  // ← bridge first
+   import './styles/utilities.css';     // ← then utilities
+   ```
+
+</Steps>
+
+<Aside type="caution">
+Import order matters. `token-bridge.css` defines the CSS custom properties that `utilities.css` references. If utilities loads first, the `var()` fallbacks kick in rather than your theme values.
+</Aside>
+
+## Use utility classes
+
+```tsx
+// Before: inline styles or custom CSS
+<div style={{ display: 'flex', gap: '1rem', padding: '1.5rem' }}>
+  <button style={{ backgroundColor: 'var(--color-primary)' }}>Save</button>
+</div>
+
+// After: utility classes
+<div className="flex gap-4 p-6">
+  <button className="bg-primary text-inverse px-4 py-2 rounded-md">Save</button>
+</div>
+```
+
+## Responsive variants
+
+Utility classes support responsive prefixes. The prefix applies the class at that breakpoint and above:
+
+```tsx
+<div className="flex-col md-flex-row gap-4">
+  {/* stacks vertically on mobile, goes horizontal at md (48rem) */}
+</div>
+```
+
+Available breakpoints: `sm` (30rem), `md` (48rem), `lg` (62rem), `xl` (80rem).
+
+## Explore available classes
+
+To see every available utility class:
+
+```text
+/utility-list
+```
+
+To see classes in a specific family:
+
+```text
+/utility-list spacing
+/utility-list flex
+/utility-list color-bg
+```
+
+## Tune the bundle
+
+You can adjust the spacing scale, enable/disable families, or change breakpoints with a natural language command:
+
+```text
+/utility-tune use a 4px spacing baseline
+/utility-tune disable shadow utilities
+/utility-tune add an xs breakpoint at 20rem
+```
+
+The bundle is regenerated and validated after each tune. Changes roll back if validation fails.
+
+→ See [/utility-tune](/acss-plugins-docs/acss-utilities/commands/utility-tune) for the full reference.
+
+## Using utilities without acss-kit
+
+If you don't have acss-kit themes, skip the token bridge:
+
+```text
+/utility-add --no-bridge
+```
+
+The utility classes still work; color utilities fall back to their hardcoded hex fallbacks.

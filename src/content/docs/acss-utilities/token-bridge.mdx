@@ -1,0 +1,99 @@
+---
+title: Token Bridge
+description: How token-bridge.css maps utility class names to acss-kit theme roles, synthesizes derived variants, and enforces dark-mode parity.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The token bridge (`token-bridge.css`) is the file that connects acss-utilities' class names to acss-kit's semantic `--color-*` role system. Without it, color utility classes fall back to hardcoded hex values. With it, they automatically reflect your generated theme — including dark mode.
+
+## The mapping problem
+
+acss-utilities and acss-kit use different naming conventions for the same conceptual colors:
+
+| acss-utilities class | uses this variable | acss-kit calls it |
+|---|---|---|
+| `.bg-error` | `--color-error` | `--color-danger` |
+| `.text-warning` | `--color-warning-text` | `--color-warning` |
+| `.border-success` | `--color-success-border` | `--color-success` |
+
+The bridge resolves this mismatch with `var()` chains: `--color-error: var(--color-danger, #dc2626)`.
+
+## Full alias mapping
+
+```css
+:root {
+  /* Direct role aliases */
+  --color-error:         var(--color-danger,  #dc2626);
+  --color-warning-text:  var(--color-warning, #b45309);
+  --color-info-text:     var(--color-info,    #0369a1);
+  --color-success-text:  var(--color-success, #047857);
+
+  /* Background variants — 12% of role color in background */
+  --color-error-bg:    color-mix(in oklch, var(--color-danger,  #dc2626) 12%, var(--color-background, #fff));
+  --color-warning-bg:  color-mix(in oklch, var(--color-warning, #b45309) 12%, var(--color-background, #fff));
+  --color-info-bg:     color-mix(in oklch, var(--color-info,    #0369a1) 12%, var(--color-background, #fff));
+  --color-success-bg:  color-mix(in oklch, var(--color-success, #047857) 12%, var(--color-background, #fff));
+
+  /* Light variants — 80% role color, 20% white */
+  --color-primary-light:  color-mix(in oklch, var(--color-primary, #4f46e5) 80%, white);
+  --color-accent-light:   color-mix(in oklch, var(--color-accent,  #7c3aed) 80%, white);
+}
+
+[data-theme="dark"] {
+  /* Dark mode — 18% mix ratio (more visible on dark backgrounds) */
+  --color-error:        var(--color-danger,  #f87171);
+  --color-error-bg:     color-mix(in oklch, var(--color-danger,  #f87171) 18%, var(--color-background, #0f172a));
+  --color-warning-bg:   color-mix(in oklch, var(--color-warning, #fbbf24) 18%, var(--color-background, #0f172a));
+  --color-info-bg:      color-mix(in oklch, var(--color-info,    #60a5fa) 18%, var(--color-background, #0f172a));
+  --color-success-bg:   color-mix(in oklch, var(--color-success, #34d399) 18%, var(--color-background, #0f172a));
+  --color-primary-light: color-mix(in oklch, var(--color-primary, #7dd3fc) 70%, black);
+  --color-accent-light:  color-mix(in oklch, var(--color-accent,  #a78bfa) 70%, black);
+}
+```
+
+## Dark-mode parity contract
+
+Every alias in `:root` must have a corresponding entry in `[data-theme="dark"]`. This is validated during both `/utility-bridge` and `/utility-add`.
+
+The parity contract ensures no utility class "forgets" to adjust in dark mode. Without parity enforcement, a class like `.bg-error-bg` would show the light-mode tint on a dark background.
+
+## `color-mix()` in OKLCH
+
+The derived variants (`-bg`, `-light`) use CSS `color-mix()` in the `oklch` color space rather than `rgba()` for two reasons:
+
+1. **Perceptual uniformity** — mixing in OKLCH produces more natural-looking tints than mixing in sRGB
+2. **Dynamic computation** — the mix updates automatically when the base `--color-*` role changes (no regeneration needed for small token updates)
+
+Browser support: `color-mix(in oklch, ...)` is supported in all modern browsers as of Chrome 111, Firefox 113, Safari 16.2.
+
+## Regenerating the bridge
+
+Run after any theme change:
+
+```text
+/utility-bridge
+```
+
+Or pass a specific theme file:
+
+```text
+/utility-bridge --theme=src/styles/theme/brand-forest.css
+```
+
+The bridge reads the `--color-*` values from your theme and regenerates both `:root` and `[data-theme="dark"]` blocks with updated `var()` chains and fallback hex values.
+
+## Using the bridge without acss-kit
+
+The bridge works without acss-kit themes. The `var()` fallback hex values are used when the acss-kit `--color-*` variables aren't defined:
+
+```css
+--color-error: var(--color-danger, #dc2626);
+/*                                 ↑ used when --color-danger is not set */
+```
+
+This means you can use the utility classes with any CSS custom property scheme — as long as your theme defines `--color-danger`, `--color-primary`, etc. with the same names as acss-kit, the bridge works automatically.
+
+<Aside type="tip">
+If you're using a different CSS variable naming system, you can edit `token-bridge.css` manually to point `var()` references at your own property names. The bridge is a plain CSS file — it's not regenerated unless you explicitly run `/utility-bridge`.
+</Aside>

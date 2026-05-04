@@ -1,0 +1,198 @@
+---
+title: Troubleshooting
+description: Concrete fixes for the most common failures when using acss-kit and acss-utilities.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## acss-kit
+
+### "sass not found in devDependencies"
+
+`/kit-add` checks `package.json` before generating. If `sass` is missing:
+
+```bash
+npm install --save-dev sass
+```
+
+Then re-run `/kit-add`. The check looks for `"sass"` in `devDependencies` — not `node-sass` (the deprecated C++ binding).
+
+### Component not found in catalogue
+
+```
+Error: 'dropdown' not found in component catalogue.
+Did you mean: select?
+```
+
+Run `/kit-list` to see exact component names. Common aliases that don't work:
+- `dropdown` → use `select`
+- `modal` → use `dialog`
+- `message` → use `alert`
+- `notification` → use `toast`
+- `nav-bar` → use `nav`
+
+### Existing file skipped unexpectedly
+
+`/kit-add` skips files that already exist. If you want to regenerate a component (e.g., to pick up a newer version):
+
+1. Delete or rename the existing `.tsx` + `.scss` files
+2. Re-run `/kit-add <component>`
+
+<Aside type="caution">
+This will overwrite your edits. Commit or backup your customizations first.
+</Aside>
+
+### Theme contrast failure
+
+```
+Pre-validation failed. No files written.
+
+  --color-primary: #ff9900
+    Contrast (primary / background): 2.4:1  ✗  (minimum 4.5:1)
+```
+
+Orange and yellow seeds often fail contrast against white backgrounds. Solutions:
+
+1. **Darken the seed** — use a darker shade of the hue as input:
+   ```text
+   /theme-create #b36a00   ← darker amber instead of #ff9900
+   ```
+
+2. **Use the seed as accent, not primary** — generate from a darker primary and use the bright color as `--color-accent` via a brand file.
+
+3. **Adjust after generation** — generate with a passing seed, then manually set accent in a brand file:
+   ```text
+   /theme-create #2563eb --mode=both
+   /theme-brand amber-accent
+   ```
+   Then add to `brand-amber-accent.css`:
+   ```css
+   :root { --color-accent: #b36a00; }  /* darker amber that passes AA */
+   ```
+
+### Dark mode not activating
+
+The dark theme uses `[data-theme="dark"]` on `<html>`, not `@media prefers-color-scheme`. Ensure:
+
+1. `dark.css` is imported in your entry file
+2. Your toggle sets `document.documentElement.dataset.theme = 'dark'`
+3. The selector in `dark.css` is `[data-theme="dark"]`, not `[data-theme=dark]` (quotes matter in some contexts)
+
+---
+
+## acss-utilities
+
+### Utility color classes show wrong colors (hex fallbacks instead of theme values)
+
+This means `token-bridge.css` isn't loaded or is loaded after `utilities.css`. Check your import order:
+
+```tsx
+// ✓ Correct order
+import './styles/token-bridge.css';
+import './styles/utilities.css';
+
+// ✗ Wrong order — bridge aliases aren't defined when utilities load
+import './styles/utilities.css';
+import './styles/token-bridge.css';
+```
+
+### Token bridge dark mode colors not working
+
+Run `/utility-bridge` to regenerate the bridge against your current theme:
+
+```text
+/utility-bridge
+```
+
+If the bridge still shows incorrect colors in dark mode, check that `dark.css` imports before `token-bridge.css` and `utilities.css`:
+
+```tsx
+import './styles/theme/light.css';
+import './styles/theme/dark.css';
+import './styles/token-bridge.css';  // reads from dark.css via var()
+import './styles/utilities.css';
+```
+
+### "Bridge parity failure" error
+
+```
+Bridge parity failure:
+  --color-error-bg defined in :root but missing from [data-theme="dark"]
+```
+
+This means `token-bridge.css` was manually edited or corrupted. Regenerate it:
+
+```text
+/utility-bridge
+```
+
+### Responsive classes not working
+
+Responsive classes use a hyphen prefix (`md-flex`), not a colon (`md:flex`). If you're migrating from Tailwind, check your JSX for colon-prefixed classes — they won't work without custom Tailwind config.
+
+```tsx
+// ✓ acss-utilities syntax
+<div className="flex-col md-flex-row">
+
+// ✗ Tailwind syntax — won't work
+<div className="flex-col md:flex-row">
+```
+
+### Bundle size over budget
+
+```
+Warning: bundle exceeds 15 KB budget (current: 18.2 KB)
+```
+
+Disable families you don't use:
+
+```text
+/utility-tune disable shadow utilities
+/utility-tune disable grid utilities
+/utility-tune drop responsive variants from type utilities
+```
+
+Or install only specific families:
+
+```text
+/utility-add --families=color-bg,color-text,spacing,flex,display
+```
+
+---
+
+## General
+
+### Plugin command not found
+
+If a slash command isn't recognized (e.g., `/kit-add` returns "unknown command"):
+
+1. Verify the plugin is installed: check with `/plugin list`
+2. Re-install if missing:
+   ```text
+   /plugin install acss-kit@shawn-sandy-agentic-acss-plugins
+   ```
+3. Refresh the Claude Code session (some versions require a restart to pick up new commands)
+
+### Python script errors
+
+The plugin's Python scripts require Python 3.8+. If you see:
+
+```
+SyntaxError: f-string expressions cannot be nested
+```
+
+Upgrade to Python 3.12+ or check your `python3` version:
+
+```bash
+python3 --version
+```
+
+### validate_theme.py exits with code 2
+
+Exit code 2 is an IO/usage error (file not found, bad arguments) — not a contrast failure. Check that the file path argument is correct:
+
+```bash
+python3 plugins/acss-kit/scripts/validate_theme.py src/styles/theme/light.css
+```
+
+Exit code 1 is a WCAG contrast failure. Exit code 0 is success.

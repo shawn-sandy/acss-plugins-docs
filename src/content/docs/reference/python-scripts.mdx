@@ -1,0 +1,268 @@
+---
+title: Python Scripts Reference
+description: API reference for all 8 Python scripts in acss-kit and acss-utilities — inputs, outputs, exit codes, and contract families.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+All scripts use **Python 3 stdlib only** — no pip dependencies. They follow one of two contract families.
+
+## Contract families
+
+### Detector contract
+
+Used when a slash command needs to parse the script's output. The script:
+- Writes JSON to stdout
+- Returns a `reasons` array in the JSON
+- Exits 0 (match/success) or 1 (no match/failure)
+- Writes nothing to stderr on success
+
+### Generator/Validator contract
+
+Used for pipeline transformers and human-readable validators. The script:
+- Writes data/CSS to stdout (or a file)
+- Writes error messages to stderr
+- Exits 0 (success), 1 (validation failure), or 2 (IO/usage error)
+
+---
+
+## acss-kit scripts
+
+### `generate_palette.py`
+
+**Contract:** Generator  
+**Location:** `plugins/acss-kit/scripts/generate_palette.py`
+
+Converts a hex seed color into a full semantic role palette using OKLCH math and WCAG 2.2 AA validation.
+
+**Inputs (CLI arguments):**
+```bash
+python3 generate_palette.py <hex-color> [--mode=light|dark|both|brand]
+```
+
+| Argument | Required | Description |
+|---|---|---|
+| `hex-color` | Yes | 6-digit hex (e.g., `#4f46e5`) |
+| `--mode` | No | `light` (default), `dark`, `both`, or `brand` |
+
+**Output (stdout):** JSON palette object
+```json
+{
+  "mode": "both",
+  "seed": "#4f46e5",
+  "seed_oklch": [0.55, 0.22, 270],
+  "light": {
+    "--color-background":     "oklch(99% 0.004 270)",
+    "--color-primary":        "oklch(55% 0.22 270)",
+    "--color-danger":         "oklch(50% 0.22 27)",
+    "...": "18 roles total"
+  },
+  "dark": {
+    "--color-background":     "oklch(12% 0.008 270)",
+    "--color-primary":        "oklch(72% 0.18 270)",
+    "...": "18 roles total"
+  },
+  "wcag": {
+    "light": { "all_pass": true, "pairs": { "text/background": 14.2 } },
+    "dark":  { "all_pass": true, "pairs": { "text/background": 12.8 } }
+  }
+}
+```
+
+**Exit codes:** 0 = success, 1 = WCAG failure after all retries, 2 = invalid input
+
+---
+
+### `css_to_tokens.py`
+
+**Contract:** Generator  
+**Location:** `plugins/acss-kit/scripts/css_to_tokens.py`
+
+Extracts `--color-*` declarations from CSS theme files and emits a JSON token object.
+
+**Inputs:**
+```bash
+python3 css_to_tokens.py <file.css> [file2.css ...]
+```
+
+**Output (stdout):** JSON conforming to `assets/theme.schema.json`
+```json
+{
+  "light": { "--color-background": "oklch(99% 0.004 270)", "...": "..." },
+  "dark":  { "--color-background": "oklch(12% 0.008 270)", "...": "..." },
+  "brand": {}
+}
+```
+
+**Features:** Resolves `var()` references recursively (up to 5 levels deep). Reports unresolvable references to stderr.
+
+**Exit codes:** 0 = success, 2 = IO/usage error
+
+---
+
+### `tokens_to_css.py`
+
+**Contract:** Generator  
+**Location:** `plugins/acss-kit/scripts/tokens_to_css.py`
+
+Converts a JSON palette (from `generate_palette.py`) to CSS theme files.
+
+**Inputs:**
+```bash
+python3 tokens_to_css.py <palette.json> --out-light=<path> --out-dark=<path>
+```
+
+**Output:** CSS files written to `--out-light` and `--out-dark` paths.
+
+**Features:**
+- Emits `:root` block for light, `[data-theme="dark"]` for dark
+- Adds section comment headers (`/* ── Backgrounds ── */`)
+- Sorts roles in canonical order (backgrounds → borders → text → brand → semantic)
+- Handles paired-role updates (primary + primary-hover kept together)
+
+**Exit codes:** 0 = success, 2 = IO/usage error
+
+---
+
+### `validate_theme.py`
+
+**Contract:** Validator  
+**Location:** `plugins/acss-kit/scripts/validate_theme.py`
+
+Validates WCAG 2.2 AA contrast ratios for all 10 semantic role pairs in a theme CSS file.
+
+**Inputs:**
+```bash
+python3 validate_theme.py <theme.css>
+# or validate a directory:
+python3 validate_theme.py src/styles/theme/
+```
+
+**Output (stdout on failure):**
+```
+WCAG validation — src/styles/theme/light.css
+
+  PASS  text / background:          14.2 : 1
+  PASS  primary / background:        5.8 : 1
+  FAIL  danger / background:         2.4 : 1  (minimum 4.5:1)
+
+1 failure. Exit code: 1
+```
+
+**Exit codes:**
+- 0 — all pairs pass
+- 1 — one or more pairs fail
+- 2 — file not found or parse error
+
+<Aside type="note">
+`validate_theme.py` resolves nested `var()` references up to 5 levels deep before computing contrast. This ensures brand files that reference base theme variables are validated correctly.
+</Aside>
+
+---
+
+### `oklch_shift.py`
+
+**Contract:** Generator  
+**Location:** `plugins/acss-kit/scripts/oklch_shift.py`
+
+Applies OKLCH deltas to a hex color and returns the resulting hex.
+
+**Inputs:**
+```bash
+python3 oklch_shift.py <hex-color> [--hue=<delta>] [--chroma=<multiplier>] [--lightness=<delta>]
+```
+
+| Flag | Type | Description |
+|---|---|---|
+| `--hue` | float (degrees) | Hue offset (e.g., `+20`, `-15`) |
+| `--chroma` | float (multiplier) | Chroma multiplier (e.g., `1.2` = 20% more saturated) |
+| `--lightness` | float (percentage points) | Lightness offset (e.g., `+5`, `-3`) |
+
+**Output (stdout):** Resulting hex color string
+```
+#6040e5
+```
+
+**Stderr (on gamut clamp):**
+```
+Warning: significant gamut clamping (>5%) on blue channel. Result may differ from expected.
+```
+
+**Exit codes:** 0 = success, 1 = invalid input, 2 = severe gamut clamping (> 20%)
+
+---
+
+## acss-utilities scripts
+
+### `generate_utilities.py`
+
+**Contract:** Generator  
+**Location:** `plugins/acss-utilities/scripts/generate_utilities.py`
+
+Generates the full utility CSS bundle from `utilities.tokens.json`.
+
+**Inputs:**
+```bash
+python3 generate_utilities.py [--tokens=<path>] [--out-dir=<dir>] [--families=<list>]
+```
+
+| Flag | Default | Description |
+|---|---|---|
+| `--tokens` | `assets/utilities.tokens.json` | Token source file |
+| `--out-dir` | `assets/utilities/` | Directory for per-family partials |
+| `--families` | All enabled families | Comma-separated override |
+
+**Output:** Per-family CSS partials + concatenated `assets/utilities.css`
+
+**Exit codes:** 0 = success, 1 = budget exceeded, 2 = IO/usage error
+
+---
+
+### `validate_utilities.py`
+
+**Contract:** Validator  
+**Location:** `plugins/acss-utilities/scripts/validate_utilities.py`
+
+Validates the committed utility bundle for integrity, bridge parity, and idempotency.
+
+**Checks:**
+1. **Bundle integrity** — valid CSS syntax
+2. **Bridge parity** — every `:root` alias also in `[data-theme="dark"]`
+3. **Idempotency** — regenerated bundle matches committed bundle byte-for-byte
+
+**Inputs:**
+```bash
+python3 validate_utilities.py [--bundle=<path>] [--bridge=<path>]
+```
+
+**Exit codes:**
+- 0 — all checks pass
+- 1 — integrity or parity failure
+- 2 — IO/usage error
+
+---
+
+### `detect_utility_target.py`
+
+**Contract:** Detector  
+**Location:** `plugins/acss-utilities/scripts/detect_utility_target.py`
+
+Detects the target styles directory for utility output.
+
+**Inputs:**
+```bash
+python3 detect_utility_target.py [--project-root=<path>]
+```
+
+**Output (stdout):** JSON
+```json
+{
+  "source": "configured",
+  "utilitiesDir": "src/styles/",
+  "reasons": ["Found .acss-target.json with utilitiesDir: src/styles/"]
+}
+```
+
+`source` values: `"configured"` (.acss-target.json found), `"default"` (src/styles/ heuristic), `"none"` (no directory found)
+
+**Exit codes:** 0 = directory found, 1 = no directory found

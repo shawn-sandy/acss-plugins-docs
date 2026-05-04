@@ -1,0 +1,150 @@
+---
+title: Your First Theme
+description: Generate a WCAG-compliant light/dark theme from a single hex color using /theme-create.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+This tutorial shows you how to go from a single brand color to a complete, WCAG AA–validated theme in two commands.
+
+## How theme generation works
+
+`/theme-create` takes one hex color — your "seed" — and derives a full 18-role semantic palette using OKLCH color math. Every light and dark value is tested against WCAG 2.2 AA contrast requirements before being written to disk.
+
+The output is two plain CSS files:
+- `src/styles/theme/light.css` — `:root` block with all `--color-*` custom properties
+- `src/styles/theme/dark.css` — `[data-theme="dark"]` block with dark-mode values
+
+## Generate your theme
+
+<Steps>
+
+1. Run `/theme-create` with your brand's primary hex color:
+
+   ```text
+   /theme-create #4f46e5
+   ```
+
+   To generate both light and dark at once (the default):
+
+   ```text
+   /theme-create #4f46e5 --mode=both
+   ```
+
+2. Claude runs the OKLCH palette algorithm and shows a validation summary:
+
+   ```
+   Generating palette from #4f46e5 (oklch 55% 0.22 270°)...
+   
+   Light mode — contrast checks:
+     ✓ text / background          14.2 : 1  (AA ✓)
+     ✓ primary / background        5.8 : 1  (AA ✓)
+     ✓ text-inverse / primary      4.7 : 1  (AA ✓)
+     ✓ danger / background         5.1 : 1  (AA ✓)
+     ✓ success / background        4.6 : 1  (AA ✓)
+     ... (10 pairs total)
+   
+   Dark mode — contrast checks:
+     ✓ text / background          12.8 : 1  (AA ✓)
+     ... (10 pairs total)
+   
+   Writing src/styles/theme/light.css  ✓
+   Writing src/styles/theme/dark.css   ✓
+   ```
+
+3. If any contrast pair fails, Claude adjusts the lightness value in OKLCH space and retries. The files are only written once all 10 pairs pass.
+
+</Steps>
+
+## Inspect the output
+
+**`src/styles/theme/light.css`**:
+
+```css
+:root {
+  /* Backgrounds */
+  --color-background:      oklch(99% 0.004 270);
+  --color-surface:         oklch(97% 0.006 270);
+  --color-surface-raised:  oklch(95% 0.008 270);
+
+  /* Borders */
+  --color-border:          oklch(88% 0.014 270);
+  --color-border-strong:   oklch(72% 0.018 270);
+
+  /* Text */
+  --color-text:            oklch(16% 0.012 270);
+  --color-text-inverse:    oklch(99% 0.004 270);
+  --color-text-muted:      oklch(48% 0.014 270);
+  --color-text-disabled:   oklch(68% 0.010 270);
+
+  /* Brand */
+  --color-primary:         oklch(55% 0.22 270);
+  --color-primary-hover:   oklch(48% 0.22 270);
+  --color-focus-ring:      oklch(63% 0.20 270);
+
+  /* Semantic */
+  --color-danger:          oklch(50% 0.22 27);
+  --color-warning:         oklch(56% 0.18 80);
+  --color-info:            oklch(55% 0.18 240);
+  --color-success:         oklch(48% 0.18 155);
+}
+```
+
+**`src/styles/theme/dark.css`**:
+
+```css
+[data-theme="dark"] {
+  --color-background:      oklch(12% 0.008 270);
+  --color-surface:         oklch(16% 0.010 270);
+  --color-surface-raised:  oklch(20% 0.012 270);
+  --color-primary:         oklch(72% 0.18 270);
+  /* ... all 18 roles ... */
+}
+```
+
+## Import the theme in your app
+
+Add both theme files to your app's entry point, in order:
+
+```tsx
+// src/main.tsx
+import './styles/theme/light.css';
+import './styles/theme/dark.css';
+import './styles/utilities.css';   // if using acss-utilities
+import './App.css';
+import App from './App';
+```
+
+## Enable dark mode
+
+Dark mode activates when `data-theme="dark"` is set on the `<html>` element:
+
+```tsx
+// Simple dark mode toggle
+function toggleTheme() {
+  const html = document.documentElement;
+  html.dataset.theme = html.dataset.theme === 'dark' ? '' : 'dark';
+}
+```
+
+<Aside type="tip">
+To respect the OS-level preference on first load, check `window.matchMedia('(prefers-color-scheme: dark)').matches` before setting `data-theme`.
+</Aside>
+
+## Create a brand override
+
+Once you have a base theme, layer a brand file on top for named overrides:
+
+```text
+/theme-brand forest --from=#2d6a4f
+```
+
+This generates `src/styles/theme/brand-forest.css` which overrides selected roles while inheriting the rest from `light.css` / `dark.css`.
+
+→ See [/theme-brand](/acss-plugins-docs/acss-kit/commands/theme-brand) for the full reference.
+
+## Next: add utility classes
+
+With your theme in place, the utility classes from acss-utilities can reference your `--color-*` tokens automatically.
+
+→ Continue to [Your First Utilities](/acss-plugins-docs/getting-started/first-utilities)

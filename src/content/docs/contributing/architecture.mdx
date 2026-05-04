@@ -1,0 +1,65 @@
+---
+title: Plugin Architecture
+description: How Claude Code plugins are structured, how commands delegate to skills, and how hooks enforce quality.
+---
+
+## Plugin manifest
+
+Each plugin has a `.claude-plugin/plugin.json` manifest:
+
+```json
+{
+  "name": "acss-kit",
+  "version": "0.5.0",
+  "description": "Generate accessible React components and CSS themes for fpkit/acss projects"
+}
+```
+
+The version here is authoritative. Do not add a `version` field to `marketplace.json` — the manifest wins.
+
+## Directory structure
+
+```
+plugins/acss-kit/
+├── .claude-plugin/plugin.json   # manifest
+├── commands/*.md                # slash commands (thin shells → skill delegation)
+├── skills/<name>/SKILL.md       # skill definitions
+├── scripts/                     # Python 3 stdlib scripts
+├── assets/                      # foundation components, schemas, templates
+└── docs/                        # user-facing developer guides
+```
+
+## Commands → Skills
+
+Commands are thin shells. A command `.md` file defines the YAML front-matter (name, description, flags) and then delegates execution to a skill:
+
+```markdown
+---
+name: kit-add
+description: Generate fpkit-style React components
+---
+
+Delegate to the `components` skill with the provided component names.
+```
+
+The skill does all the heavy lifting: file resolution, generation, validation, output.
+
+## Hooks
+
+`.claude/settings.json` registers PostToolUse hooks that run on every Write/Edit:
+
+- **JSON syntax validation** — catches malformed `plugin.json`
+- **plugin.json required fields** — ensures `name`, `version`, `description` are present
+- **Command front-matter** — validates YAML in command files
+- **SKILL.md front-matter** — validates `name:` and `description:` are present
+
+A PreToolUse hook blocks commits and pushes to `main`.
+
+## Rules
+
+`.claude/rules/` contains advisory text injected into Claude's context when matching files are edited:
+
+- `scss-conventions.md` — fires on `**/*.scss`, `**/*.css`
+- `python-scripts.md` — fires on `plugins/*/scripts/**`
+- `command-authoring.md` — fires on `plugins/*/commands/*.md`
+- `fpkit-references.md` — fires on reference docs

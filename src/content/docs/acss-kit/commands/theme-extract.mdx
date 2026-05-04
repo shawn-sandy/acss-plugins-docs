@@ -1,0 +1,105 @@
+---
+title: /theme-extract
+description: Extract brand colors from an image or Figma design URL and generate a full OKLCH theme.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+Extract dominant brand colors from a local image file or a Figma design, then generate a full WCAG-validated theme using those colors as the seed palette.
+
+## Syntax
+
+```text
+/theme-extract <image-path|figma-url>
+```
+
+## Arguments
+
+| Argument | Required | Description |
+|---|---|---|
+| `image-path` | One of these | Path to a local image file (PNG, JPG, WebP, SVG) |
+| `figma-url` | One of these | URL to a Figma file or frame (`figma.com/file/...` or `figma.com/design/...`) |
+
+## Examples
+
+Extract from a local image:
+
+```text
+/theme-extract ./assets/brand-logo.png
+/theme-extract /Users/me/downloads/brand-guidelines.jpg
+```
+
+Extract from a Figma design:
+
+```text
+/theme-extract https://www.figma.com/file/abc123/Brand-Guidelines
+/theme-extract https://www.figma.com/design/xyz789/Marketing-Site?node-id=0%3A1
+```
+
+## Workflow
+
+<Steps>
+
+1. **Detect input type** — determines whether the argument is a file path or Figma URL.
+
+2. **Extract colors:**
+   - **Image:** Analyzes pixel data to identify 3–5 dominant colors by frequency and saturation. Filters near-white, near-black, and near-gray colors to find intentional brand colors.
+   - **Figma:** Uses the Figma MCP to read styles, fills, and color variables from the design. Identifies colors used in primary actions, headings, and brand elements.
+
+3. **Select seed** — maps the most prominent/saturated extracted color to `--color-primary`.
+
+4. **Generate palette** — runs the same OKLCH algorithm as `/theme-create` using the extracted seed.
+
+5. **WCAG validate** — checks all 10 contrast pairs.
+
+6. **Write files** — writes `light.css` and `dark.css` to `src/styles/theme/`.
+
+</Steps>
+
+## Figma requirements
+
+For Figma extraction, you need:
+- A Figma personal access token configured in your Claude Code MCP settings
+- The Figma file must be accessible with your token (public file or member access)
+
+<Aside type="note">
+Figma extraction reads color styles, component fills, and local variables — not pixel data. This means it works reliably even on complex designs with many layers.
+</Aside>
+
+## Output
+
+Same as `/theme-create` — two CSS files in `src/styles/theme/`:
+
+```
+src/styles/theme/light.css    ✓
+src/styles/theme/dark.css     ✓
+```
+
+Claude also reports the extracted colors and which one was selected as the seed:
+
+```
+Extracted colors from brand-logo.png:
+  #4f46e5  (dominant — selected as primary seed)
+  #f59e0b  (secondary — mapped to --color-accent)
+  #10b981  (tertiary — used to influence --color-success hue)
+
+Generating theme from seed #4f46e5...
+```
+
+## Post-extraction refinement
+
+After extraction, use `/theme-update` to fine-tune specific roles:
+
+```text
+/theme-update src/styles/theme/light.css --color-accent=#f59e0b
+```
+
+Or create a brand file for additional overrides:
+
+```text
+/theme-brand extracted --from=#4f46e5
+```
+
+<Aside type="tip">
+If the extracted color produces poor contrast ratios (e.g., a very light brand color against a white background), Claude will suggest an adjusted seed that preserves the hue while boosting contrast.
+</Aside>

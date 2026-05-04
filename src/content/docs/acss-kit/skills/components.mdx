@@ -1,0 +1,159 @@
+---
+title: components skill
+description: Deep dive into how the components skill generates React components — the generation contract, dependency resolution, and file output conventions.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+The `components` skill drives `/kit-add`. It defines the six-step generation workflow, the component reference system, and all the conventions that keep generated code consistent across every component.
+
+## Trigger
+
+The `components` skill is triggered by `/kit-add`. It can also be invoked by the `component-form` pilot skill when it needs to generate field-level dependencies.
+
+## The six steps (A–F)
+
+<Steps>
+
+1. **Step A — Resolve component name.** The skill looks up the requested name in the component reference catalogue (`skills/components/references/catalog.md`). Names are normalized (case-insensitive, hyphenated or camelCase both accepted). If a name doesn't match, the skill lists the closest alternatives and stops.
+
+2. **Step B — Verify sass and copy `ui.tsx`.** Checks `devDependencies` in `package.json` for `sass`. If missing, halts with an install command. Then checks whether `ui.tsx` exists in the components directory — if not, copies `assets/foundation/ui.tsx` there. The foundation file is never overwritten on subsequent runs.
+
+3. **Step C — Resolve dependency tree.** Reads the component's spec doc for its `dependencies:` list, then recursively resolves each dependency's dependencies. The result is a flat, deduplicated list ordered from leaf to root (bottom-up).
+
+4. **Step D — Generate bottom-up.** Starting from leaf components, each is generated in turn. The skill reads the component's reference spec, builds the TSX file in memory using the generation contract, then writes it. Components that already exist in the target directory are skipped.
+
+5. **Step E — Handle existing files.** When a file already exists, its import path is captured and used in parent components instead of re-generating it. The summary marks these as "skipped — existing file imported."
+
+6. **Step F — Display summary.** After all files are written, the skill prints a summary table and the import statement(s) to add to your code.
+
+</Steps>
+
+## The generation contract
+
+Every component spec doc includes a **generation contract** — a declaration of exactly what files will be produced:
+
+```
+Generation contract:
+  Button.tsx     src/components/fpkit/Button.tsx
+  Button.scss    src/components/fpkit/Button.scss
+
+Imports:
+  import { UI } from './ui';
+  import './Button.scss';
+
+TypeScript interface:
+  ButtonProps { children, variant?, size?, disabled?, onClick?, className? }
+```
+
+The skill uses this contract to verify output before writing. If the generated file doesn't match the contract (wrong exports, missing types, wrong import paths), it retries once with corrections.
+
+## Component reference docs
+
+Each component has a spec doc in `skills/components/references/components/<name>.md`. The spec includes:
+
+- **Category** — simple / interactive / form / layout / complex
+- **Generation contract** — exact file names and import paths
+- **Props** — TypeScript interface with types, required/optional, defaults
+- **CSS tokens** — every `--comp-*` variable with its role and fallback
+- **Accessibility** — ARIA roles, keyboard behavior, focus management
+- **Dependencies** — other components required
+- **Usage examples** — copy-paste JSX snippets
+
+## CSS variable naming convention
+
+All component tokens follow the `--comp-role-descriptor` pattern:
+
+| Segment | Meaning | Example |
+|---|---|---|
+| `comp` | Component abbreviation | `btn`, `card`, `dlg` |
+| `role` | Semantic role | `bg`, `color`, `border`, `radius` |
+| `descriptor` | Optional modifier | `hover`, `focus`, `active`, `disabled` |
+
+Approved abbreviations:
+- `bg` → background
+- `bd` / `border` → border
+- `rad` / `radius` → border-radius
+- `clr` / `color` → text color
+- `sz` / `size` → font-size
+- `fw` → font-weight
+- `px`, `py` → horizontal/vertical padding
+- `mx`, `my` → horizontal/vertical margin
+- `el` → elevation / shadow
+
+## Inline type pattern
+
+Generated TypeScript interfaces are always inline in the component file — never imported from a shared types file:
+
+```tsx
+// ✓ Inline types — what the skill generates
+export interface ButtonProps {
+  children: React.ReactNode;
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+}
+
+// ✗ Imported types — the skill never does this
+import type { ButtonProps } from '../types/button';
+```
+
+This keeps each component self-contained and makes it easy to copy a single file into any project.
+
+## The `UI` polymorphic base
+
+Every component uses the `UI` base component from `ui.tsx`:
+
+```tsx
+export function Button({ children, ...props }: ButtonProps) {
+  return (
+    <UI as="button" {...props}>
+      {children}
+    </UI>
+  );
+}
+```
+
+`UI` accepts an `as` prop and forwards all HTML attributes to the correct element. It also handles the `data-*` attribute pattern used for variants and states.
+
+## `aria-disabled` pattern
+
+The skill uses `aria-disabled="true"` instead of the `disabled` attribute for interactive components. This preserves keyboard focusability and screen reader announcement while visually appearing disabled:
+
+```tsx
+<UI
+  as="button"
+  aria-disabled={disabled}
+  onClick={disabled ? undefined : onClick}
+>
+```
+
+The disabled visual state is styled via the CSS selector `[aria-disabled="true"]` in the component's SCSS.
+
+## Extending a generated component
+
+Generated components are meant to be edited. After running `/kit-add`, you own the files. Common extension patterns:
+
+**Add a new variant** — add a `data-variant` value and its CSS:
+```scss
+&[data-variant="outline"] {
+  --btn-bg: transparent;
+  --btn-border: var(--color-primary);
+}
+```
+
+**Add a prop** — extend the TypeScript interface and add the conditional attribute:
+```tsx
+interface ButtonProps {
+  loading?: boolean;
+}
+// In render:
+aria-busy={loading}
+```
+
+**Override a token** — in your app CSS, not in the generated file:
+```css
+.btn { --btn-radius: 9999px; }
+```
+
+<Aside type="note">
+The skill never overwrites existing files, so edits you make to generated components are safe — re-running `/kit-add` for the same component is a no-op.
+</Aside>

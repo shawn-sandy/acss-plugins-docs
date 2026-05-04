@@ -1,0 +1,108 @@
+---
+title: /theme-update
+description: Edit specific color roles in an existing theme file with atomic WCAG re-validation.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Atomically update one or more color roles in an existing theme file. Every change is WCAG-validated before being written. If any role fails its contrast check, the entire batch rolls back.
+
+## Syntax
+
+```text
+/theme-update <file> <--color-role=#hex> [--color-role2=#hex ...]
+```
+
+## Arguments
+
+| Argument | Required | Description |
+|---|---|---|
+| `file` | Yes | Path to the theme CSS file to update (e.g., `src/styles/theme/light.css`) |
+| `--color-role=<hex>` | Yes (at least one) | Role-value pair. The role name must match an existing `--color-*` property in the file. |
+
+## Examples
+
+Update the primary color in the light theme:
+
+```text
+/theme-update src/styles/theme/light.css --color-primary=#2563eb
+```
+
+Update multiple roles at once:
+
+```text
+/theme-update src/styles/theme/light.css \
+  --color-primary=#2563eb \
+  --color-danger=#dc2626
+```
+
+Update the dark theme:
+
+```text
+/theme-update src/styles/theme/dark.css --color-primary=#60a5fa
+```
+
+## Paired role updates
+
+Some roles are paired — they must stay in sync when one changes. `/theme-update` automatically includes the paired role in the WCAG validation even if you only specify one of them.
+
+| Updated role | Automatically paired with |
+|---|---|
+| `--color-primary` | `--color-primary-hover` |
+| `--color-accent` | `--color-accent-hover` |
+
+If you update `--color-primary`, the existing `--color-primary-hover` value is validated against the new primary. If hover fails contrast, Claude proposes an adjusted hover value.
+
+## Atomicity
+
+`/theme-update` uses a **pre-validate-then-write** approach:
+
+1. Load the current theme file
+2. Apply all requested changes in a **temporary copy**
+3. Run WCAG validation on the temp copy against all 10 contrast pairs
+4. If **all pass** → write the temp copy to the actual file
+5. If **any fail** → discard the temp copy, report the failures, suggest adjusted values
+
+This means your theme file is never left in a partially-updated state.
+
+<Aside type="caution">
+If you're updating both `light.css` and `dark.css`, run two separate `/theme-update` commands. Each file is validated independently.
+</Aside>
+
+## Output
+
+On success:
+
+```
+Updating src/styles/theme/light.css...
+
+  --color-primary:  #4f46e5 → #2563eb
+    Contrast (primary / background): 5.8:1  ✓  (was 5.4:1)
+
+All checks passed. File updated.
+```
+
+On failure:
+
+```
+Pre-validation failed. No changes written.
+
+  --color-danger: #ff6b6b
+    Contrast (danger / background): 2.8:1  ✗  (minimum 4.5:1)
+
+Suggested value: #dc2626  (contrast: 5.1:1)
+Run again with --color-danger=#dc2626, or adjust manually.
+```
+
+## When to use `/theme-update` vs. other commands
+
+| Situation | Command |
+|---|---|
+| Fine-tune a single role | `/theme-update` |
+| Regenerate the entire palette from a new seed | `/theme-create` |
+| Override roles for a specific brand | `/theme-brand` |
+| Natural language: "make the primary warmer" | Handled by the `style-tune` skill |
+
+<Aside type="tip">
+To see all current role values in a theme file before updating, view the file directly. The CSS custom properties are human-readable and sorted by semantic category.
+</Aside>

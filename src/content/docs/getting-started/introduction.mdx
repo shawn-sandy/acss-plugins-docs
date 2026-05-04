@@ -1,0 +1,53 @@
+---
+title: Introduction
+description: What acss-kit and acss-utilities are, what they do, and when to use them.
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+**acss-plugins** is a marketplace of two Claude Code plugins that work together to help you build accessible, themeable React applications faster — without manually writing boilerplate components or calculating WCAG-compliant color palettes.
+
+## The two plugins
+
+<CardGrid>
+  <Card title="acss-kit" icon="puzzle">
+    Generates accessible React components (TSX + SCSS) and OKLCH-based CSS themes directly into your project. No runtime npm dependency — components are vendored in as source files you own.
+  </Card>
+  <Card title="acss-utilities" icon="seti:css">
+    Provides Tailwind-style atomic CSS utility classes tied to your acss-kit theme tokens via a token bridge. Drop in a pre-built bundle or tune it with natural language.
+  </Card>
+</CardGrid>
+
+## What you get
+
+- **Components on demand.** Type `/kit-add button card dialog` and Claude generates fully typed, WCAG-compliant TSX + SCSS files into `src/components/fpkit/`. Dependency trees are resolved automatically — adding `dialog` also adds `button` and `overlay` if they're missing.
+
+- **One-command themes.** `/theme-create #4f46e5` produces a complete 18-role light and dark theme in OKLCH color space, WCAG AA validated on every semantic role pair, written to `src/styles/theme/`.
+
+- **Atomic CSS without config.** `/utility-add` drops a pre-built `utilities.css` (and a `token-bridge.css` that wires up your theme colors) into your styles folder. Responsive variants use a hyphen prefix (`.sm-hide`, `.md-flex`) that works cleanly in JSX `className` strings.
+
+- **Natural language tuning.** "Warmer button" or "softer card" routes to the right tokens and validates WCAG contrast before writing anything.
+
+## Design principles
+
+**Self-contained generation.** Generated components import only from each other, never from `@fpkit/acss`. This means your app has no new runtime dependency after installing the plugin.
+
+**CSS-variable-first.** Every customizable value — colors, spacing, radius, elevation — is a CSS custom property with a hardcoded fallback. You own the cascade.
+
+**Atomic WCAG validation.** Theme edits are pre-validated in a temp directory. If any contrast pair fails the AA threshold, the entire batch rolls back. You never land in a partially-broken state.
+
+**OKLCH color space.** All palette math happens in OKLCH for perceptually uniform scaling. Hue, chroma, and lightness behave predictably across the spectrum.
+
+## When to use these plugins
+
+| Situation | Recommended approach |
+|---|---|
+| Starting a new React app | Install both plugins, run `/kit-add` for core components, `/theme-create` for your palette, `/utility-add` for utility classes |
+| Adding accessible components to an existing app | Install acss-kit only; run `/kit-add` for the specific components you need |
+| Theming an fpkit/acss project | Install acss-kit; use `/theme-create` + `/theme-brand` |
+| Utility-class layer on top of a custom theme | Install acss-utilities; use `/utility-add --no-bridge` to skip the token bridge |
+
+## Next steps
+
+<LinkCard title="Prerequisites" href="/acss-plugins-docs/getting-started/prerequisites" description="What your project needs before you install the plugins." />
+<LinkCard title="Installation" href="/acss-plugins-docs/getting-started/installation" description="Install both plugins from the Claude Code marketplace in one command." />

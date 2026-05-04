@@ -1,0 +1,104 @@
+---
+title: /utility-bridge
+description: Regenerate token-bridge.css against your active acss-kit theme, including dark-mode parity.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Regenerate `token-bridge.css` to reflect your current acss-kit theme. Use this after running `/theme-create` or `/theme-update` to keep the utility color classes in sync with your theme tokens.
+
+## Syntax
+
+```text
+/utility-bridge [--theme=<file>]
+```
+
+## Options
+
+| Option | Default | Description |
+|---|---|---|
+| `--theme=<file>` | Auto-detected | Override the source theme file path |
+
+## Examples
+
+Regenerate against the auto-detected theme:
+
+```text
+/utility-bridge
+```
+
+Regenerate against a specific theme file:
+
+```text
+/utility-bridge --theme=src/styles/theme/light.css
+```
+
+Regenerate against a brand override:
+
+```text
+/utility-bridge --theme=src/styles/theme/brand-forest.css
+```
+
+## Theme detection
+
+Without `--theme`, the command looks for your theme in this order:
+
+1. `src/styles/theme/light.css` ← preferred (has both `:root` and `[data-theme="dark"]`)
+2. `src/styles/theme/dark.css`
+3. Any `.css` file in `src/styles/theme/` containing `--color-primary`
+4. Built-in defaults (hardcoded fallback hex values)
+
+## What the bridge generates
+
+The bridge maps **fpkit-style utility names** to **acss-kit role names** and synthesizes derived variants:
+
+```css
+/* token-bridge.css */
+:root {
+  /* Direct role mappings */
+  --color-error:         var(--color-danger, #dc2626);
+  --color-warning-text:  var(--color-warning, #b45309);
+  --color-info-text:     var(--color-info, #0369a1);
+  --color-success-text:  var(--color-success, #047857);
+
+  /* Derived bg variants (12% of role color mixed into background) */
+  --color-error-bg:     color-mix(in oklch, var(--color-danger, #dc2626) 12%, var(--color-background, #ffffff));
+  --color-warning-bg:   color-mix(in oklch, var(--color-warning, #b45309) 12%, var(--color-background, #ffffff));
+  --color-info-bg:      color-mix(in oklch, var(--color-info, #0369a1) 12%, var(--color-background, #ffffff));
+  --color-success-bg:   color-mix(in oklch, var(--color-success, #047857) 12%, var(--color-background, #ffffff));
+
+  /* Derived light variants (80% role color, 20% white) */
+  --color-primary-light: color-mix(in oklch, var(--color-primary, #4f46e5) 80%, white);
+}
+
+[data-theme="dark"] {
+  /* Dark mode mappings — 18% mix, darker backgrounds */
+  --color-error:         var(--color-danger, #f87171);
+  --color-error-bg:      color-mix(in oklch, var(--color-danger, #f87171) 18%, var(--color-background, #0f172a));
+  --color-primary-light: color-mix(in oklch, var(--color-primary, #7dd3fc) 70%, black);
+  /* ... all aliases mirrored */
+}
+```
+
+## Dark-mode parity validation
+
+After generating the bridge, the command validates that every alias defined in `:root` also exists in `[data-theme="dark"]`. This prevents the situation where a utility class works correctly in light mode but produces the wrong color in dark mode.
+
+If parity fails, the command reports the missing aliases and does not write the file.
+
+## When to run `/utility-bridge`
+
+Run it whenever your theme changes:
+
+- After `/theme-create` (new theme)
+- After `/theme-update` (role value changed)
+- After `/theme-brand` (brand overlay applied)
+- After manually editing a theme CSS file
+
+<Aside type="tip">
+`/utility-add` runs a bridge regeneration automatically if it detects a theme file. You only need to call `/utility-bridge` directly if you've updated the theme after the initial install and don't want to re-copy the full utilities bundle.
+</Aside>
+
+## Output location
+
+The regenerated bridge is written to the same location as the existing `token-bridge.css`, auto-detected or from `--target` in `.acss-target.json`.

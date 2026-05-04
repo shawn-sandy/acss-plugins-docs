@@ -1,0 +1,121 @@
+---
+title: Tune Styles with Natural Language
+description: Use the style-tune pilot skill to adjust visual feel without editing theme or component files directly.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `style-tune` skill lets you adjust your app's visual character with plain English. It routes your intent to the right CSS tokens, validates WCAG contrast, and rolls back if anything fails.
+
+## Component-layer tuning
+
+Adjust tokens that affect a single component:
+
+```
+warmer button
+softer card
+sharper inputs
+more elevated dialog
+larger button text
+```
+
+These edits go to the component's `.scss` file — scoped to that component only.
+
+### Example session
+
+```
+You: make the button a bit warmer
+
+Claude: Routing to component layer → --btn-bg
+
+  Current:  oklch(55% 0.22 270)
+  Delta:    hue +20° → oklch(55% 0.22 290)
+
+  WCAG pre-check: text-inverse / btn-bg: 4.8:1 ✓
+
+  Writing Button.scss ✓
+  --btn-bg shifted 20° warmer.
+
+You: and rounder
+
+Claude: Routing to component layer → --btn-radius
+
+  Current:  var(--radius-md, 0.375rem) = 6px
+  Delta:    × 1.5 → 9px (0.5625rem)
+
+  Writing Button.scss ✓
+  --btn-radius increased to 0.5625rem.
+```
+
+## Theme-layer tuning
+
+Adjust tokens that affect all components (changes `--color-*` roles):
+
+```
+bolder primary
+tone down the primary
+cooler info color
+warmer palette
+```
+
+These route through `/theme-update` with pre-validation.
+
+### Example
+
+```
+You: bolder primary
+
+Claude: Routing to theme layer → --color-primary chroma
+
+  Current:  oklch(55% 0.22 270)  C: 0.22
+  Delta:    C × 1.20 → C 0.264
+
+  WCAG pre-check (temp dir):
+    primary / background: 4.1:1 ✗  (minimum 4.5:1)
+
+  Rollback. No files written.
+  Suggested safe step: C × 1.09 → C 0.24 (ratio: 4.6:1)
+
+You: ok try the smaller step
+
+Claude: C 0.22 → C 0.24
+
+  WCAG pre-check: primary / background: 4.6:1 ✓
+  Writing light.css ✓
+```
+
+## Stacking adjustments
+
+You can chain multiple natural language adjustments in sequence. Each is validated independently:
+
+```
+warmer button
+→ hue +20°, validated ✓, written
+
+softer card
+→ radius ×1.5, validated ✓, written
+
+bolder primary
+→ chroma +10%, validated ✓, written
+```
+
+If any step in the chain fails, only that step rolls back — earlier successful adjustments are preserved.
+
+## Resetting to defaults
+
+To undo a component-layer change, re-generate the component:
+
+1. Delete `Button.tsx` and `Button.scss`
+2. Run `/kit-add button`
+
+The freshly generated files use the original defaults.
+
+To undo a theme-layer change, re-generate the theme:
+
+```text
+/theme-create #your-seed --mode=both
+```
+
+<Aside type="note">
+`style-tune` is a pilot skill — its intent vocabulary is actively being refined. If a phrase doesn't trigger the expected behavior, try rephrasing with the component name and adjective more explicitly: "make the button background warmer" rather than just "warmer".
+</Aside>

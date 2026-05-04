@@ -1,0 +1,138 @@
+---
+title: /theme-create
+description: Generate a complete WCAG AA–validated light and dark theme from a single hex seed color.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+Generate a full 18-role semantic color palette in OKLCH color space from a single hex color. Every role is WCAG 2.2 AA contrast-validated before the files are written.
+
+## Syntax
+
+```text
+/theme-create <hex-color> [--mode=light|dark|both]
+```
+
+## Arguments
+
+| Argument | Required | Default | Description |
+|---|---|---|---|
+| `hex-color` | Yes | — | Seed color as a 6-digit hex (e.g., `#4f46e5`) |
+| `--mode` | No | `both` | Which theme files to generate: `light`, `dark`, or `both` |
+
+## Examples
+
+Generate both light and dark themes from indigo:
+
+```text
+/theme-create #4f46e5
+```
+
+Generate only the light theme:
+
+```text
+/theme-create #4f46e5 --mode=light
+```
+
+Generate only the dark theme:
+
+```text
+/theme-create #2563eb --mode=dark
+```
+
+## Output files
+
+| File | Contents |
+|---|---|
+| `src/styles/theme/light.css` | `:root` block with all 18 `--color-*` custom properties |
+| `src/styles/theme/dark.css` | `[data-theme="dark"]` block with dark-mode values |
+
+<Aside type="note">
+The output directory defaults to `src/styles/theme/`. Override with `"utilitiesDir"` in `.acss-target.json`.
+</Aside>
+
+## The 18 semantic color roles
+
+### Required (15)
+
+| Role | Purpose |
+|---|---|
+| `--color-background` | Page background |
+| `--color-surface` | Card/panel background |
+| `--color-surface-raised` | Elevated surface (dropdowns, modals) |
+| `--color-border` | Default border |
+| `--color-border-strong` | Emphasized border |
+| `--color-text` | Body text |
+| `--color-text-inverse` | Text on colored backgrounds |
+| `--color-text-muted` | Secondary/caption text |
+| `--color-text-disabled` | Disabled state text |
+| `--color-primary` | Primary brand action |
+| `--color-primary-hover` | Primary hover state |
+| `--color-focus-ring` | Keyboard focus outline |
+| `--color-danger` | Destructive / error state |
+| `--color-warning` | Warning state |
+| `--color-info` | Informational state |
+| `--color-success` | Success / positive state |
+
+### Optional (3, generated when hue allows)
+
+| Role | Purpose |
+|---|---|
+| `--color-accent` | Secondary brand accent |
+| `--color-accent-hover` | Accent hover state |
+| `--color-brand-accent` | Decorative brand color |
+
+## OKLCH palette algorithm
+
+The palette generation uses OKLCH color space for perceptually uniform scaling:
+
+1. **Parse seed** → convert `#hex` to OKLCH `(L%, C, H°)`
+2. **Set primary** → use seed hue as `--color-primary`; find highest lightness where contrast ≥ 4.5:1 against background
+3. **Derive backgrounds** → high lightness (L 97–99%) for light mode, low lightness (L 12–20%) for dark
+4. **Derive text** → lightness that achieves ≥ 4.5:1 against its paired background
+5. **Semantic hues** → danger at H°27, warning at H°80, success at H°155, info at H°240 — derived chroma from seed
+6. **Hover states** → `primary-hover` = primary with L reduced by ~5 steps; `focus-ring` = primary with L raised by ~8 steps
+7. **WCAG validation** → check all 10 contrast pairs; adjust lightness if any fail; retry up to 8 times
+
+## WCAG contrast pairs validated
+
+| Foreground | Background | Minimum |
+|---|---|---|
+| `--color-text` | `--color-background` | 4.5:1 |
+| `--color-primary` | `--color-background` | 4.5:1 |
+| `--color-text-inverse` | `--color-primary` | 4.5:1 |
+| `--color-danger` | `--color-background` | 4.5:1 |
+| `--color-success` | `--color-background` | 4.5:1 |
+| `--color-warning` | `--color-background` | 3.0:1 |
+| `--color-info` | `--color-background` | 4.5:1 |
+| `--color-text-muted` | `--color-background` | 4.5:1 |
+| `--color-border` | `--color-background` | 3.0:1 |
+| `--color-text` | `--color-surface` | 4.5:1 |
+
+## Failure handling
+
+If a contrast pair cannot pass AA after 8 lightness iterations, the command:
+1. Reports the failing pair and its computed ratio
+2. Suggests an alternative seed color with sufficient contrast range
+3. Does **not** write any files (atomic — either all pass or nothing is written)
+
+## Dark mode output format
+
+Dark mode values are written in `[data-theme="dark"]` selector blocks (not `@media prefers-color-scheme`). This gives you manual control over when dark mode activates:
+
+```css
+[data-theme="dark"] {
+  --color-background: oklch(12% 0.008 270);
+  /* ... */
+}
+```
+
+To activate dark mode, set `data-theme="dark"` on `<html>`:
+
+```tsx
+document.documentElement.dataset.theme = 'dark';
+```
+
+<Aside type="tip">
+After generating a theme, run `/theme-update src/styles/theme/light.css --color-primary=#hex` to adjust a single role without regenerating the entire palette.
+</Aside>

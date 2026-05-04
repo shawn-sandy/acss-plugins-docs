@@ -1,0 +1,215 @@
+---
+title: Build an Accessible Form
+description: End-to-end walkthrough — from natural language description to a fully WCAG-compliant form component.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+This recipe walks through building a contact form using the `component-form` pilot skill, covering dependency generation, the generated output, and WCAG patterns used.
+
+## What you'll build
+
+A contact form with:
+- Name, email, subject (select), and message (textarea) fields
+- Client-side validation with accessible error messages
+- A submit button that disables while submitting
+- Full WCAG 2.2 AA compliance: aria-required, aria-invalid, aria-describedby, role="alert"
+
+## Trigger the form skill
+
+<Steps>
+
+1. In a Claude Code session at your project root, type:
+
+   ```
+   build a contact form with name, email, subject dropdown, and message textarea
+   ```
+
+2. The `component-form` skill activates automatically. It resolves the required components:
+
+   ```
+   Resolved: field, input, select, textarea, button
+   Running /kit-add field input select textarea button...
+   ```
+
+3. Dependencies are generated in order (leaf first):
+   ```
+   src/components/fpkit/ui.tsx         ✓ (foundation)
+   src/components/fpkit/Field.tsx      ✓
+   src/components/fpkit/Field.scss     ✓
+   src/components/fpkit/Input.tsx      ✓
+   src/components/fpkit/Input.scss     ✓
+   src/components/fpkit/Select.tsx     ✓
+   src/components/fpkit/Select.scss    ✓
+   src/components/fpkit/Textarea.tsx   ✓
+   src/components/fpkit/Textarea.scss  ✓
+   src/components/fpkit/Button.tsx     ✓
+   src/components/fpkit/Button.scss    ✓
+   ```
+
+4. The form component is written to:
+   ```
+   src/forms/ContactForm.tsx           ✓
+   ```
+
+</Steps>
+
+## The generated form
+
+```tsx
+// src/forms/ContactForm.tsx
+import React, { useState } from 'react';
+import { Field } from '../components/fpkit/Field';
+import { Input } from '../components/fpkit/Input';
+import { Select } from '../components/fpkit/Select';
+import { Textarea } from '../components/fpkit/Textarea';
+import { Button } from '../components/fpkit/Button';
+
+const SUBJECTS = [
+  { value: '', label: 'Select a subject…' },
+  { value: 'general', label: 'General enquiry' },
+  { value: 'support', label: 'Technical support' },
+  { value: 'billing', label: 'Billing question' },
+  { value: 'other', label: 'Other' },
+];
+
+interface ContactFormValues {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
+type ContactFormErrors = Partial<Record<keyof ContactFormValues, string>>;
+
+export function ContactForm() {
+  const [values, setValues] = useState<ContactFormValues>({
+    name: '', email: '', subject: '', message: '',
+  });
+  const [errors, setErrors] = useState<ContactFormErrors>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  function validate(): ContactFormErrors {
+    const e: ContactFormErrors = {};
+    if (!values.name.trim())    e.name    = 'Name is required';
+    if (!values.email.includes('@')) e.email = 'Enter a valid email address';
+    if (!values.subject)        e.subject  = 'Please select a subject';
+    if (values.message.trim().length < 10) e.message = 'Message must be at least 10 characters';
+    return e;
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+    setSubmitting(true);
+    try {
+      await sendContact(values);   // your API call here
+      setSubmitted(true);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (submitted) {
+    return (
+      <div role="alert" aria-live="polite">
+        <p>Thanks for your message — we'll be in touch within 24 hours.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      aria-labelledby="contact-heading"
+      noValidate
+    >
+      <h2 id="contact-heading">Contact us</h2>
+
+      {Object.keys(errors).length > 0 && (
+        <div role="alert" aria-live="assertive">
+          Please fix {Object.keys(errors).length} error{Object.keys(errors).length > 1 ? 's' : ''} below.
+        </div>
+      )}
+
+      <Field label="Your name" htmlFor="contact-name" error={errors.name} required>
+        <Input
+          id="contact-name"
+          type="text"
+          value={values.name}
+          onChange={e => setValues(v => ({ ...v, name: e.target.value }))}
+          aria-required="true"
+          aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? 'contact-name-error' : undefined}
+          autoComplete="name"
+        />
+      </Field>
+
+      <Field label="Email address" htmlFor="contact-email" error={errors.email} required>
+        <Input
+          id="contact-email"
+          type="email"
+          value={values.email}
+          onChange={e => setValues(v => ({ ...v, email: e.target.value }))}
+          aria-required="true"
+          aria-invalid={!!errors.email}
+          autoComplete="email"
+        />
+      </Field>
+
+      <Field label="Subject" htmlFor="contact-subject" error={errors.subject} required>
+        <Select
+          id="contact-subject"
+          value={values.subject}
+          onChange={e => setValues(v => ({ ...v, subject: e.target.value }))}
+          options={SUBJECTS}
+          aria-required="true"
+          aria-invalid={!!errors.subject}
+        />
+      </Field>
+
+      <Field label="Message" htmlFor="contact-message" error={errors.message} required>
+        <Textarea
+          id="contact-message"
+          value={values.message}
+          onChange={e => setValues(v => ({ ...v, message: e.target.value }))}
+          rows={5}
+          aria-required="true"
+          aria-invalid={!!errors.message}
+          aria-describedby="contact-message-hint"
+        />
+        <span id="contact-message-hint" className="text-muted text-sm">
+          Minimum 10 characters
+        </span>
+      </Field>
+
+      <Button type="submit" variant="primary" disabled={submitting}>
+        {submitting ? 'Sending…' : 'Send message'}
+      </Button>
+    </form>
+  );
+}
+```
+
+## WCAG patterns explained
+
+**Form landmark:** `aria-labelledby="contact-heading"` associates the form with its visible heading. Screen readers announce "Contact us, form" when the user enters the form region.
+
+**`noValidate`:** Disables native browser validation bubbles. Custom error messages are rendered by your code and announced via `aria-describedby`.
+
+**`aria-required="true"`:** Used in addition to (or instead of) the HTML `required` attribute. Always explicit on form fields.
+
+**`aria-invalid`:** Set to `true` when validation fails. Screen readers like NVDA and VoiceOver announce the field as invalid when it receives focus after submission.
+
+**`aria-describedby`:** Links error messages and hints to their fields. When the field has an error, `aria-describedby` points to the error element so it's read aloud when the field is focused.
+
+**`role="alert"` on error summary:** The summary div with `role="alert"` and `aria-live="assertive"` is announced immediately by screen readers when it appears after a failed submit.
+
+**Accessible submit button:** The `Button` component uses `aria-disabled` — the button stays focusable and is announced as "disabled" even when it can't be clicked.
+
+<Aside type="tip">
+Test your form with a screen reader (NVDA, VoiceOver, or JAWS) and keyboard-only navigation before shipping. Tab through all fields, submit with errors, and confirm all error messages are announced.
+</Aside>

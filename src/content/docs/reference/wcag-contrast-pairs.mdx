@@ -1,0 +1,30 @@
+---
+title: WCAG Contrast Pairs
+description: The 10 contrast pairs validated by acss-kit, their required ratios, and what they mean.
+---
+
+acss-kit validates 10 contrast pairs against WCAG 2.2 AA requirements. All pairs must pass before theme files are written.
+
+## The 10 pairs
+
+| Foreground | Background | Minimum | Category |
+|---|---|---|---|
+| `--color-text` | `--color-background` | 4.5:1 | Normal text |
+| `--color-primary` | `--color-background` | 4.5:1 | Interactive |
+| `--color-text-inverse` | `--color-primary` | 4.5:1 | Text on brand |
+| `--color-danger` | `--color-background` | 4.5:1 | Semantic text |
+| `--color-success` | `--color-background` | 4.5:1 | Semantic text |
+| `--color-warning` | `--color-background` | 3.0:1 | Non-text indicator |
+| `--color-info` | `--color-background` | 4.5:1 | Semantic text |
+| `--color-text-muted` | `--color-background` | 4.5:1 | Secondary text |
+| `--color-border` | `--color-background` | 3.0:1 | Non-text indicator |
+| `--color-text` | `--color-surface` | 4.5:1 | Text on card |
+
+## WCAG thresholds
+
+- **4.5:1** — normal text (< 18pt or < 14pt bold). Required for text, links, and UI labels.
+- **3.0:1** — large text (≥ 18pt or ≥ 14pt bold) or non-text UI components. Used for borders and warning indicators.
+
+## Testing manually
+
+Use the browser DevTools color picker or a tool like [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/) to verify ratios. Paste the `oklch()` or hex values for both colors.

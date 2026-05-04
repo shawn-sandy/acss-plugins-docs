@@ -1,0 +1,63 @@
+---
+title: acss-kit Overview
+description: What acss-kit does, what it generates, and how the commands and skills fit together.
+---
+
+import { CardGrid, Card, LinkCard } from '@astrojs/starlight/components';
+
+**acss-kit** is a Claude Code plugin that generates accessible React components and CSS themes for [fpkit/acss](https://github.com/shawn-sandy/acss) projects.
+
+## What it generates
+
+<CardGrid>
+  <Card title="Components" icon="puzzle">
+    Self-contained `.tsx` + `.scss` file pairs written to `src/components/fpkit/`. No runtime npm dependency — you own the source.
+  </Card>
+  <Card title="Themes" icon="seti:css">
+    OKLCH-derived CSS custom property files in `src/styles/theme/`. 18 semantic color roles, WCAG AA validated, light + dark.
+  </Card>
+</CardGrid>
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) | Generate one or more components (with dependency resolution) |
+| [`/kit-list`](/acss-plugins-docs/acss-kit/commands/kit-list) | Browse the component catalogue or inspect a specific component |
+| [`/theme-create`](/acss-plugins-docs/acss-kit/commands/theme-create) | Generate a full light/dark theme from a seed hex color |
+| [`/theme-brand`](/acss-plugins-docs/acss-kit/commands/theme-brand) | Scaffold a brand-specific theme override file |
+| [`/theme-extract`](/acss-plugins-docs/acss-kit/commands/theme-extract) | Extract brand colors from an image or Figma URL |
+| [`/theme-update`](/acss-plugins-docs/acss-kit/commands/theme-update) | Edit specific color roles in an existing theme file |
+
+## Skills
+
+| Skill | Triggered by | Purpose |
+|---|---|---|
+| `components` | `/kit-add` | Full component generation workflow (Steps A–F) |
+| `styles` | All `/theme-*` commands | OKLCH palette math, WCAG validation, role catalogue |
+| `component-form` | Natural language ("build a signup form") | Auto-generates accessible form components |
+| `style-tune` | Natural language ("warmer button") | Adjusts visual feel via token edits + WCAG validation |
+
+## Key design decisions
+
+**Vendored source.** Components are written as source files into your project. There's no runtime `@fpkit/acss` import — your bundle doesn't grow, and you can edit the generated files freely.
+
+**Generation contract.** Before writing any file, `/kit-add` shows a preview listing exactly which files will be created or skipped. You always know what's about to happen.
+
+**Dependency resolution.** If you request `dialog`, acss-kit checks whether `button` and `overlay` exist. Missing dependencies are generated first (bottom-up), never silently skipped.
+
+**Atomic WCAG validation.** Theme edits are pre-validated in a temp directory. If any contrast pair fails, the entire batch rolls back. Paired roles (`primary` + `primary-hover`) are always updated together.
+
+**CSS-variable-first.** Every component token — `--btn-bg`, `--card-radius`, `--dialog-overlay` — is a CSS custom property with a hardcoded fallback. Override anything in your own CSS without touching the generated file.
+
+## Available components
+
+Components are organized into five categories:
+
+- **Simple:** Badge, Icon, Link, Divider
+- **Interactive:** Button, Checkbox, Toggle, Tabs
+- **Form:** Field, Input, Select, Textarea, FormGroup
+- **Layout:** Card, Alert, Banner
+- **Complex:** Dialog, Nav, Popover, Table, Toast
+
+→ See the [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue) for the full list with props and CSS tokens.

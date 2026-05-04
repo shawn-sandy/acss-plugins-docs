@@ -1,0 +1,85 @@
+---
+title: Add Utilities to an Existing App
+description: How to drop acss-utilities into a project that already has components or a design system.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+This recipe covers adding acss-utilities to an existing React app — including apps that aren't using acss-kit.
+
+## With acss-kit (recommended)
+
+If you already have acss-kit components and a generated theme:
+
+<Steps>
+
+1. Install acss-utilities from the marketplace:
+
+   ```text
+   /plugin marketplace add shawn-sandy/agentic-acss-plugins
+   /plugin install acss-utilities@shawn-sandy-agentic-acss-plugins
+   ```
+
+2. Run `/utility-add` — it auto-detects your styles directory and finds your existing theme:
+
+   ```text
+   /utility-add
+   ```
+
+3. Check the import order in your entry file:
+
+   ```tsx
+   import './styles/theme/light.css';
+   import './styles/theme/dark.css';
+   import './styles/token-bridge.css';   // ← after theme
+   import './styles/utilities.css';      // ← last
+   ```
+
+4. Start using utility classes alongside your components:
+
+   ```tsx
+   <div className="flex gap-4 p-6">
+     <Button variant="primary">Save</Button>
+     <Button variant="secondary">Cancel</Button>
+   </div>
+   ```
+
+</Steps>
+
+## Without acss-kit (standalone)
+
+If you have your own component system and just want utility classes:
+
+```text
+/utility-add --no-bridge
+```
+
+This installs `utilities.css` only. Color utilities use hardcoded hex fallbacks — no token bridge needed.
+
+If your own design system uses CSS custom properties with compatible names (e.g., `--color-primary`, `--color-danger`), the utility classes will automatically pick them up via the `var()` fallbacks in the CSS.
+
+## Only install the families you need
+
+Reduce bundle size by specifying only the families relevant to your project:
+
+```text
+/utility-add --families=color-bg,color-text,spacing,flex,display
+```
+
+## Override the target directory
+
+If your project uses a non-standard styles path:
+
+```text
+/utility-add --target=app/assets/css/
+```
+
+Or set it permanently in `.acss-target.json`:
+
+```json
+{ "utilitiesDir": "app/assets/css/" }
+```
+
+<Aside type="tip">
+After adding utilities, run `/utility-list` to see all available classes. If the spacing scale or breakpoints don't match your project's grid, use `/utility-tune` to adjust them.
+</Aside>

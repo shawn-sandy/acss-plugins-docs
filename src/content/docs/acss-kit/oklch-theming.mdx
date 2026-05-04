@@ -1,0 +1,29 @@
+---
+title: OKLCH Theming
+description: Why acss-kit uses OKLCH, how to read OKLCH values, and how to work with them in your browser DevTools.
+---
+
+## What is OKLCH?
+
+OKLCH is a perceptually uniform color space with three channels:
+- **L** — lightness (0% black, 100% white)
+- **C** — chroma / saturation (0 = gray, ~0.25 = vivid)
+- **H** — hue angle in degrees (0° red, 120° green, 240° blue, 270° indigo)
+
+Browser support: All modern browsers (Chrome 111+, Firefox 113+, Safari 15.4+).
+
+## Reading OKLCH values
+
+```css
+--color-primary: oklch(55% 0.22 270);
+/*                      ↑   ↑    ↑
+                         L   C    H
+                    lightness  chroma  hue (indigo)
+*/
+```
+
+## Working in DevTools
+
+Chrome and Firefox DevTools display OKLCH values in the color picker. Click the color swatch next to an `oklch()` value to open the picker and adjust L, C, H interactively.
+
+To see how your theme colors map visually, inspect `<html>` in DevTools → Computed → filter by `--color-`.

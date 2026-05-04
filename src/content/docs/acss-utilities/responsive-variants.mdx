@@ -1,0 +1,38 @@
+---
+title: Responsive Variants
+description: How the hyphen-prefix responsive system works, which families support it, and how it differs from Tailwind.
+---
+
+## Syntax
+
+Responsive utilities use a hyphen-prefix: `{breakpoint}-{class}`
+
+```tsx
+<div className="flex-col md-flex-row lg-gap-8">
+```
+
+This applies `flex-col` always, `flex-row` from `md` (48rem) upward, and `gap-8` from `lg` (62rem) upward.
+
+## Breakpoints
+
+| Prefix | min-width | px (at 16px base) |
+|---|---|---|
+| `sm` | 30rem | 480px |
+| `md` | 48rem | 768px |
+| `lg` | 62rem | 992px |
+| `xl` | 80rem | 1280px |
+
+## Families with responsive variants
+
+spacing, display, flex, grid — plus any family enabled for responsive in your tokens configuration.
+
+## Why not colon prefix?
+
+Tailwind's `md:flex-row` requires CSS escaping in JSX (`className="md:flex-row"`). Modern bundlers handle this, but it adds friction in JSX. The hyphen prefix (`md-flex-row`) requires no escaping in any context.
+
+To customize breakpoints or add/remove responsive support from a family:
+
+```text
+/utility-tune add an xs breakpoint at 20rem
+/utility-tune drop responsive variants from type utilities
+```

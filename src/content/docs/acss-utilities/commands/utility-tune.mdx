@@ -1,0 +1,133 @@
+---
+title: /utility-tune
+description: Adjust spacing baseline, breakpoints, or family settings with natural language — bundle is regenerated and validated automatically.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Modify the utility bundle configuration using natural language. Changes are applied to `utilities.tokens.json`, the bundle is regenerated via `generate_utilities.py`, validated, and rolled back if validation fails.
+
+## Syntax
+
+```text
+/utility-tune <natural-language description>
+```
+
+## Examples
+
+### Spacing baseline
+
+```text
+/utility-tune use a 4px spacing baseline
+/utility-tune use an 8px spacing baseline
+/utility-tune switch to a 6px base unit
+```
+
+### Breakpoints
+
+```text
+/utility-tune add an xs breakpoint at 20rem
+/utility-tune change the lg breakpoint to 64rem
+/utility-tune remove the xl breakpoint
+/utility-tune add a 2xl breakpoint at 96rem
+```
+
+### Enabling / disabling families
+
+```text
+/utility-tune disable shadow utilities
+/utility-tune enable shadow utilities
+/utility-tune turn off grid utilities
+```
+
+### Responsive variants
+
+```text
+/utility-tune drop responsive variants from spacing
+/utility-tune add responsive variants to type utilities
+/utility-tune make flex non-responsive
+```
+
+## Ambiguous input
+
+If the intent isn't clear, Claude asks a single clarifying question before making changes:
+
+```
+"change spacing" — did you mean:
+  1. Change the baseline unit (currently 4px)?
+  2. Change the spacing scale values?
+  3. Disable or enable the spacing family?
+
+Reply with a number or rephrase.
+```
+
+## What gets modified
+
+All changes edit `assets/utilities.tokens.json` — the single source of truth for the bundle:
+
+```json
+{
+  "spacing": {
+    "baseline": "0.25rem",
+    "scale": [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24]
+  },
+  "breakpoints": {
+    "sm": "30rem",
+    "md": "48rem",
+    "lg": "62rem",
+    "xl": "80rem"
+  },
+  "families": {
+    "color-bg":    { "enabled": true,  "responsive": false },
+    "spacing":     { "enabled": true,  "responsive": true  },
+    "shadow":      { "enabled": true,  "responsive": false }
+  }
+}
+```
+
+## Atomicity
+
+The tune workflow is atomic:
+
+1. Edit `utilities.tokens.json` in memory
+2. Run `generate_utilities.py` → new bundle
+3. Run `validate_utilities.py` → integrity check
+4. If **pass** → write tokens file + bundle
+5. If **fail** → discard everything, report what went wrong
+
+Your existing `utilities.css` and `utilities.tokens.json` are never partially modified.
+
+## Output
+
+On success:
+
+```
+Applying: spacing baseline → 4px (0.25rem)
+
+Regenerating bundle...
+  Classes:  312 → 312 (no change)
+  Size:     8.4 KB → 8.3 KB  (-0.1 KB)
+
+Validation passed ✓
+Files updated:
+  assets/utilities.tokens.json
+  assets/utilities.css
+
+Re-run /utility-add to copy the updated bundle into your project.
+```
+
+<Aside type="tip">
+After tuning, run `/utility-add` to copy the updated bundle into your project. The tune command only modifies the plugin's source files, not your project's `src/styles/` copy.
+</Aside>
+
+## Spacing scale reference
+
+| Step | 4px base | 8px base |
+|---|---|---|
+| 1 | 0.25rem (4px) | 0.5rem (8px) |
+| 2 | 0.5rem (8px) | 1rem (16px) |
+| 3 | 0.75rem (12px) | 1.5rem (24px) |
+| 4 | 1rem (16px) | 2rem (32px) |
+| 5 | 1.25rem (20px) | 2.5rem (40px) |
+| 6 | 1.5rem (24px) | 3rem (48px) |
+| 8 | 2rem (32px) | 4rem (64px) |

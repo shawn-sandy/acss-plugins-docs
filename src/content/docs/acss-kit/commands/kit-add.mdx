@@ -1,0 +1,146 @@
+---
+title: /kit-add
+description: Generate one or more accessible React components into your project with automatic dependency resolution.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+Generate fpkit-style React components (`.tsx` + `.scss`) directly into your project. Dependency trees are resolved automatically — requesting `dialog` also generates `button` and `overlay` if they don't exist yet.
+
+## Syntax
+
+```text
+/kit-add <component> [component2 component3 ...]
+```
+
+## Arguments
+
+| Argument | Required | Description |
+|---|---|---|
+| `component` | Yes | One or more component names (space-separated). Case-insensitive. |
+
+## Examples
+
+Generate a single component:
+
+```text
+/kit-add button
+```
+
+Generate multiple components at once:
+
+```text
+/kit-add card badge dialog
+```
+
+Generate a complex component (dependencies resolved automatically):
+
+```text
+/kit-add table
+```
+
+## Workflow
+
+When you run `/kit-add`, the `components` skill executes these steps:
+
+<Steps>
+
+1. **Resolve component name** — looks up the component in the reference catalogue and finds its spec doc.
+
+2. **Verify sass** — checks that `sass` is in `devDependencies`. If missing, stops and tells you how to install it.
+
+3. **Copy `ui.tsx` foundation** — copies the polymorphic `UI` base component to your components folder if it doesn't exist already.
+
+4. **Resolve dependency tree** — recursively resolves all dependencies. For example, `dialog` → `button`, `overlay`; `form` → `field`, `input`, `button`.
+
+5. **Generate bottom-up** — leaf dependencies are written first, then the requested component. This ensures imports resolve correctly from the start.
+
+6. **Handle existing files** — files that already exist are skipped (not overwritten). The existing file's import is used instead.
+
+7. **Display summary** — shows which files were created, which were skipped, and the import statement to add to your code.
+
+</Steps>
+
+## Output
+
+Files are written to `src/components/fpkit/` by default (configurable via `.acss-target.json`).
+
+Each component produces two files:
+
+| File | Contents |
+|---|---|
+| `<Component>.tsx` | React component with inline TypeScript types, no external imports |
+| `<Component>.scss` | SCSS with `--comp-*` CSS custom properties and hardcoded fallbacks |
+
+Plus a one-time copy of:
+
+| File | Contents |
+|---|---|
+| `ui.tsx` | Polymorphic `UI` base component (copied once, never overwritten) |
+
+## Generation contract
+
+Before writing anything, `/kit-add` shows a preview:
+
+```
+Will generate:
+  src/components/fpkit/ui.tsx           (foundation — copied once)
+  src/components/fpkit/Button.tsx       (new)
+  src/components/fpkit/Button.scss      (new)
+  src/components/fpkit/Overlay.tsx      (new)
+  src/components/fpkit/Overlay.scss     (new)
+  src/components/fpkit/Dialog.tsx       (new)   ← requested
+  src/components/fpkit/Dialog.scss      (new)   ← requested
+
+Dependencies resolved: button, overlay
+```
+
+If a file already exists, the preview shows `(exists — will import)` instead of `(new)`.
+
+## Existing file handling
+
+`/kit-add` **never overwrites** existing files. If `Button.tsx` already exists, the command:
+1. Skips generating `Button.tsx` and `Button.scss`
+2. Uses the existing file for imports
+3. Reports it as "skipped — existing file imported"
+
+This is safe to run repeatedly without risk of clobbering your edits.
+
+## Available components
+
+Run `/kit-list` for the full catalogue. Quick reference by category:
+
+| Category | Components |
+|---|---|
+| Simple | `badge`, `icon`, `link`, `divider` |
+| Interactive | `button`, `checkbox`, `toggle`, `tabs` |
+| Form | `field`, `input`, `select`, `textarea`, `form-group` |
+| Layout | `card`, `alert`, `banner` |
+| Complex | `dialog`, `nav`, `popover`, `table`, `toast` |
+
+## CSS variables
+
+All component styles use `--comp-role-descriptor` naming. Example for `button`:
+
+```css
+--btn-bg          /* background color */
+--btn-color       /* text color */
+--btn-border      /* border color */
+--btn-radius      /* border radius */
+--btn-padding-x   /* horizontal padding */
+--btn-padding-y   /* vertical padding */
+```
+
+Override any token in your own CSS — no need to edit the generated file.
+
+## Accessibility features
+
+Every generated component includes:
+- `aria-disabled="true"` pattern instead of `disabled` attribute (keeps element focusable and announced)
+- `aria-label`, `aria-labelledby`, or `aria-describedby` where applicable
+- `:focus-visible` styles using `--color-focus-ring`
+- WCAG-appropriate color contrast via theme `--color-*` tokens
+
+<Aside type="tip">
+Run `/kit-list <component>` before `/kit-add` to preview the generation contract, props, CSS tokens, and dependencies for a specific component without generating it.
+</Aside>

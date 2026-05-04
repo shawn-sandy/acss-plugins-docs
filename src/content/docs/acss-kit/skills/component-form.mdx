@@ -1,0 +1,231 @@
+---
+title: component-form skill (pilot)
+description: Auto-generates accessible form components from natural language — no slash command required.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+`component-form` is a pilot skill that auto-triggers on natural language form requests. Instead of running `/kit-add form`, you describe the form you want and the skill resolves the right field types, generates the dependencies, and produces a complete, accessible form component.
+
+<Aside type="note">
+This is a **pilot skill** — it validates a per-component skill discovery pattern and may evolve. The generated output is stable; the natural language trigger vocabulary is what's being refined.
+</Aside>
+
+## Trigger phrases
+
+The skill activates when your message contains any of these patterns:
+
+| Phrase | Example |
+|---|---|
+| "create a ___ form" | "create a signup form" |
+| "build a ___ form" | "build a contact form" |
+| "generate a form" | "generate a login form with email and password" |
+| "make a form for" | "make a form for collecting user feedback" |
+| "I need a form that" | "I need a form that captures name, email, and message" |
+
+## Field resolution
+
+The skill infers the field list from your description. Given "create a signup form with name, email, and password":
+
+| Detected field | Resolved type | Component |
+|---|---|---|
+| `name` | text input | `Input` |
+| `email` | email input | `Input` (type="email") |
+| `password` | password input | `Input` (type="password") |
+
+Supported field types:
+
+| Field description | Resolved to |
+|---|---|
+| text, name, first name, last name, title | `Input` (text) |
+| email, email address | `Input` (email) |
+| password, confirm password | `Input` (password) |
+| message, description, notes, bio | `Textarea` |
+| dropdown, select, pick | `Select` |
+| agree, accept, check | `Checkbox` |
+| radio, choose one | Radio group (using `Checkbox`) |
+| file, upload, attachment | `Input` (file) |
+
+## Dependency generation
+
+After resolving the field list, the skill runs `/kit-add` for all required dependencies:
+
+```
+Resolved dependencies:
+  /kit-add field input checkbox button
+
+Generating (4 components)...
+  src/components/fpkit/Field.tsx     ✓
+  src/components/fpkit/Field.scss    ✓
+  src/components/fpkit/Input.tsx     ✓
+  src/components/fpkit/Input.scss    ✓
+  src/components/fpkit/Checkbox.tsx  ✓
+  src/components/fpkit/Checkbox.scss ✓
+  src/components/fpkit/Button.tsx    ✓
+  src/components/fpkit/Button.scss   ✓
+```
+
+## Generated form output
+
+The form component is written to `src/forms/<FormName>.tsx`. Example for "create a signup form":
+
+```tsx
+// src/forms/SignupForm.tsx
+import React, { useState } from 'react';
+import { Field } from '../components/fpkit/Field';
+import { Input } from '../components/fpkit/Input';
+import { Checkbox } from '../components/fpkit/Checkbox';
+import { Button } from '../components/fpkit/Button';
+
+interface SignupFormValues {
+  name: string;
+  email: string;
+  password: string;
+  agreeToTerms: boolean;
+}
+
+interface SignupFormErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  agreeToTerms?: string;
+}
+
+export function SignupForm() {
+  const [values, setValues] = useState<SignupFormValues>({
+    name: '',
+    email: '',
+    password: '',
+    agreeToTerms: false,
+  });
+  const [errors, setErrors] = useState<SignupFormErrors>({});
+  const [submitting, setSubmitting] = useState(false);
+
+  function validate(): SignupFormErrors {
+    const e: SignupFormErrors = {};
+    if (!values.name.trim()) e.name = 'Name is required';
+    if (!values.email.includes('@')) e.email = 'Valid email required';
+    if (values.password.length < 8) e.password = 'Password must be at least 8 characters';
+    if (!values.agreeToTerms) e.agreeToTerms = 'You must agree to continue';
+    return e;
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const errs = validate();
+    setErrors(errs);
+    if (Object.keys(errs).length > 0) return;
+
+    setSubmitting(true);
+    try {
+      // TODO: replace with your submit logic
+      await new Promise(r => setTimeout(r, 1000));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} aria-labelledby="signup-heading" noValidate>
+      <h2 id="signup-heading">Create your account</h2>
+
+      <Field
+        label="Full name"
+        htmlFor="signup-name"
+        error={errors.name}
+        required
+      >
+        <Input
+          id="signup-name"
+          type="text"
+          value={values.name}
+          onChange={e => setValues(v => ({ ...v, name: e.target.value }))}
+          aria-required="true"
+          aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? 'signup-name-error' : undefined}
+        />
+      </Field>
+
+      <Field
+        label="Email address"
+        htmlFor="signup-email"
+        error={errors.email}
+        required
+      >
+        <Input
+          id="signup-email"
+          type="email"
+          value={values.email}
+          onChange={e => setValues(v => ({ ...v, email: e.target.value }))}
+          aria-required="true"
+          aria-invalid={!!errors.email}
+        />
+      </Field>
+
+      <Field
+        label="Password"
+        htmlFor="signup-password"
+        error={errors.password}
+        required
+      >
+        <Input
+          id="signup-password"
+          type="password"
+          value={values.password}
+          onChange={e => setValues(v => ({ ...v, password: e.target.value }))}
+          aria-required="true"
+          aria-invalid={!!errors.password}
+          aria-describedby="signup-password-hint"
+        />
+        <span id="signup-password-hint" className="text-muted text-sm">
+          Must be at least 8 characters
+        </span>
+      </Field>
+
+      <Checkbox
+        id="signup-agree"
+        label="I agree to the terms of service"
+        checked={values.agreeToTerms}
+        onChange={e => setValues(v => ({ ...v, agreeToTerms: e.target.checked }))}
+        error={errors.agreeToTerms}
+        required
+      />
+
+      <Button
+        type="submit"
+        variant="primary"
+        disabled={submitting}
+      >
+        {submitting ? 'Creating account…' : 'Create account'}
+      </Button>
+    </form>
+  );
+}
+```
+
+## WCAG accessibility features
+
+Every generated form includes:
+
+- **`aria-labelledby`** on `<form>` pointing to the form heading
+- **`noValidate`** on `<form>` (prevents native browser validation so custom error messages render)
+- **`aria-required="true"`** on required fields (not just the `required` attribute)
+- **`aria-invalid`** set to `true` when a field has an error
+- **`aria-describedby`** linking error messages to their fields
+- **`role="alert"`** on error containers for screen reader announcement
+- Accessible disabled button — `aria-disabled` via the `Button` component's built-in pattern
+- Form heading with unique `id` for `aria-labelledby` linkage
+
+## Clarifying questions
+
+If the description is ambiguous, the skill asks one question before generating:
+
+```
+You mentioned "select" — should this be:
+  1. A native <select> dropdown
+  2. A custom Select component with keyboard navigation
+
+Reply with 1 or 2.
+```
+
+The skill asks at most one clarifying question per run.

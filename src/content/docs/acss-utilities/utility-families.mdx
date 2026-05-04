@@ -1,0 +1,30 @@
+---
+title: Utility Families
+description: Every utility family, its classes, and the CSS properties they map to.
+---
+
+Run `/utility-list` in a Claude Code session to see the full family catalogue with current values based on your tokens configuration.
+
+```text
+/utility-list            # all families summary
+/utility-list spacing    # spacing family detail
+/utility-list flex       # flex family detail
+/utility-list color-bg   # color-bg family detail
+```
+
+## Family quick reference
+
+| Family | Responsive | `!important` | Example |
+|---|---|---|---|
+| color-bg | no | no | `.bg-primary`, `.bg-surface` |
+| color-text | no | no | `.text-primary`, `.text-muted` |
+| color-border | no | no | `.border-primary` |
+| spacing | yes | no | `.m-4`, `.px-6`, `.gap-3` |
+| display | yes | yes | `.hide`, `.show`, `.sr-only` |
+| flex | yes | no | `.flex`, `.flex-col`, `.items-center` |
+| grid | yes | no | `.grid`, `.grid-cols-3` |
+| type | no | no | `.text-sm`, `.font-bold` |
+| radius | no | no | `.rounded-md`, `.rounded-full` |
+| shadow | no | no | `.shadow-sm`, `.shadow-lg` |
+| position | no | no | `.relative`, `.absolute` |
+| z-index | no | no | `.z-10`, `.z-50` |

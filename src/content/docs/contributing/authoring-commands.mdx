@@ -1,0 +1,42 @@
+---
+title: Authoring Commands
+description: How to write a new slash command that delegates correctly to a skill.
+---
+
+Commands are Markdown files in `plugins/<plugin>/commands/<name>.md` with YAML front-matter.
+
+## Required front-matter
+
+```yaml
+---
+name: my-command
+description: One-sentence description shown in /help and the marketplace.
+---
+```
+
+Both `name` and `description` are required. The PostToolUse hook validates these on every save.
+
+## Command body
+
+The body tells Claude what to do when the command is invoked. It should:
+
+1. Parse any CLI arguments from the user's input
+2. Validate the arguments
+3. Delegate to the appropriate skill
+
+```markdown
+Parse the `<component>` argument(s) from the user's message.
+
+Validate: each argument must match a name in the component catalogue.
+If any name is unrecognized, list the closest matches and stop.
+
+Delegate to the `components` skill with the resolved component list.
+```
+
+## Delegate to skill, don't duplicate logic
+
+Commands must not contain generation logic. All logic lives in the skill. The command is a routing layer only.
+
+## Front-matter validation
+
+The PostToolUse hook rejects saves to `plugins/*/commands/*.md` that are missing `name:` or `description:` in their YAML front-matter.

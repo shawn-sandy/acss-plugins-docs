@@ -1,0 +1,78 @@
+---
+title: Prerequisites
+description: What your project needs before installing acss-kit or acss-utilities.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+Before installing the plugins, make sure your environment meets the following requirements.
+
+## Claude Code
+
+You need [Claude Code](https://claude.ai/code) installed and running. The plugins use Claude Code's plugin system and slash commands.
+
+```bash
+# Verify Claude Code is available
+claude --version
+```
+
+## React project with TypeScript
+
+Both plugins assume a React project. TypeScript is strongly recommended — all generated components are `.tsx` files with inline type definitions.
+
+A minimal setup that works:
+- **React 18+** (17 works but is untested)
+- **TypeScript 5+** with a `tsconfig.json` (strict mode recommended)
+- Any bundler: Vite, Next.js, Remix, Create React App, Parcel
+
+<Aside type="note">
+The plugins generate source files — they don't care what bundler you use, as long as it can handle TSX and SCSS imports.
+</Aside>
+
+## sass (for acss-kit components)
+
+Generated components import `.scss` files. You need `sass` (the Dart Sass npm package) in your project's `devDependencies`.
+
+```bash
+npm install --save-dev sass
+# or
+yarn add -D sass
+# or
+pnpm add -D sass
+```
+
+<Aside type="caution">
+`node-sass` (the deprecated C++ binding) is **not** supported. Use `sass` (Dart Sass).
+</Aside>
+
+## Project structure conventions
+
+The plugins write to predictable paths by default. You can override these with a `.acss-target.json` file at your project root.
+
+| Plugin | Default output path |
+|---|---|
+| acss-kit (components) | `src/components/fpkit/` |
+| acss-kit (themes) | `src/styles/theme/` |
+| acss-utilities | `src/styles/` |
+
+### Optional: `.acss-target.json`
+
+Create this at your project root to override defaults:
+
+```json
+{
+  "componentsDir": "src/components/ui/",
+  "utilitiesDir": "app/styles/",
+  "stack": "vite"
+}
+```
+
+## Figma (optional, for `/theme-extract`)
+
+If you plan to use `/theme-extract` with a Figma URL, you need a [Figma personal access token](https://www.figma.com/developers/api#access-tokens) configured in Claude Code's MCP settings.
+
+## What you don't need
+
+- You do **not** need to install `@fpkit/acss` from npm. The plugins vendor component code directly into your project.
+- You do **not** need any special Claude Code subscription — the plugins work on any plan that supports Claude Code plugins.
+- You do **not** need a specific folder structure beyond the defaults above (or whatever you configure in `.acss-target.json`).

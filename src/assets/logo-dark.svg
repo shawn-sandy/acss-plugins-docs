@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" fill="none">
+  <rect width="28" height="28" x="2" y="2" rx="6" fill="oklch(70% 0.18 270)" />
+  <text x="16" y="21" font-family="system-ui,sans-serif" font-size="14" font-weight="700" text-anchor="middle" fill="#0f0f1a">ac</text>
+  <text x="40" y="22" font-family="system-ui,sans-serif" font-size="15" font-weight="700" fill="#f8f8ff">acss</text>
+  <text x="76" y="22" font-family="system-ui,sans-serif" font-size="15" font-weight="400" fill="oklch(72% 0.014 270)">plugins</text>
+</svg>

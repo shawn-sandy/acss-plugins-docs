@@ -1,0 +1,93 @@
+---
+title: Extract a Theme from Figma
+description: Use /theme-extract to pull brand colors from a Figma design and generate a full WCAG-validated theme.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+This recipe walks through extracting brand colors from a Figma file and generating a production-ready theme.
+
+## Prerequisites
+
+- Figma personal access token configured in Claude Code MCP settings
+- A Figma file you have access to (public or via token)
+
+## Step 1 — Get the Figma URL
+
+Copy the URL of your Figma file or a specific frame from the browser address bar:
+
+```
+https://www.figma.com/file/abc123XYZ/Brand-Guidelines?node-id=0%3A1
+https://www.figma.com/design/xyz789/Marketing-Site
+```
+
+Either format works.
+
+## Step 2 — Run extraction
+
+```text
+/theme-extract https://www.figma.com/file/abc123XYZ/Brand-Guidelines
+```
+
+Claude reads your Figma file's color styles and component fills, then reports what it found:
+
+```
+Reading Figma file: Brand-Guidelines
+  Found 12 color styles
+  Found 3 local color variables
+
+Extracted brand colors:
+  #4f46e5  primary (used in 8 components, CTA buttons, headings)
+  #f59e0b  accent  (used in 3 components, badges, highlights)
+  #10b981  success (used in success states, checkmarks)
+
+Selected seed: #4f46e5 (most prominent interactive color)
+
+Generating theme from #4f46e5...
+```
+
+## Step 3 — Review validation output
+
+```
+Light mode — 10 contrast pairs:  ✓ all pass
+Dark mode  — 10 contrast pairs:  ✓ all pass
+
+Writing src/styles/theme/light.css  ✓
+Writing src/styles/theme/dark.css   ✓
+```
+
+## Step 4 — Apply the Figma accent as a brand override
+
+The secondary Figma color (amber `#f59e0b`) can be added as a brand overlay:
+
+```text
+/theme-brand figma-brand --from=#f59e0b
+```
+
+Then import it after the base theme:
+
+```tsx
+import './styles/theme/light.css';
+import './styles/theme/dark.css';
+import './styles/theme/brand-figma-brand.css';
+```
+
+## Step 5 — Fine-tune specific roles
+
+If the extracted palette doesn't match the Figma design exactly in certain roles:
+
+```text
+/theme-update src/styles/theme/light.css --color-primary=#4338ca
+```
+
+<Aside type="tip">
+For a closer match to Figma's exact colors, use `/theme-update` to override specific roles after extraction rather than re-running `/theme-extract`. Extraction picks the "best contrast-passing" version of your Figma color — which may differ slightly from the source value.
+</Aside>
+
+## When extraction picks the wrong color
+
+If Claude selects the wrong seed (e.g., a background color instead of the brand primary), pass the seed explicitly using `/theme-create` instead:
+
+```text
+/theme-create #your-actual-primary-hex --mode=both
+```

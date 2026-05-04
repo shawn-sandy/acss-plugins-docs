@@ -1,0 +1,178 @@
+---
+title: Create a Brand Dark Theme
+description: Generate a base palette, layer a brand override, wire up a dark mode toggle, and respect OS preferences.
+---
+
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+This recipe builds a complete two-mode theme with a brand layer and a dark mode toggle that also respects `prefers-color-scheme`.
+
+## Step 1 — Generate the base palette
+
+<Steps>
+
+1. Choose your brand's primary hex color (here: forest green `#2d6a4f`):
+
+   ```text
+   /theme-create #2d6a4f --mode=both
+   ```
+
+2. Review the WCAG output. All 10 pairs should pass at 4.5:1 or 3.0:1:
+
+   ```
+   Light mode — all 10 contrast pairs:  ✓
+   Dark mode  — all 10 contrast pairs:  ✓
+
+   Writing src/styles/theme/light.css   ✓
+   Writing src/styles/theme/dark.css    ✓
+   ```
+
+3. Import both files in your entry point:
+
+   ```tsx
+   // src/main.tsx
+   import './styles/theme/light.css';
+   import './styles/theme/dark.css';
+   ```
+
+</Steps>
+
+## Step 2 — Create the brand override
+
+For a named brand (let's call it `forest`):
+
+```text
+/theme-brand forest --from=#2d6a4f
+```
+
+This generates `src/styles/theme/brand-forest.css` with selective overrides. Import it **after** the base files:
+
+```tsx
+import './styles/theme/light.css';
+import './styles/theme/dark.css';
+import './styles/theme/brand-forest.css';  // overrides last
+```
+
+## Step 3 — Wire up the dark mode toggle
+
+Dark mode activates when `data-theme="dark"` is on `<html>`. Here's a complete toggle hook:
+
+```tsx
+// src/hooks/useDarkMode.ts
+import { useState, useEffect } from 'react';
+
+type ColorScheme = 'light' | 'dark';
+
+export function useDarkMode(): [ColorScheme, () => void] {
+  function getInitial(): ColorScheme {
+    // 1. Check localStorage for user's explicit choice
+    const stored = localStorage.getItem('color-scheme') as ColorScheme | null;
+    if (stored === 'light' || stored === 'dark') return stored;
+    // 2. Fall back to OS preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+
+  const [scheme, setScheme] = useState<ColorScheme>(getInitial);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = scheme === 'dark' ? 'dark' : '';
+    localStorage.setItem('color-scheme', scheme);
+  }, [scheme]);
+
+  // Also respond to OS-level changes while the app is open
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => {
+      // Only update if user hasn't made an explicit choice in this session
+      if (!localStorage.getItem('color-scheme')) {
+        setScheme(e.matches ? 'dark' : 'light');
+      }
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const toggle = () => setScheme(s => s === 'dark' ? 'light' : 'dark');
+
+  return [scheme, toggle];
+}
+```
+
+## Step 4 — Build the toggle button
+
+```tsx
+// src/components/ThemeToggle.tsx
+import { useDarkMode } from '../hooks/useDarkMode';
+
+export function ThemeToggle() {
+  const [scheme, toggle] = useDarkMode();
+
+  return (
+    <button
+      onClick={toggle}
+      aria-label={scheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      aria-pressed={scheme === 'dark'}
+      className="btn"
+      data-variant="ghost"
+    >
+      {scheme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+    </button>
+  );
+}
+```
+
+<Aside type="note">
+`aria-pressed` on the toggle button communicates the current state to screen readers. "Button, dark mode, pressed" in light mode; "Button, dark mode, not pressed" in dark mode.
+</Aside>
+
+## Step 5 — Prevent flash of wrong theme (FOCT)
+
+Add this inline script to your `index.html` `<head>` **before** any CSS loads:
+
+```html
+<script>
+  (function() {
+    const stored = localStorage.getItem('color-scheme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (stored === 'dark' || (!stored && prefersDark)) {
+      document.documentElement.dataset.theme = 'dark';
+    }
+  })();
+</script>
+```
+
+This runs synchronously before paint, so the `[data-theme="dark"]` selector on `<html>` is active when CSS loads.
+
+## Fine-tune the brand colors
+
+After generating, review the brand file and adjust specific roles if needed:
+
+```text
+/theme-update src/styles/theme/light.css --color-primary=#1b4332
+/theme-update src/styles/theme/dark.css  --color-primary=#52b788
+```
+
+Or use natural language:
+
+```
+make the primary a bit darker in the light theme
+```
+
+The `style-tune` skill routes this to `/theme-update` with WCAG pre-validation.
+
+## What you end up with
+
+```
+src/
+  styles/
+    theme/
+      light.css         ← base light roles (18 roles)
+      dark.css          ← base dark roles (18 roles)
+      brand-forest.css  ← brand overrides (primary + accent)
+    token-bridge.css    ← utility class bridge (if using acss-utilities)
+    utilities.css       ← utility classes (if using acss-utilities)
+  hooks/
+    useDarkMode.ts      ← toggle hook with localStorage + OS preference
+  components/
+    ThemeToggle.tsx     ← accessible toggle button
+```

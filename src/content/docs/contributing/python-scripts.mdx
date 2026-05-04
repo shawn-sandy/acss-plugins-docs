@@ -1,0 +1,53 @@
+---
+title: Python Script Contracts
+description: The two contract families for Python scripts in acss-plugins, and conventions for adding new ones.
+---
+
+All scripts in `plugins/*/scripts/` use Python 3 stdlib only — no pip dependencies.
+
+## Detector contract
+
+Use when a slash command parses the script's JSON output.
+
+- Write JSON to stdout (always, even on failure)
+- Include a `reasons` array in the JSON
+- Exit 0 for match/success, 1 for no match/failure
+- Write nothing to stderr on success
+
+```python
+import json, sys
+
+result = {"found": True, "path": "src/styles/", "reasons": ["Found src/styles/ directory"]}
+print(json.dumps(result))
+sys.exit(0)
+```
+
+## Generator/Validator contract
+
+Use for pipeline transformers and human-readable validators.
+
+- Write data/CSS to stdout (or a specified output path)
+- Write error messages to stderr
+- Exit 0 (success), 1 (validation failure), 2 (IO/usage error)
+
+```python
+import sys
+
+try:
+    result = generate(args)
+    print(result)           # data to stdout
+    sys.exit(0)
+except ValidationError as e:
+    print(str(e), file=sys.stderr)
+    sys.exit(1)
+except (IOError, ValueError) as e:
+    print(str(e), file=sys.stderr)
+    sys.exit(2)
+```
+
+## Adding a new script
+
+1. Choose the right contract family based on how the script is called
+2. Add it to `.claude/rules/python-scripts.md` (inventory + contract type)
+3. Add a corresponding entry in the Bash hooks if a command calls it directly
+4. Document it in this reference page
