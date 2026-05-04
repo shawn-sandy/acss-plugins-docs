@@ -1,0 +1,88 @@
+---
+title: component-creator skill
+description: Generates a single component instance from a natural-language description, resolving prop vocabulary against per-component reference docs.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `component-creator` skill powers [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create). It also auto-triggers on natural-language phrases, so the slash command is optional.
+
+| | |
+|---|---|
+| **Triggered by** | `/kit-create` plus phrases like *"create a …"*, *"make me a …"*, *"build a …"*, *"design a …"*, *"generate a …"* |
+| **Output** | A TSX snippet (default) or a standalone component file |
+| **Dependencies** | Per-component reference docs under `references/components/<name>.md` |
+
+## Supported components
+
+| Component | Reference doc |
+|---|---|
+| Button, IconButton | `button.md`, `icon-button.md` |
+| Alert | `alert.md` |
+| Card, Dialog, Popover | `card.md`, `dialog.md`, `popover.md` |
+| Link, Img, Icon | `link.md`, `img.md`, `icon.md` |
+| Input, Checkbox, Field | `input.md`, `checkbox.md`, `field.md` |
+| List, Table, Nav | `list.md`, `table.md`, `nav.md` |
+
+<Aside type="caution">
+Badge, Tag, Heading, Text/Paragraph, Details, and Progress live as inline catalogue entries and are **not** supported by `component-creator` yet.
+</Aside>
+
+## Steps A–I
+
+The skill is structured as a nine-step pipeline. Each step has explicit halt/confirm rules so the output is reproducible.
+
+### Step A — Parse the description
+- **A1** Resolve component noun to its reference doc via the dispatch table.
+- **A2** Load the doc's *Props Interface*, *Generation Contract*, and *Usage Examples*.
+- **A3** Match user phrases against the prop vocabulary (colours, sizes, booleans, slots).
+- **A3.5** State-control demo defaults: `open`/`expanded`/`visible` → `true`, `checked` → `false`. Wire up to caller state in the summary note.
+- **A4** Extract quoted strings for slot content (`"Add to cart"` → `children`).
+- **A5** Halt if any required prop is unresolved or any conflict is detected.
+
+### Step B — Resolve the target
+Run `detect_target.py` to locate the components directory. If the requested component or any dependency is missing, bootstrap it via `/kit-add`.
+
+### Step C — Choose output
+Ask the user: snippet mode (print the TSX block) or file mode (write a standalone component).
+
+### Step D — Validate
+Apply H1 generic rules; then any H2 rules from the component's reference doc.
+
+### Step E — Generate
+Emit single-element JSX, or compound JSX (Step E2) when slots are present. Add the correct imports.
+
+### Step F — Accessibility
+Verify `aria-label`, `alt`, and `labelFor` (where required). Drop empty compound slots rather than emitting them.
+
+### Step G — Refinement
+Support delta turns ("make it larger", "swap to secondary") on the in-memory spec until the user resets or names a new component.
+
+### Step H — Validation matrix
+- **Hard halts** — unresolved required props, out-of-union values, same-axis conflicts.
+- **Confirms** — long text, sub-minimum sizes called out by the reference doc.
+
+### Step I — Examples
+Four worked examples (button, alert, card, refinement) double as parser test fixtures.
+
+## Anti-patterns
+
+1. Silently default a colour prop. Ask the user instead.
+2. Substitute a value that isn't in the prop's union.
+3. Hard-code component import paths — always use `detect_target.py`.
+4. Generate empty compound slots.
+5. Write files without confirmation when an H1 halt fires.
+
+## Roadmap
+
+| Version | Planned |
+|---|---|
+| v0.2 | Each reference doc declares its own *Generation Notes — Creator Mode* halts/confirms |
+| v0.3 | Multi-component compositions in one prompt |
+| v0.4 | Project naming-conventions awareness |
+
+## Related
+
+- [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create)
+- [`components` skill](/acss-plugins-docs/acss-kit/skills/components)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

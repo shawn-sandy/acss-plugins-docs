@@ -22,21 +22,26 @@ import { CardGrid, Card, LinkCard } from '@astrojs/starlight/components';
 
 | Command | What it does |
 |---|---|
+| [`/setup`](/acss-plugins-docs/acss-kit/commands/setup) | Bootstrap a project — install `ui.tsx`, configure the target, seed a starter theme |
 | [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) | Generate one or more components (with dependency resolution) |
+| [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) | Generate a single component from a natural-language description |
 | [`/kit-list`](/acss-plugins-docs/acss-kit/commands/kit-list) | Browse the component catalogue or inspect a specific component |
 | [`/theme-create`](/acss-plugins-docs/acss-kit/commands/theme-create) | Generate a full light/dark theme from a seed hex color |
 | [`/theme-brand`](/acss-plugins-docs/acss-kit/commands/theme-brand) | Scaffold a brand-specific theme override file |
 | [`/theme-extract`](/acss-plugins-docs/acss-kit/commands/theme-extract) | Extract brand colors from an image or Figma URL |
 | [`/theme-update`](/acss-plugins-docs/acss-kit/commands/theme-update) | Edit specific color roles in an existing theme file |
+| [`/style-tune`](/acss-plugins-docs/acss-kit/commands/style-tune) | Tune theme roles or component tokens with natural-language modifiers |
 
 ## Skills
 
 | Skill | Triggered by | Purpose |
 |---|---|---|
+| `setup` | `/setup` | One-shot project bootstrap (ui.tsx, target, optional seed theme) |
 | `components` | `/kit-add` | Full component generation workflow (Steps A–F) |
+| `component-creator` | `/kit-create` or natural language ("create a primary pill button") | Generate a single component instance from a description |
 | `styles` | All `/theme-*` commands | OKLCH palette math, WCAG validation, role catalogue |
 | `component-form` | Natural language ("build a signup form") | Auto-generates accessible form components |
-| `style-tune` | Natural language ("warmer button") | Adjusts visual feel via token edits + WCAG validation |
+| `style-tune` | `/style-tune` or natural language ("warmer button") | Adjusts visual feel via token edits + WCAG validation |
 
 ## Key design decisions
 

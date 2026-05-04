@@ -1,0 +1,62 @@
+---
+title: setup skill
+description: Bootstrap workflow for a new acss-kit project — verifies React/TypeScript/Sass, configures the components target, and seeds the foundation.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The `setup` skill is the workflow behind the [`/setup`](/acss-plugins-docs/acss-kit/commands/setup) command. It runs a single-pass bootstrap that prepares a React + TypeScript project for everything else acss-kit does.
+
+| | |
+|---|---|
+| **Triggered by** | `/setup` (and natural-language phrases like "bootstrap acss-kit", "set up the kit") |
+| **Pre-conditions** | React + TypeScript in `package.json`; `sass` or `sass-embedded` available |
+| **Idempotent** | Yes — every step checks for existing artefacts before writing |
+| **Plan mode** | Exits immediately so file writes can run |
+
+## Steps
+
+The skill executes eight sequential checks, each guarded by an existence check so re-runs are safe.
+
+| Step | Action | Script / Asset |
+|---|---|---|
+| 1 | Verify React + TypeScript present | `detect_stack.py` |
+| 2 | Detect React major version, warn on 19+ | `detect_stack.py` |
+| 3 | Detect package manager (npm, pnpm, yarn, bun) | `detect_package_manager.py` |
+| 4 | Verify Sass installed; halt with install instructions if missing | `detect_stack.py` |
+| 5 | Set components target via prompt or `.acss-target.json` | `detect_target.py` |
+| 6 | Copy `ui.tsx` from plugin assets | `assets/ui.tsx` |
+| 7 | Seed `light.css` and `dark.css` from a hex seed (skipped with `--no-theme`) | `generate_palette.py` + `tokens_to_css.py` |
+| 7.5 | Wire theme imports into the project's CSS/SCSS entry point | — |
+| 8 | Print summary listing `created[]` vs `kept[]` | — |
+
+## Output contract
+
+After a successful run:
+
+```
+.acss-target.json                # records the components dir
+src/components/fpkit/ui.tsx      # foundation file (or your --target)
+src/styles/theme/light.css       # if --no-theme not set
+src/styles/theme/dark.css        # if --no-theme not set
+src/styles/main.scss             # @import statements added idempotently
+```
+
+## Failure handling
+
+| Failure | Behaviour |
+|---|---|
+| React or TypeScript missing | Halt with copy-paste install command |
+| Sass missing | Halt with `pnpm add -D sass` (or pkg-manager equivalent) |
+| Theme generation fails WCAG | Roll back theme files; bootstrap continues without seed theme |
+| Target dir already populated | Keep existing files; record in `kept[]` |
+
+<Aside type="note">
+The skill never deletes files. If a previous bootstrap left partial state, a re-run will fill in only what's missing.
+</Aside>
+
+## Related
+
+- [`/setup` command](/acss-plugins-docs/acss-kit/commands/setup)
+- [Prerequisites](/acss-plugins-docs/getting-started/prerequisites)
+- [Detection scripts](/acss-plugins-docs/reference/python-scripts#acss-kit-detection-scripts)
