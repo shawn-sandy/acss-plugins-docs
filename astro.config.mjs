@@ -20,6 +20,9 @@ export default defineConfig({
       editLink: {
         baseUrl: 'https://github.com/shawn-sandy/acss-plugins-docs/edit/main/',
       },
+      components: {
+        ThemeProvider: './src/components/ThemeProvider.astro',
+      },
       customCss: ['./src/styles/custom.css'],
       sidebar: [
         {
