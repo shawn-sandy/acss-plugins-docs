@@ -14,9 +14,9 @@ export default defineConfig({
         dark: './src/assets/logo-dark.svg',
         replacesTitle: false,
       },
-      social: {
-        github: 'https://github.com/shawn-sandy/agentic-acss-plugins',
-      },
+      social: [
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/shawn-sandy/agentic-acss-plugins' },
+      ],
       editLink: {
         baseUrl: 'https://github.com/shawn-sandy/acss-plugins-docs/edit/main/',
       },
