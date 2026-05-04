@@ -12,7 +12,7 @@ Your job: detect drift between the upstream plugin source and the docs in this r
 ## Inputs you can rely on
 
 - This repo (`acss-plugins-docs`): MDX docs under `src/content/docs/`, sidebar in `astro.config.mjs`.
-- Upstream repo: `https://github.com/shawn-sandy/agentic-acss-plugins`. Clone it shallowly into a temp directory; do not commit it.
+- Upstream repo: `https://github.com/shawn-sandy/agentic-acss-plugins`. Clone it fully into a temp directory so diffs against `lastUpstreamSha` succeed even when that SHA is older than the most recent few commits; do not commit it.
 - The current branch you operate on is provided by the harness or set up below. Never push to `main`.
 
 ## Doc-to-source mapping
@@ -115,8 +115,14 @@ If a command or skill is **removed** upstream, do NOT delete the MDX immediately
 - Never modify `package.json`, `package-lock.json`, CI workflows, or `src/styles/` unless the upstream change explicitly requires it (and call it out prominently in the PR body if so).
 - Never invent commands, flags, or behavior. If upstream is unclear, flag in the PR rather than guess.
 - Keep the PR scoped to documentation drift. If you notice unrelated issues (typos, broken links elsewhere), list them in a "Noted but not changed" section instead of fixing them.
-- If there are no upstream changes that affect docs, do not open a PR — but still persist sync state so the same range isn't rescanned next run. Push a state-only commit directly to the dedicated `docs-sync-state` branch (orphan/tracking branch in this repo, never merged into `main`):
+- If there are no upstream changes that affect docs, do not open a PR — but still persist sync state so the same range isn't rescanned next run. First, write the new `lastUpstreamSha` and ISO timestamp into `.claude/docs-sync-state.json` in the working tree (do **not** commit it to the working branch — the working branch should remain clean since there's no PR). Then push a state-only commit directly to the dedicated `docs-sync-state` branch (orphan/tracking branch in this repo, never merged into `main`):
   ```bash
+  # Step A — update the local state file in place (working-tree only, do NOT
+  # add/commit on the working branch).
+  # (Use whatever JSON-edit primitive the runtime provides; the file must end
+  # up with { "lastUpstreamSha": "<new-sha>", "lastSyncedAt": "<ISO-8601>" }.)
+
+  # Step B — push the updated file to the docs-sync-state tracking branch.
   git fetch origin docs-sync-state || true
   git worktree add -B docs-sync-state /tmp/docs-sync-state origin/docs-sync-state 2>/dev/null \
     || git worktree add --orphan -b docs-sync-state /tmp/docs-sync-state
@@ -125,6 +131,10 @@ If a command or skill is **removed** upstream, do NOT delete the MDX immediately
   git -C /tmp/docs-sync-state commit -m "chore(docs-sync): no drift, bump state to <short-sha>"
   git -C /tmp/docs-sync-state push -u origin docs-sync-state
   git worktree remove /tmp/docs-sync-state
+
+  # Step C — restore .claude/docs-sync-state.json on the working branch so it
+  # matches origin (working tree should be clean before exit):
+  git checkout -- .claude/docs-sync-state.json 2>/dev/null || true
   ```
   Then report "no drift detected" and exit. The state file in `.claude/docs-sync-state.json` on `main` is only updated by merged drift PRs; the `docs-sync-state` branch is the source of truth for the next run's `lastUpstreamSha`.
 
