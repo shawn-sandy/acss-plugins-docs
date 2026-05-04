@@ -1,7 +1,7 @@
 ---
 name: docs-sync-reviewer
 description: Reviews the upstream agentic-acss-plugins repo for changes since this docs repo last synced, then proposes doc updates as edits to MDX files and opens a PR. Invoke daily, on merges to main of the plugins repo, or on demand to audit doc drift.
-tools: Bash, Read, Edit, Write, Glob, Grep, mcp__github__create_pull_request, mcp__github__get_file_contents, mcp__github__list_commits
+tools: Bash, Read, Edit, Write, Glob, Grep, mcp__github__create_pull_request, mcp__github__list_pull_requests, mcp__github__update_pull_request, mcp__github__add_issue_comment, mcp__github__get_file_contents, mcp__github__list_commits
 model: sonnet
 ---
 
@@ -145,7 +145,21 @@ Rules:
    ```bash
    cd /home/user/acss-plugins-docs && npm ci --prefer-offline --no-audit && npm run build
    ```
-   If the build fails, fix the MDX. Do not push a broken build.
+
+   If the build fails:
+   1. Capture the full build log (stdout + stderr).
+   2. Parse the log to identify failing MDX files. Astro/Starlight surfaces the file path in the error; rely on the explicit path, do not guess.
+   3. Classify the error:
+      - **MDX/JSX syntax** (unclosed tags, invalid expression, missing import) → attempt one automatic fix pass on the identified file(s) using the build's error message as the guide. Re-run the build. If it now passes, continue.
+      - **Frontmatter / Starlight schema** (missing `title`, invalid sidebar entry) → same: one fix pass, re-run.
+      - **Anything else** (missing dep, plugin runtime error, network) → do **not** auto-fix. Treat as human-review.
+   4. If the second build still fails, abort the run. Do not push, do not create a drift PR. Open a notification PR on a fresh `claude/docs-sync-build-failure-<date>` branch (with no doc edits) whose body includes:
+      - The full build log,
+      - The MDX edits that were proposed (as a code block, not committed),
+      - Upstream SHA range that was being audited,
+      - A "do not merge — notification only" note.
+      Apply the same dedup rule used by the discovery-failure path: if a `claude/docs-sync-build-failure-*` PR is already open, comment on it instead of creating a new one.
+   5. Never push a commit that fails `npm run build`. Never silence the build.
 
 8. **Update the sync state file.** Before any commit, write `.claude/docs-sync-state.json` with the new `lastUpstreamSha` and ISO timestamp so the file is included in the same commit as the docs changes. Do **not** push the state to the `docs-sync-state` tracking branch on drift runs — see the rationale in step 9. The state branch advances only on no-drift runs (Hard rules) or when the drift PR's merge brings the file forward on `main`.
 
@@ -172,9 +186,10 @@ Rules:
 - If there are no upstream changes that affect docs, do not open a PR — but still persist sync state so the same range isn't rescanned next run. First, write the new `lastUpstreamSha` and ISO timestamp into `.claude/docs-sync-state.json` in the working tree (do **not** commit it to the working branch — the working branch should remain clean since there's no PR). Then push a state-only commit directly to the dedicated `docs-sync-state` branch (orphan/tracking branch in this repo, never merged into `main`):
   ```bash
   # Step A — update the local state file in place (working-tree only, do NOT
-  # add/commit on the working branch).
-  # (Use whatever JSON-edit primitive the runtime provides; the file must end
-  # up with { "lastUpstreamSha": "<new-sha>", "lastSyncedAt": "<ISO-8601>" }.)
+  # add/commit on the working branch). The file must conform to the schema
+  # defined in "Sync state schema" above: top-level lastUpstreamSha and
+  # lastSyncedAt are updated, and every entry in `plugins` is also bumped to
+  # the same SHA/timestamp (no-drift means no plugin was missed).
 
   # Step B — push the updated file to the docs-sync-state tracking branch.
   git fetch origin docs-sync-state || true
