@@ -12,7 +12,7 @@ The `setup` skill is the workflow behind the [`/setup`](/acss-plugins-docs/acss-
 | **Triggered by** | `/setup` (and natural-language phrases like "bootstrap acss-kit", "set up the kit") |
 | **Pre-conditions** | React + TypeScript in `package.json`; `sass` or `sass-embedded` available |
 | **Idempotent** | Yes — every step checks for existing artefacts before writing |
-| **Plan mode** | Exits immediately so file writes can run |
+| **Plan mode** | Exits plan mode immediately so file writes can run |
 
 ## Steps
 
@@ -27,8 +27,9 @@ The skill executes eight sequential checks, each guarded by an existence check s
 | 5 | Set components target via prompt or `.acss-target.json` | `detect_target.py` |
 | 6 | Copy `ui.tsx` from plugin assets | `assets/ui.tsx` |
 | 7 | Seed `light.css` and `dark.css` from a hex seed (skipped with `--no-theme`) | `generate_palette.py` + `tokens_to_css.py` |
-| 7.5 | Wire theme imports into the project's CSS/SCSS entry point | — |
-| 8 | Print summary listing `created[]` vs `kept[]` | — |
+| 8 | Wire theme imports into the project's CSS/SCSS entry point | — |
+
+After the eight checks complete, the skill prints a summary listing `created[]` vs `kept[]` so you can see exactly which files were written and which were left untouched.
 
 ## Output contract
 
@@ -39,7 +40,7 @@ After a successful run:
 src/components/fpkit/ui.tsx      # foundation file (or your --target)
 src/styles/theme/light.css       # if --no-theme not set
 src/styles/theme/dark.css        # if --no-theme not set
-src/styles/main.scss             # @import statements added idempotently
+<detected CSS/SCSS entry>      # @import statements added idempotently
 ```
 
 ## Failure handling
