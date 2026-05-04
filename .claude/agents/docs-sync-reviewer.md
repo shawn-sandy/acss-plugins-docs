@@ -41,7 +41,23 @@ From the discovery output, build the path mapping for this run. The mapping rule
 | Top-level README / architecture | `src/content/docs/contributing/architecture.mdx` |
 | New plugin (neither acss-kit nor acss-utilities) | NEW top-level section — flag for human decision, do not auto-add |
 
-If discovery cannot locate a plugin root, stop and flag the layout change in the PR body rather than guessing.
+Discovery failure handling — never guess at plugin locations or invent paths:
+
+- **Total failure (no plugin roots found at all).** Abort layout diffing immediately. Skip steps 3–9. Open a minimal "discovery failure" PR on a fresh `claude/docs-sync-discovery-<date>` branch with no doc edits, whose body contains:
+  - A clear failure notice: "docs-sync-reviewer could not locate any plugin roots in upstream `agentic-acss-plugins`."
+  - The discovery commands that were run and their (empty) output.
+  - Upstream HEAD SHA and run timestamp.
+  - Remediation steps: confirm the upstream layout, then update the discovery `find` patterns and the `<*-root>` mapping table in this agent file before re-running.
+  - A "do not merge — notification only" note.
+
+  Do not advance any sync-state file in this case (so the next run re-detects the same drift after the layout fix lands).
+
+- **Partial failure (some plugin roots found, others missing).** Continue the workflow for the discovered plugins and produce the normal drift PR (steps 3–9). Add a top-level **Discovery Issues** section to the PR body listing:
+  - Each expected plugin (`acss-kit`, `acss-utilities`) that was not located.
+  - The patterns that were searched.
+  - A request for human investigation of an upstream layout change for the missing plugins.
+
+  Advance sync state only for the discovered plugins; do not record a global `lastUpstreamSha` that would cover the missing ones (record per-plugin SHAs in the state file when partial, or annotate the entry).
 
 If a command or skill is **added** upstream and has no corresponding MDX page, create one and add a sidebar entry in `astro.config.mjs` under the right group.
 
