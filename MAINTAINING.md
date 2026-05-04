@@ -45,7 +45,7 @@ The docs are versioned and edited independently of the plugins, but they must st
 
 ## Architecture at a glance
 
-```
+```text
 ┌────────────────────────────┐         clone + diff           ┌────────────────────────────┐
 │ agentic-acss-plugins       │  ←──────────────────────────── │ docs-sync-reviewer agent   │
 │  plugins/acss-kit/         │                                │ (.claude/agents/...)       │
@@ -120,7 +120,7 @@ All internal links must include this prefix (or use Starlight's `<a href="/acss-
 
 ## Repository layout
 
-```
+```text
 acss-plugins-docs/
 ├── .claude/
 │   └── agents/
@@ -578,9 +578,9 @@ Direct, second-person ("you"), present tense. No marketing language. Match the t
 
 ### Code blocks
 
-- Always set the language: ` ```bash`, ` ```js`, ` ```mdx`, ` ```css`.
+- Always declare the language on fenced blocks: `bash`, `js`, `mdx`, `css`.
 - Prefer **complete, runnable examples** over fragments.
-- For shell, prefix interactive output with `# →`, not `$ `.
+- For shell, prefix interactive output with `# →` rather than a `$` prompt.
 
 ### MDX vs Markdown
 
