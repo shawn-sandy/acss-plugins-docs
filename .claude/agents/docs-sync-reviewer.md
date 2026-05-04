@@ -92,12 +92,17 @@ Rules:
 
 ## Workflow
 
-1. **Set up branch and upstream clone.**
+1. **Set up repo path, branch, and upstream clone.**
    ```bash
-   git -C /home/user/acss-plugins-docs status --short
-   git -C /home/user/acss-plugins-docs branch --show-current
+   # Resolve the docs repo path. Prefer an explicit harness-provided value;
+   # otherwise discover it from the current working tree. Never hard-code
+   # a path — the checkout location varies by runner.
+   REPO_DIR="${ACSS_DOCS_REPO_DIR:-$(git rev-parse --show-toplevel)}"
+
+   git -C "$REPO_DIR" status --short
+   git -C "$REPO_DIR" branch --show-current
    # Use the branch the harness assigned. If on main, create:
-   #   git checkout -b claude/docs-sync-$(date +%Y%m%d)
+   #   git -C "$REPO_DIR" checkout -b "claude/docs-sync-$(date +%Y%m%d)"
    tmpdir=$(mktemp -d)
    # Full clone — a fixed shallow depth can fall outside the recorded
    # lastUpstreamSha after a few missed runs. If clone bandwidth is a concern,
@@ -105,18 +110,26 @@ Rules:
    git clone https://github.com/shawn-sandy/agentic-acss-plugins "$tmpdir/upstream"
    ```
 
-2. **Determine the diff window.** Read both possible state sources, then pick the newest by `lastSyncedAt` (ISO timestamp). The `docs-sync-state` branch is the canonical source for no-drift bumps; `main` carries the state file forward when a drift PR is merged. Either may be ahead, depending on what ran last.
+   `REPO_DIR` is set once here and used for all subsequent git/npm operations in this agent. Replace any hard-coded path you may see in this document with `"$REPO_DIR"`.
+
+2. **Determine the diff window — per-plugin, not whole-blob.** Read both possible state sources, then **merge** them at the per-plugin level: for each plugin, pick the entry with the newer `lastSyncedAt`. Picking one whole blob is wrong because the two refs can diverge per-plugin (e.g. after a partial-discovery drift PR is merged, `main` has the newer `acss-kit` entry while `docs-sync-state` still has the newer `acss-utilities` entry).
 
    ```bash
    # Always fetch both refs first — neither is guaranteed to be local.
-   git fetch origin main docs-sync-state 2>/dev/null || git fetch origin main
-   git fetch origin docs-sync-state 2>/dev/null || true
+   git -C "$REPO_DIR" fetch origin main docs-sync-state 2>/dev/null \
+     || git -C "$REPO_DIR" fetch origin main
+   git -C "$REPO_DIR" fetch origin docs-sync-state 2>/dev/null || true
 
-   state_branch=$(git show origin/docs-sync-state:docs-sync-state.json 2>/dev/null || echo '')
-   state_main=$(git show origin/main:.claude/docs-sync-state.json 2>/dev/null || echo '')
+   state_branch=$(git -C "$REPO_DIR" show origin/docs-sync-state:docs-sync-state.json 2>/dev/null || echo '')
+   state_main=$(git -C "$REPO_DIR" show origin/main:.claude/docs-sync-state.json 2>/dev/null || echo '')
    ```
 
-   Compare `lastSyncedAt` on each blob and use whichever is newer; if only one exists, use it; if neither exists (first run or state loss), audit the **full** upstream/docs mapping with no SHA window — every command, skill, and script page is compared against the current upstream HEAD. Do not fall back to a fixed time window, which would miss older drift.
+   Merge rules:
+   - For each plugin name appearing in `plugins.<name>` in either blob, take the entry whose `lastSyncedAt` is newer (ISO-8601 string compare is correct for UTC-Z timestamps). Plugins present in only one blob are kept as-is.
+   - For top-level `lastUpstreamSha` / `lastSyncedAt`, take whichever blob's top-level pair is newer; if only one blob has top-level fields populated, use that one. If both are missing top-level fields but per-plugin entries exist (e.g. all prior runs were partial), leave the merged top-level pair empty.
+   - Use the merged result as the single source of truth for the rest of the run. Each plugin's effective `lastUpstreamSha` is `plugins.<name>.lastUpstreamSha` if present, else the merged top-level `lastUpstreamSha`, else "never synced".
+
+   If neither blob exists (first run or state loss), audit the **full** upstream/docs mapping with no SHA window — every command, skill, and script page is compared against the current upstream HEAD. Do not fall back to a fixed time window, which would miss older drift.
 
    After a successful drift PR run, `.claude/docs-sync-state.json` is included in the PR commit and reaches `main` only when the PR is merged — the `docs-sync-state` branch is **not** advanced for drift runs (see step 9 for the rationale: advancing it before merge would let the agent silently skip unmerged drift). After a no-drift run, only the `docs-sync-state` branch is updated (see Hard rules below).
 
@@ -143,7 +156,7 @@ Rules:
 
 7. **Verify the build before pushing.**
    ```bash
-   cd /home/user/acss-plugins-docs && npm ci --prefer-offline --no-audit && npm run build
+   (cd "$REPO_DIR" && npm ci --prefer-offline --no-audit && npm run build)
    ```
 
    If the build fails:
@@ -164,7 +177,8 @@ Rules:
 8. **Update the sync state file.** Before any commit, write `.claude/docs-sync-state.json` with the new `lastUpstreamSha` and ISO timestamp so the file is included in the same commit as the docs changes. Do **not** push the state to the `docs-sync-state` tracking branch on drift runs — see the rationale in step 9. The state branch advances only on no-drift runs (Hard rules) or when the drift PR's merge brings the file forward on `main`.
 
 9. **Check for an existing open sync PR, then commit, push, open PR.**
-   - Before opening a new PR, list open PRs targeting `main` whose head branch matches `claude/docs-sync-*`. If one exists, push your commit to that PR's branch instead of creating a duplicate; update its title/body to reflect the new SHA range and skip PR creation. Otherwise:
+   - Before opening a new PR, list open PRs targeting `main` whose head branch matches the **drift-PR pattern only**: `claude/docs-sync-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]` (date-suffixed, e.g. `claude/docs-sync-20260504`). Notification branches such as `claude/docs-sync-discovery-*` and `claude/docs-sync-build-failure-*` must **not** match — pushing real doc changes onto a notification PR would corrupt that PR's purpose. Concretely, exclude any branch whose suffix after `claude/docs-sync-` is non-numeric.
+   - If a matching drift PR exists, push your commit to that PR's branch and update its title/body to reflect the new SHA range; skip PR creation. Otherwise:
    - Commit (state file + doc changes together) with message: `docs: sync with agentic-acss-plugins@<short-sha>`
    - Push to the current branch with `git push -u origin <branch>`.
    - Open a PR via `mcp__github__create_pull_request` targeting `main`.
@@ -192,25 +206,27 @@ Rules:
   # the same SHA/timestamp (no-drift means no plugin was missed).
 
   # Step B — push the updated file to the docs-sync-state tracking branch.
-  git fetch origin docs-sync-state || true
-  git worktree add -B docs-sync-state /tmp/docs-sync-state origin/docs-sync-state 2>/dev/null \
-    || git worktree add --orphan docs-sync-state /tmp/docs-sync-state
-  cp .claude/docs-sync-state.json /tmp/docs-sync-state/docs-sync-state.json
-  git -C /tmp/docs-sync-state add docs-sync-state.json
-  git -C /tmp/docs-sync-state commit -m "chore(docs-sync): no drift, bump state to <short-sha>"
-  git -C /tmp/docs-sync-state push -u origin docs-sync-state
-  git worktree remove /tmp/docs-sync-state
+  # All git ops use $REPO_DIR (set in step 1) — do not assume the cwd.
+  worktree_dir=$(mktemp -d -t docs-sync-state.XXXXXX)
+  git -C "$REPO_DIR" fetch origin docs-sync-state || true
+  git -C "$REPO_DIR" worktree add -B docs-sync-state "$worktree_dir" origin/docs-sync-state 2>/dev/null \
+    || git -C "$REPO_DIR" worktree add --orphan docs-sync-state "$worktree_dir"
+  cp "$REPO_DIR/.claude/docs-sync-state.json" "$worktree_dir/docs-sync-state.json"
+  git -C "$worktree_dir" add docs-sync-state.json
+  git -C "$worktree_dir" commit -m "chore(docs-sync): no drift, bump state to <short-sha>"
+  git -C "$worktree_dir" push -u origin docs-sync-state
+  git -C "$REPO_DIR" worktree remove "$worktree_dir"
 
   # Step C — restore .claude/docs-sync-state.json on the working branch so the
   # working tree is clean before exit. The file may be tracked (revert with
   # checkout) or untracked-on-this-branch (remove it), depending on history.
-  if git ls-files --error-unmatch .claude/docs-sync-state.json >/dev/null 2>&1; then
-    git checkout -- .claude/docs-sync-state.json
+  if git -C "$REPO_DIR" ls-files --error-unmatch .claude/docs-sync-state.json >/dev/null 2>&1; then
+    git -C "$REPO_DIR" checkout -- .claude/docs-sync-state.json
   else
-    rm -f .claude/docs-sync-state.json
+    rm -f "$REPO_DIR/.claude/docs-sync-state.json"
   fi
   # Verify cleanliness — any residue is a bug, fail loudly:
-  test -z "$(git status --porcelain -- .claude/docs-sync-state.json)" \
+  test -z "$(git -C "$REPO_DIR" status --porcelain -- .claude/docs-sync-state.json)" \
     || { echo "no-drift cleanup left state file dirty" >&2; exit 1; }
   ```
   Then report "no drift detected" and exit. The next run resolves `lastUpstreamSha` by reading both `origin/docs-sync-state` and `origin/main` and picking the newer `lastSyncedAt` (see step 2), so both paths can advance state independently without one going stale.
