@@ -43,7 +43,9 @@ From the discovery output, build the path mapping for this run. The mapping rule
 
 Discovery failure handling — never guess at plugin locations or invent paths:
 
-- **Total failure (no plugin roots found at all).** Abort layout diffing immediately. Skip steps 3–9. Open a minimal "discovery failure" PR on a fresh `claude/docs-sync-discovery-<date>` branch with no doc edits, whose body contains:
+- **Total failure (no plugin roots found at all).** Abort layout diffing immediately. Skip steps 3–9. Before opening a notification PR, list open PRs targeting `main` whose head branch matches `claude/docs-sync-discovery-*`. If one is already open, **do not create a new PR** — instead, post a single comment on the existing PR with the new run's upstream HEAD SHA and timestamp, and exit. This prevents a flood of duplicate notifications on every scheduled run while the layout issue remains unfixed.
+
+  If no notification PR is open, create one on a fresh `claude/docs-sync-discovery-<date>` branch with no doc edits, whose body contains:
   - A clear failure notice: "docs-sync-reviewer could not locate any plugin roots in upstream `agentic-acss-plugins`."
   - The discovery commands that were run and their (empty) output.
   - Upstream HEAD SHA and run timestamp.
@@ -62,6 +64,31 @@ Discovery failure handling — never guess at plugin locations or invent paths:
 If a command or skill is **added** upstream and has no corresponding MDX page, create one and add a sidebar entry in `astro.config.mjs` under the right group.
 
 If a command or skill is **removed** upstream, do NOT delete the MDX immediately — flag it in the PR description for human review.
+
+## Sync state schema
+
+`.claude/docs-sync-state.json` (and the file at `docs-sync-state.json` on the `docs-sync-state` branch) must conform to this schema. The agent must never invent fields outside it.
+
+```json
+{
+  "lastUpstreamSha": "<full-sha>",
+  "lastSyncedAt": "<ISO-8601 UTC, e.g. 2026-05-04T20:47:56Z>",
+  "plugins": {
+    "<plugin-name>": {
+      "lastUpstreamSha": "<full-sha>",
+      "lastSyncedAt": "<ISO-8601 UTC>"
+    }
+  }
+}
+```
+
+Rules:
+- The top-level `lastUpstreamSha` / `lastSyncedAt` are the **global** sync marker. Set them only when every expected plugin (`acss-kit`, `acss-utilities`, plus any future plugin discovered upstream) was successfully audited at the same upstream SHA.
+- The `plugins` map records **per-plugin** progress. After any successful audit, write/update the entry for that plugin with the upstream SHA at which it was audited.
+- When step 2 needs `lastUpstreamSha` for a plugin, look up `plugins.<name>.lastUpstreamSha` first; if absent, fall back to the top-level `lastUpstreamSha`; if both are missing, treat as never-synced.
+- Drift runs that cover all plugins update both global and per-plugin fields. Drift runs covering only some plugins (partial discovery) update only the per-plugin entries for the discovered plugins and leave the top-level fields untouched.
+- No-drift runs update both global and per-plugin entries (no plugin was missed — there was just no drift).
+- `lastSyncedAt` must use UTC and be ISO-8601 with second precision; this is what step 2's "newer wins" comparison reads.
 
 ## Workflow
 
@@ -89,7 +116,7 @@ If a command or skill is **removed** upstream, do NOT delete the MDX immediately
    state_main=$(git show origin/main:.claude/docs-sync-state.json 2>/dev/null || echo '')
    ```
 
-   Compare `lastSyncedAt` on each blob and use whichever is newer; if only one exists, use it; if neither exists, treat the last 14 days of upstream commits as the window.
+   Compare `lastSyncedAt` on each blob and use whichever is newer; if only one exists, use it; if neither exists (first run or state loss), audit the **full** upstream/docs mapping with no SHA window — every command, skill, and script page is compared against the current upstream HEAD. Do not fall back to a fixed time window, which would miss older drift.
 
    After a successful drift PR run, `.claude/docs-sync-state.json` is included in the PR commit and reaches `main` only when the PR is merged — the `docs-sync-state` branch is **not** advanced for drift runs (see step 9 for the rationale: advancing it before merge would let the agent silently skip unmerged drift). After a no-drift run, only the `docs-sync-state` branch is updated (see Hard rules below).
 
