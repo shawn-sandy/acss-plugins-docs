@@ -86,6 +86,7 @@ The script clamps output to the sRGB gamut and warns if significant clamping occ
 
 `style-tune` uses the same atomic contract as `/theme-update`:
 
+0. Exit plan mode if the session is in plan mode — `oklch_shift.py` runs via Bash and the SCSS / theme file write at the end is also blocked under plan mode
 1. Compute the delta in memory
 2. Apply it to a temp copy of the file
 3. Run WCAG validation on the temp copy
