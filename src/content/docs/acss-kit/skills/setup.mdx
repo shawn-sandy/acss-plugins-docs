@@ -16,10 +16,11 @@ The `setup` skill is the workflow behind the [`/setup`](/acss-plugins-docs/acss-
 
 ## Steps
 
-The skill executes eight sequential checks, each guarded by an existence check so re-runs are safe.
+The skill executes nine sequential checks, each guarded by an existence check so re-runs are safe. Step 0 unblocks the rest — every subsequent step shells out to a Python detector or writes a file, both of which plan mode would block.
 
 | Step | Action | Script / Asset |
 |---|---|---|
+| 0 | Exit plan mode if the session is in plan mode | — |
 | 1 | Verify React + TypeScript present | `detect_stack.py` |
 | 2 | Detect React major version, warn on 19+ | `detect_stack.py` |
 | 3 | Detect package manager (npm, pnpm, yarn, bun) | `detect_package_manager.py` |

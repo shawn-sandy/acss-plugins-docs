@@ -11,21 +11,23 @@ The `components` skill drives `/kit-add`. It defines the six-step generation wor
 
 The `components` skill is triggered by `/kit-add`. It can also be invoked by the `component-form` pilot skill when it needs to generate field-level dependencies.
 
-## The six steps (A–F)
+## The seven steps (0, A–F)
 
 <Steps>
 
-1. **Step A — Resolve component name.** The skill looks up the requested name in the component reference catalogue (`skills/components/references/catalog.md`). Names are normalized (case-insensitive, hyphenated or camelCase both accepted). If a name doesn't match, the skill lists the closest alternatives and stops.
+1. **Step 0 — Exit plan mode.** If the session is in plan mode, exit it before any other work. Step B reads `package.json` and copies `ui.tsx`, and Step D writes the generated component files — plan mode would block both. The skill only stays in plan mode when the user asked for a description without running anything.
 
-2. **Step B — Verify sass and copy `ui.tsx`.** Checks `devDependencies` in `package.json` for `sass`. If missing, halts with an install command. Then checks whether `ui.tsx` exists in the components directory — if not, copies `assets/foundation/ui.tsx` there. The foundation file is never overwritten on subsequent runs.
+2. **Step A — Resolve component name.** The skill looks up the requested name in the component reference catalogue (`skills/components/references/catalog.md`). Names are normalized (case-insensitive, hyphenated or camelCase both accepted). If a name doesn't match, the skill lists the closest alternatives and stops.
 
-3. **Step C — Resolve dependency tree.** Reads the component's spec doc for its `dependencies:` list, then recursively resolves each dependency's dependencies. The result is a flat, deduplicated list ordered from leaf to root (bottom-up).
+3. **Step B — Verify sass and copy `ui.tsx`.** Checks `devDependencies` in `package.json` for `sass`. If missing, halts with an install command. Then checks whether `ui.tsx` exists in the components directory — if not, copies `assets/foundation/ui.tsx` there. The foundation file is never overwritten on subsequent runs.
 
-4. **Step D — Generate bottom-up.** Starting from leaf components, each is generated in turn. The skill reads the component's reference spec, builds the TSX file in memory using the generation contract, then writes it. Components that already exist in the target directory are skipped.
+4. **Step C — Resolve dependency tree.** Reads the component's spec doc for its `dependencies:` list, then recursively resolves each dependency's dependencies. The result is a flat, deduplicated list ordered from leaf to root (bottom-up).
 
-5. **Step E — Handle existing files.** When a file already exists, its import path is captured and used in parent components instead of re-generating it. The summary marks these as "skipped — existing file imported."
+5. **Step D — Generate bottom-up.** Starting from leaf components, each is generated in turn. The skill reads the component's reference spec, builds the TSX file in memory using the generation contract, then writes it. Components that already exist in the target directory are skipped.
 
-6. **Step F — Display summary.** After all files are written, the skill prints a summary table and the import statement(s) to add to your code.
+6. **Step E — Handle existing files.** When a file already exists, its import path is captured and used in parent components instead of re-generating it. The summary marks these as "skipped — existing file imported."
+
+7. **Step F — Display summary.** After all files are written, the skill prints a summary table and the import statement(s) to add to your code.
 
 </Steps>
 
