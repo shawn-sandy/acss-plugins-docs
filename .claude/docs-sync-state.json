@@ -1,0 +1,14 @@
+{
+  "lastUpstreamSha": "3c2c66d2fc205e04bb5e5fa011fc77afc0d53cdc",
+  "lastSyncedAt": "2026-05-05T00:00:00Z",
+  "plugins": {
+    "acss-kit": {
+      "lastUpstreamSha": "3c2c66d2fc205e04bb5e5fa011fc77afc0d53cdc",
+      "lastSyncedAt": "2026-05-05T00:00:00Z"
+    },
+    "acss-utilities": {
+      "lastUpstreamSha": "3c2c66d2fc205e04bb5e5fa011fc77afc0d53cdc",
+      "lastSyncedAt": "2026-05-05T00:00:00Z"
+    }
+  }
+}

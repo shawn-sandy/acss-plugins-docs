@@ -3,31 +3,37 @@ title: setup skill
 description: Bootstrap workflow for a new acss-kit project — verifies React/TypeScript/Sass, configures the components target, and seeds the foundation.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 The `setup` skill is the workflow behind the [`/setup`](/acss-plugins-docs/acss-kit/commands/setup) command. It runs a single-pass bootstrap that prepares a React + TypeScript project for everything else acss-kit does.
 
-| | |
-|---|---|
-| **Triggered by** | `/setup` (and natural-language phrases like "bootstrap acss-kit", "set up the kit") |
-| **Pre-conditions** | React + TypeScript in `package.json`; `sass` or `sass-embedded` available |
-| **Idempotent** | Yes — every step checks for existing artefacts before writing |
-| **Plan mode** | Exits plan mode immediately so file writes can run |
+|                    |                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| **Triggered by**   | `/setup` (and natural-language phrases like "bootstrap acss-kit", "set up the kit") |
+| **Pre-conditions** | React + TypeScript in `package.json`; `sass` or `sass-embedded` available           |
+| **Idempotent**     | Yes — every step checks for existing artefacts before writing                       |
+| **Plan mode**      | Exits plan mode immediately so file writes can run                                  |
+
+## Step 0 — Exit plan mode
+
+If the session is in plan mode, the skill calls `ExitPlanMode` before doing anything else. `/setup` writes `.acss-target.json`, copies `ui.tsx`, edits the project's CSS entry, and shells out to `detect_target.py`, `detect_package_manager.py`, `detect_css_entry.py`, `generate_palette.py`, `tokens_to_css.py`, and `validate_theme.py` via Bash — plan mode blocks every one of those.
+
+The skill stays in plan mode only when the user explicitly asked for a dry-run ("show me what `/setup` would touch", "don't write anything yet"). In that case it lists the artifacts each step would create or keep without invoking Write/Edit/Bash and waits for approval.
 
 ## Steps
 
 The skill executes eight sequential checks, each guarded by an existence check so re-runs are safe.
 
-| Step | Action | Script / Asset |
-|---|---|---|
-| 1 | Verify React + TypeScript present | `detect_stack.py` |
-| 2 | Detect React major version, warn on 19+ | `detect_stack.py` |
-| 3 | Detect package manager (npm, pnpm, yarn, bun) | `detect_package_manager.py` |
-| 4 | Verify Sass installed; halt with install instructions if missing | `detect_stack.py` |
-| 5 | Set components target via prompt or `.acss-target.json` | `detect_target.py` |
-| 6 | Copy `ui.tsx` from plugin assets | `assets/ui.tsx` |
-| 7 | Seed `light.css` and `dark.css` from a hex seed (skipped with `--no-theme`) | `generate_palette.py` + `tokens_to_css.py` |
-| 8 | Wire theme imports into the project's CSS/SCSS entry point | — |
+| Step | Action                                                                      | Script / Asset                             |
+| ---- | --------------------------------------------------------------------------- | ------------------------------------------ |
+| 1    | Verify React + TypeScript present                                           | `detect_stack.py`                          |
+| 2    | Detect React major version, warn on 19+                                     | `detect_stack.py`                          |
+| 3    | Detect package manager (npm, pnpm, yarn, bun)                               | `detect_package_manager.py`                |
+| 4    | Verify Sass installed; halt with install instructions if missing            | `detect_stack.py`                          |
+| 5    | Set components target via prompt or `.acss-target.json`                     | `detect_target.py`                         |
+| 6    | Copy `ui.tsx` from plugin assets                                            | `assets/ui.tsx`                            |
+| 7    | Seed `light.css` and `dark.css` from a hex seed (skipped with `--no-theme`) | `generate_palette.py` + `tokens_to_css.py` |
+| 8    | Wire theme imports into the project's CSS/SCSS entry point                  | —                                          |
 
 After the eight checks complete, the skill prints a summary listing `created[]` vs `kept[]` so you can see exactly which files were written and which were left untouched.
 
@@ -45,15 +51,16 @@ src/styles/theme/dark.css        # if --no-theme not set
 
 ## Failure handling
 
-| Failure | Behaviour |
-|---|---|
-| React or TypeScript missing | Halt with copy-paste install command |
-| Sass missing | Halt with `pnpm add -D sass` (or pkg-manager equivalent) |
-| Theme generation fails WCAG | Roll back theme files; bootstrap continues without seed theme |
-| Target dir already populated | Keep existing files; record in `kept[]` |
+| Failure                      | Behaviour                                                     |
+| ---------------------------- | ------------------------------------------------------------- |
+| React or TypeScript missing  | Halt with copy-paste install command                          |
+| Sass missing                 | Halt with `pnpm add -D sass` (or pkg-manager equivalent)      |
+| Theme generation fails WCAG  | Roll back theme files; bootstrap continues without seed theme |
+| Target dir already populated | Keep existing files; record in `kept[]`                       |
 
 <Aside type="note">
-The skill never deletes files. If a previous bootstrap left partial state, a re-run will fill in only what's missing.
+  The skill never deletes files. If a previous bootstrap left partial state, a
+  re-run will fill in only what's missing.
 </Aside>
 
 ## Related

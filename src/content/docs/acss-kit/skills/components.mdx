@@ -3,13 +3,19 @@ title: components skill
 description: Deep dive into how the components skill generates React components — the generation contract, dependency resolution, and file output conventions.
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps } from "@astrojs/starlight/components";
 
 The `components` skill drives `/kit-add`. It defines the six-step generation workflow, the component reference system, and all the conventions that keep generated code consistent across every component.
 
 ## Trigger
 
 The `components` skill is triggered by `/kit-add`. It can also be invoked by the `component-form` pilot skill when it needs to generate field-level dependencies.
+
+## Step 0 — Exit plan mode
+
+If the session is in plan mode, the skill calls `ExitPlanMode` before doing anything else. Every subsequent step writes files (`ui.tsx`, component TSX/SCSS), edits `.acss-target.json`, or runs Python scripts via Bash — plan mode blocks all of it.
+
+The skill stays in plan mode only when the user explicitly asked for a dry-run or preview ("show me the plan first", "what would `/kit-add` do", "don't generate yet"). In that case it narrates the dependency tree and file list without invoking Write/Edit/Bash and waits for approval.
 
 ## The six steps (A–F)
 
@@ -64,13 +70,14 @@ Each component has a spec doc in `skills/components/references/components/<name>
 
 All component tokens follow the `--comp-role-descriptor` pattern:
 
-| Segment | Meaning | Example |
-|---|---|---|
-| `comp` | Component abbreviation | `btn`, `card`, `dlg` |
-| `role` | Semantic role | `bg`, `color`, `border`, `radius` |
-| `descriptor` | Optional modifier | `hover`, `focus`, `active`, `disabled` |
+| Segment      | Meaning                | Example                                |
+| ------------ | ---------------------- | -------------------------------------- |
+| `comp`       | Component abbreviation | `btn`, `card`, `dlg`                   |
+| `role`       | Semantic role          | `bg`, `color`, `border`, `radius`      |
+| `descriptor` | Optional modifier      | `hover`, `focus`, `active`, `disabled` |
 
 Approved abbreviations:
+
 - `bg` → background
 - `bd` / `border` → border
 - `rad` / `radius` → border-radius
@@ -89,11 +96,11 @@ Generated TypeScript interfaces are always inline in the component file — neve
 // ✓ Inline types — what the skill generates
 export interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  variant?: "primary" | "secondary" | "ghost" | "danger";
 }
 
 // ✗ Imported types — the skill never does this
-import type { ButtonProps } from '../types/button';
+import type { ButtonProps } from "../types/button";
 ```
 
 This keeps each component self-contained and makes it easy to copy a single file into any project.
@@ -133,6 +140,7 @@ The disabled visual state is styled via the CSS selector `[aria-disabled="true"]
 Generated components are meant to be edited. After running `/kit-add`, you own the files. Common extension patterns:
 
 **Add a new variant** — add a `data-variant` value and its CSS:
+
 ```scss
 &[data-variant="outline"] {
   --btn-bg: transparent;
@@ -141,6 +149,7 @@ Generated components are meant to be edited. After running `/kit-add`, you own t
 ```
 
 **Add a prop** — extend the TypeScript interface and add the conditional attribute:
+
 ```tsx
 interface ButtonProps {
   loading?: boolean;
@@ -150,10 +159,14 @@ aria-busy={loading}
 ```
 
 **Override a token** — in your app CSS, not in the generated file:
+
 ```css
-.btn { --btn-radius: 9999px; }
+.btn {
+  --btn-radius: 9999px;
+}
 ```
 
 <Aside type="note">
-The skill never overwrites existing files, so edits you make to generated components are safe — re-running `/kit-add` for the same component is a no-op.
+  The skill never overwrites existing files, so edits you make to generated
+  components are safe — re-running `/kit-add` for the same component is a no-op.
 </Aside>
