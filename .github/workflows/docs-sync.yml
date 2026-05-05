@@ -1,0 +1,47 @@
+name: Docs Sync
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily at 06:00 UTC
+  workflow_dispatch: # manual trigger from the Actions tab
+
+jobs:
+  docs-sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push sync branches
+      pull-requests: write # open / update drift PRs
+      issues: write # comment on notification PRs
+      id-token: write # OIDC for claude-code-action
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so git diff windows reach lastUpstreamSha
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Run docs-sync-reviewer
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          additional_permissions: |
+            actions: read
+          prompt: |
+            Invoke the docs-sync-reviewer subagent to audit documentation drift
+            between this repo and the upstream agentic-acss-plugins repository.
+
+            Follow the full workflow defined in .claude/agents/docs-sync-reviewer.md:
+            clone the upstream repo into a temp directory, determine the diff window
+            from lastUpstreamSha (reading both origin/main and origin/docs-sync-state),
+            enumerate upstream changes, propose MDX edits for any drift found, verify
+            the build passes, update .claude/docs-sync-state.json, and either open /
+            update a drift PR or advance the docs-sync-state branch when there is no
+            drift.
+
+            Do not push to main. Follow all hard rules in the agent definition.
