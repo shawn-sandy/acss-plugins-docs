@@ -1,0 +1,73 @@
+---
+title: /kit-update
+description: Safely re-copy unmodified acss-kit components after a plugin upgrade — overwrites clean files, skips user-modified ones based on .acss-kit/manifest.json drift detection.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+Refresh every component, foundation, and theme file recorded in `.acss-kit/manifest.json` whose on-disk SHA256 still matches the recorded hash. Files you've edited (drift detected) are skipped by default and listed in the summary so your changes are preserved.
+
+Pair with [`/kit-sync`](/acss-plugins-docs/acss-kit/commands/kit-sync), which writes the manifest in the first place — `/kit-update` halts if no manifest exists.
+
+## Syntax
+
+```text
+/kit-update [<component> ...] [--check] [--force]
+```
+
+## Arguments
+
+| Argument | Description |
+|---|---|
+| `<component> ...` | Optional positional list. Restrict the refresh to specific components (e.g. `/kit-update button alert`). Default: every entry in the manifest. |
+| `--check` | Report drift only — no writes. Useful for previewing what would change. |
+| `--force` | Overwrite modified files too. Each modified file is backed up to `<file>.bak` before being overwritten. |
+
+## Examples
+
+```text
+/kit-update                      # update every tracked file that's still clean
+/kit-update button alert         # restrict to specific components
+/kit-update --check              # preview drift, no writes
+/kit-update --force              # overwrite modifications, writes <file>.bak first
+```
+
+## Workflow
+
+The command delegates to the [`kit-sync` skill](/acss-plugins-docs/acss-kit/skills/kit-sync). The safe-update path runs eight phases:
+
+<Steps>
+
+1. **Read manifest** — load `.acss-kit/manifest.json` via `manifest_read.py`. Halts if missing or schema-mismatched (re-sync via `/kit-sync` instead).
+
+2. **Compute drift** — `diff_status.py` classifies every tracked file as `clean`, `modified`, or `missing` against its recorded normalized SHA256.
+
+3. **Filter** — when positional component names are supplied, intersect each list with the requested set.
+
+4. **Report** — display counts plus the modified and missing file lists. `--check` exits here.
+
+5. **Regenerate clean + missing** — re-run the bulk-install logic for each entry, hash the new content, write the file, and stage a manifest update.
+
+6. **Skip or force modified** — without `--force`, modified files are preserved untouched. With `--force`, the current content is copied to `<file>.bak` before regeneration.
+
+7. **Rewrite manifest** — pipe the merged payload through `manifest_write.py`. Skipped entries keep their previous SHA, so there is no spurious churn.
+
+8. **Summary** — print updated / skipped / recreated counts and the manifest path.
+
+</Steps>
+
+## Drift classifications
+
+| Class | Meaning | Default action |
+|---|---|---|
+| `clean` | On-disk SHA256 matches the manifest. | Overwrite with the latest generated content. |
+| `modified` | On-disk SHA256 differs — you've edited the file. | Skip (preserve your changes). `--force` overwrites with a `.bak` backup. |
+| `missing` | Manifest entry exists but the file was deleted. | Recreate from the template. |
+
+<Aside type="caution">
+`/kit-update` will not run without a manifest. If you've never run `/kit-sync`, run that first — there is no fall-through to a fresh-install path, since that would bypass drift protection on every tracked file.
+</Aside>
+
+<Aside type="tip">
+For the full step-by-step workflow (manifest schema, hash normalization rules, drift classification details, and `--check` / `--force` semantics), see the [`kit-sync` skill](/acss-plugins-docs/acss-kit/skills/kit-sync).
+</Aside>

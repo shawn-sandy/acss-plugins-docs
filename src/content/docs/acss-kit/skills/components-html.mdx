@@ -1,0 +1,151 @@
+---
+title: components-html skill
+description: Generate static HTML snippets, SCSS, and (for stateful components) vanilla-JS helpers for fpkit-style components in non-React projects.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+The `components-html` skill drives [`/kit-add-html`](/acss-plugins-docs/acss-kit/commands/kit-add-html). It is a sibling to the [`components` skill](/acss-plugins-docs/acss-kit/skills/components) — both read the same reference docs at `references/components/<name>.md`. The TSX generator copies the `## TSX Template` block; this generator copies `## HTML Template` and (for stateful components) `## Vanilla JS`. The `## SCSS Template` block is identical for both — the SCSS is framework-agnostic.
+
+| | |
+|---|---|
+| **Triggered by** | `/kit-add-html` |
+| **Output** | `<name>.html` + `<name>.scss` + (stateful only) `<name>.js`, plus a one-time `_stateful.js` foundation helper |
+| **Target config** | `<projectRoot>/.acss-html-target.json` |
+| **Stateless components emit no `.js`** | Img, Link, Icon, List, Table, Field, Nav, plain Card variant |
+
+## Sibling vs the React generator
+
+| Aspect | `components` skill (TSX) | `components-html` skill |
+|---|---|---|
+| **Output files** | `<Name>.tsx` | `<name>.html` + `<name>.scss` + `<name>.js` (stateful only) |
+| **Target projects** | React-based | Server-rendered apps, static sites, email templates, prototypes |
+| **Template source** | `## TSX Template` block | `## HTML Template` + `## Vanilla JS` blocks |
+| **SCSS** | Per-component | Byte-identical to the TSX output |
+| **Disabled-state helper** | Inline React hook | `_stateful.js` foundation + `wireDisabled` import |
+
+## Step A — First-run initialization
+
+### A1. Determine the target directory
+
+Run `detect_html_target.py`. If the script returns `"source": "configured"`, use the reported `componentsHtmlDir`. If it returns `"source": "none"`, ask:
+
+```text
+Where should HTML components be generated? (default: components/html)
+```
+
+Then write `.acss-html-target.json` at the project root:
+
+```json
+{ "componentsHtmlDir": "components/html" }
+```
+
+Commit this file — the skill reads it on subsequent runs.
+
+### A2. Copy the foundation helper
+
+If `_stateful.js` does not exist in `<componentsHtmlDir>`, copy `assets/html-foundation/_stateful.js` into it. This is the vanilla-JS counterpart to React's inlined `useDisabledState` — stateful components import `wireDisabled` from `./_stateful.js`.
+
+## Step B — Component generation
+
+<Steps>
+
+1. **B1. Look up the component.** Read `skills/components/references/components/<name>.md` (the same path the TSX generator uses). If the component is not catalogued, run `/kit-list` instead.
+
+2. **B2. Read the canonical sections.** A reference doc that supports HTML output contains `## Generation Contract`, `## HTML Template` (verbatim into `<name>.html`), `## SCSS Template` (verbatim into `<name>.scss`), and — for stateful components — `## Vanilla JS` (verbatim into `<name>.js`). `## Accessibility` patterns are load-bearing; do not strip ARIA or focus styles during generation.
+
+3. **B3. Resolve the dependency tree.** Walk dependencies recursively using each dependency's own Generation Contract — the same algorithm as the TSX generator's Step B3.
+
+4. **B4. Show the dependency tree.** Display every file that will be created (and skipped) before generating. Wait for confirmation.
+
+5. **B5. Generate files bottom-up.** Generate leaf dependencies first, then composite components. Skip any file that already exists. The HTML output is a **fragment** — it begins with the component's root element and contains slot placeholders as plain text where the React version interpolates `{children}` (e.g. `<!-- slot: children -->`).
+
+</Steps>
+
+If a reference doc is missing `## HTML Template`, the skill warns the developer and offers to author the markup from the TSX template by hand — but it never silently skips. The catalog's `HTML Status` column tracks which components have been augmented.
+
+## Step C — Output characteristics
+
+### C1. HTML file (`.html`)
+
+- **Fragment** — no `<html>` / `<head>` / `<body>` wrapper.
+- Same class names as the TSX output (`btn`, `card`, `alert`, etc.) so the SCSS works unchanged.
+- Same `data-*` attributes (`data-btn`, `data-style`, `data-color`, `data-card`, `data-severity`).
+- Same ARIA attributes (`aria-disabled`, `aria-labelledby`, `role` only when needed).
+- Slot placeholders are HTML comments — `<!-- slot: children -->`, `<!-- slot: title -->`.
+- Multiple variants in a single file are separated by an HTML-comment header — `<!-- variant: primary -->`.
+
+### C2. SCSS file (`.scss`)
+
+Byte-identical to the TSX generator's output. Same rules:
+
+- All values in **rem** (never px).
+- CSS variable naming: `--{component}-{element?}-{variant?}-{property}`.
+- Global token references always have a hardcoded fallback.
+- `[aria-disabled="true"]` styles are present on every interactive component.
+
+### C3. JS file (`.js`) — stateful components only
+
+Emitted for: **Button** (aria-disabled wrap), **Card** (interactive variant only — keyboard activation + `card:activate` event), **Alert** (dismiss + auto-hide + pause-on-hover), **Dialog** (`showModal` + backdrop close), **Popover**, **Checkbox**, **Input**, **IconButton**.
+
+- Plain ES module — no bundler required.
+- Imports `wireDisabled` from `./_stateful.js` when the component participates in the disabled-state pattern.
+- Exports an `init` function that the user calls (e.g. `import { init } from './components/html/dialog.js'; init();`).
+- Idempotent — `init()` may be called multiple times without double-binding listeners.
+
+## Step D — Accessibility patterns
+
+The skill preserves the same patterns as the TSX generator:
+
+- `aria-disabled="true"` (paired with the `is-disabled` class) — never the native `disabled` attribute, so disabled controls stay focusable (WCAG 2.1.1).
+- `:focus-visible` outline preserved by the SCSS.
+- Semantic HTML preferred over roles (`<button>` not `<div role="button">`, `<dialog>` not `<div role="dialog">`).
+- Icon-only controls require `aria-label`.
+
+## Step E — Post-generation summary
+
+The skill prints integration steps after writing:
+
+```text
+Generated HTML components in components/html/:
+
+  Created:
+    button.html
+    button.scss
+    button.js
+
+  Skipped (already existed):
+    _stateful.js
+
+How to wire it up:
+
+  1. Compile the SCSS to CSS first — browsers cannot load .scss directly:
+       npx sass components/html/button.scss components/html/button.css
+     Then add to your page <head>:
+       <link rel="stylesheet" href="components/html/button.css">
+  2. <script type="module" src="components/html/button.js"></script>
+  3. Paste the markup from button.html into your page or template.
+```
+
+## Step F — Verify integration
+
+Runs `verify_html_integration.py`:
+
+- **Exit 0** → every `.scss` / `.js` artifact is referenced by at least one page (`.html`, `.css`, `.scss`, `.tsx`, `.vue`, `.svelte`, …). No further action.
+- **Exit 1** → the script returns a `reasons` array. The skill prints each reason as a numbered fix-up list with the suggested `<link>` / `<script>` snippet. **It never auto-edits the user's pages.**
+
+`*.html` snippets are listed but not checked — they're fragments meant to be copy-pasted, so absence of a reference is expected.
+
+## Key rules
+
+1. **Fragments only** — no `<html>`/`<body>` wrappers; the user owns the page shell.
+2. **Same classes, same data attributes, same ARIA** as TSX — so SCSS is reused unchanged.
+3. **Vanilla JS for stateful components** — no React, no bundler, no framework runtime.
+4. **`_stateful.js` is the disabled-state helper** — copied once per project, imported by stateful components.
+5. **Skip existing** — never overwrite a file that already exists; the user owns the generated code.
+6. **Bottom-up dependency order** — leaf components first.
+7. **No auto-edits to user pages** — Step F reports missing references but never patches them.
+
+<Aside type="tip">
+For React-only projects, use the [`components` skill](/acss-plugins-docs/acss-kit/skills/components) (driven by [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)) instead. The two are designed to coexist — the framework-agnostic SCSS contract is the foundation that makes both possible.
+</Aside>

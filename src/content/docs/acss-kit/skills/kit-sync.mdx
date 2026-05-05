@@ -1,0 +1,141 @@
+---
+title: kit-sync skill
+description: Bulk-install every acss-kit component, foundation, and starter theme — and safely re-copy unmodified files after plugin upgrades — using a SHA256 manifest at .acss-kit/manifest.json.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+The `kit-sync` skill backs both [`/kit-sync`](/acss-plugins-docs/acss-kit/commands/kit-sync) (bulk install) and [`/kit-update`](/acss-plugins-docs/acss-kit/commands/kit-update) (safe re-copy). It exists because `/kit-add` is per-component and [`/setup`](/acss-plugins-docs/acss-kit/commands/setup) is one-time bootstrap — neither helps a developer who wants to vendor the entire kit at once or stay current with upstream changes without losing local edits.
+
+| | |
+|---|---|
+| **Triggered by** | `/kit-sync`, `/kit-update`, plus phrases like *"install all components"*, *"bulk copy the kit"*, *"sync the entire kit into my project"*, *"refresh anything I haven't touched"* |
+| **Output** | Component TSX/SCSS, `ui.tsx` foundation, theme CSS, and `.acss-kit/manifest.json` |
+| **Manifest** | `<projectRoot>/.acss-kit/manifest.json` — the source of truth for what was generated |
+
+## Manifest format
+
+`.acss-kit/manifest.json` records every generated file's normalized SHA256 at the moment it was written. Drift detection compares on-disk content to that recorded hash to classify each tracked file as `clean`, `modified`, or `missing`.
+
+```json
+{
+  "schemaVersion": 1,
+  "pluginVersion": "0.9.0",
+  "targetDir": "src/components/fpkit",
+  "stylesDir": "src/styles",
+  "themeFile": "acss-kit.theme.json",
+  "generatedAt": "2026-05-03T14:22:11Z",
+  "files": {
+    "src/components/fpkit/ui.tsx": {
+      "source": "asset:foundation/ui.tsx",
+      "sha256": "<hex>",
+      "pluginVersion": "0.9.0",
+      "kind": "foundation"
+    },
+    "src/components/fpkit/button.tsx": {
+      "source": "ref:components/button.md#tsx-template",
+      "sha256": "<hex>",
+      "pluginVersion": "0.9.0",
+      "kind": "component",
+      "component": "button"
+    }
+  }
+}
+```
+
+`kind` is one of `foundation` (the verbatim `ui.tsx`), `component` (a tracked TSX/SCSS pair), `style` (a generated theme CSS file), or `theme` (the user's seed `theme.json`).
+
+## Hash normalization (load-bearing)
+
+Drift detection runs SHA256 on **normalized** content, not raw bytes. The same normalization applies before recording the manifest hash and before comparing on-disk content:
+
+1. Replace CRLF / CR with LF.
+2. Strip trailing whitespace (spaces and tabs) from every line.
+3. Collapse trailing blank lines to a single trailing newline.
+
+Without normalization, a Prettier or editor save would flip every file to `modified` immediately. The logic lives in `scripts/hash_file.py` and is duplicated in `scripts/diff_status.py`.
+
+## Bulk install workflow (`/kit-sync`)
+
+### Flags
+
+| Flag | Effect |
+|---|---|
+| `--target=<dir>` | Override the components directory (default from `.acss-target.json`, fallback `src/components/fpkit`). |
+| `--styles-dir=<dir>` | Override the styles directory (default from `.acss-target.json`, fallback `src/styles`). |
+| `--seed=<hex>` | Seed colour for theme generation (default: prompt the developer). |
+| `--skip-styles` | Components-only sync; do not seed theme. |
+| `--dry-run` | Print the plan tree, do not write files or manifest. |
+
+<Steps>
+
+1. **Step S1 — Preflight.** Detect project root via `detect_target.py`; halt if missing. Confirm `cssPipeline` includes `sass` via `detect_stack.py`. Read any existing manifest via `manifest_read.py` — if present, route every file through the safe-update diff/skip logic before writing.
+
+2. **Step S2 — Enumerate the catalog.** Read `skills/components/references/components/catalog.md`. Every component named in the **Verification Status** table is in scope, plus the inline catalogue entries (Badge, Tag, Heading, Text/Paragraph, Details, Progress) that have a Generation Contract. Excludes `Form` (lives as a skill) and `UI (foundation)` (handled separately as `ui.tsx`).
+
+3. **Step S3 — Resolve dep tree, dedupe.** For each in-scope component, walk its Generation Contract `dependencies:` recursively. Union all results into one ordered list, leaves first.
+
+4. **Step S4 — Show the plan.** Display the full plan (foundation, components, styles, manifest) and wait for confirmation. If `--dry-run`, exit without writing.
+
+5. **Step S5 — Generate components bottom-up.** For each entry: load the reference doc, substitute placeholders, hash the rendered TSX with `hash_file.py --stdin` *before writing*, then write. Repeat for SCSS where the contract has one. Re-sync runs route `modified` files into a skipped list.
+
+6. **Step S6 — Foundation.** Copy `assets/foundation/ui.tsx` to `<targetDir>/ui.tsx`. Hash and record as `kind: "foundation"`. Skip if already on disk and `modified`.
+
+7. **Step S7 — Styles** *(skipped under `--skip-styles`)*. Resolve seed colour (`--seed`, prior `acss-kit.theme.json`, or prompt). Run `generate_palette.py` then `tokens_to_css.py` to emit `<stylesDir>/theme/light.css` and `dark.css`. Write `acss-kit.theme.json` for re-runs. Hash all three and record. Run `validate_theme.py` and surface any WCAG failures (non-blocking).
+
+8. **Step S8 — Write the manifest.** Pipe the assembled payload to `manifest_write.py`. Includes `projectRoot`, `pluginVersion` (from `.claude-plugin/plugin.json`), `targetDir`, `stylesDir`, `themeFile`, and the `files[]` array.
+
+9. **Step S9 — Verify integration.** Run `verify_integration.py` and surface any missing-import reasons as a numbered fix-up list.
+
+10. **Step S10 — Summary.** Print created / skipped counts, the manifest path, and next-step hints (`/kit-update`, `/kit-update --check`).
+
+</Steps>
+
+## Safe-update workflow (`/kit-update`)
+
+### Flags
+
+| Flag | Effect |
+|---|---|
+| `<component>...` | Restrict the update to a list of components. Default: every entry in the manifest. |
+| `--check` | Report only — do not write. |
+| `--force` | Overwrite modified files. Each is backed up to `<file>.bak` before being overwritten. |
+
+<Steps>
+
+1. **Step U1 — Read the manifest.** Run `manifest_read.py`. Halts on `exists: false` (telling the user to run `/kit-sync` first) or `schemaMismatch: true` (no fall-through to fresh-install — that would bypass drift protection on every tracked file).
+
+2. **Step U2 — Compute drift.** Run `diff_status.py`. Capture `clean[]`, `modified[]`, and `missing[]`. If a positional component filter was supplied, intersect each list with the requested set.
+
+3. **Step U3 — Show the report.** Display counts plus the modified and missing lists. If `--check`, stop here.
+
+4. **Step U4 — Regenerate clean + missing.** For each entry: re-run the bulk-install logic for that file's `kind` and `source`, hash the new content, write the file, stage a manifest update.
+
+5. **Step U5 — Handle modified.** Without `--force`, skip and add to the summary. With `--force`, copy to `<file>.bak`, regenerate, write, hash, update.
+
+6. **Step U6 — Rewrite the manifest.** Pipe the merged payload to `manifest_write.py`. Existing entries that were not touched keep their previous SHA — no spurious churn.
+
+7. **Step U7 — Summary.** Print updated / skipped / recreated counts and the manifest path.
+
+</Steps>
+
+## Plan-mode behaviour
+
+Both workflows write component TSX/SCSS, theme CSS, and the manifest, and they shell out to a dozen Python scripts. If the session is in plan mode when invoked, the skill exits plan mode before the first write step (S1 / U1).
+
+`--dry-run` is **not** a reason to remain in plan mode — the flag suppresses writes inside the workflow, but the workflow still has to run `detect_target.py`, `manifest_read.py`, and `diff_status.py` via Bash to produce the plan tree, and plan mode would block those.
+
+The skill stays in plan mode only when the user explicitly asked for a description without running any scripts at all.
+
+<Aside type="caution">
+The `Form` component is **not** vendored by `/kit-sync`. It lives behind the [`component-form` skill](/acss-plugins-docs/acss-kit/skills/component-form) and is generated on-demand from a natural-language prompt. Run [`/setup`](/acss-plugins-docs/acss-kit/commands/setup) plus a form-shaped prompt to bootstrap it.
+</Aside>
+
+## When invoked outside a slash command
+
+If a user phrase auto-triggers this skill, pick the workflow that fits:
+
+- *"install everything"*, *"bulk copy"*, *"vendor the whole kit"* → bulk install workflow.
+- *"update unmodified"*, *"refresh clean components"*, *"safely re-copy"* → safe-update workflow.
+
+When ambiguous, the skill asks once: *"Bulk install (writes everything) or safe update (only re-copies unmodified files)?"*

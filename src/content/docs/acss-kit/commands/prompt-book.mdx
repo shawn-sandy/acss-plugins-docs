@@ -1,0 +1,42 @@
+---
+title: /prompt-book
+description: Display the acss-kit prompt book — copy-paste prompts mapped to every shipped slash command.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Display the acss-kit + acss-utilities prompt book — a catalogue of copy-paste prompts mapped to every shipped slash command. Run with no argument to print the full book, or pass a section number to print a single section.
+
+## Syntax
+
+```text
+/prompt-book [section-number]
+```
+
+## Arguments
+
+| Argument | Required | Description |
+|---|---|---|
+| `section-number` | No | Print only the section whose heading begins with `## <number>.`. Invalid numbers fall back to a table of contents. |
+
+## Examples
+
+```text
+/prompt-book        # full book
+/prompt-book 5      # only section 5
+```
+
+## Behaviour
+
+- **No argument** — prints the entire prompt book verbatim.
+- **Valid section number** — prints from the matching `## <n>.` heading through the next `---` separator (or end of file).
+- **Invalid section number** — prints the table of contents (every `## <n>. <title>` heading) and prompts to re-run with a valid number.
+- **Read-only** — never edits files, never paraphrases, never reformats.
+
+## Source
+
+The prompt book lives in the plugin at `plugins/acss-kit/docs/prompt-book.md` and ships with every install. To update it, edit the file there and bump `plugin.json` per the repo's pre-submit checklist.
+
+<Aside type="tip">
+For the matching algorithm and read-only constraints, see the [`prompt-book` skill](/acss-plugins-docs/acss-kit/skills/prompt-book).
+</Aside>
