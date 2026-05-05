@@ -32,7 +32,7 @@ The `kit-sync` skill backs both [`/kit-sync`](/acss-plugins-docs/acss-kit/comman
       "pluginVersion": "0.9.0",
       "kind": "foundation"
     },
-    "src/components/fpkit/button.tsx": {
+    "src/components/fpkit/Button.tsx": {
       "source": "ref:components/button.md#tsx-template",
       "sha256": "<hex>",
       "pluginVersion": "0.9.0",
@@ -83,7 +83,7 @@ Without normalization, a Prettier or editor save would flip every file to `modif
 
 7. **Step S7 — Styles** *(skipped under `--skip-styles`)*. Resolve seed colour (`--seed`, prior `acss-kit.theme.json`, or prompt). Run `generate_palette.py` then `tokens_to_css.py` to emit `<stylesDir>/theme/light.css` and `dark.css`. Write `acss-kit.theme.json` for re-runs. Hash all three and record. Run `validate_theme.py` and surface any WCAG failures (non-blocking).
 
-8. **Step S8 — Write the manifest.** Pipe the assembled payload to `manifest_write.py`. Includes `projectRoot`, `pluginVersion` (from `.claude-plugin/plugin.json`), `targetDir`, `stylesDir`, `themeFile`, and the `files` map (path-keyed entries, as shown in the schema above).
+8. **Step S8 — Write the manifest.** Pipe the assembled payload to `manifest_write.py`. The payload carries `projectRoot` (used to locate the write target — not persisted in the manifest itself), plus `pluginVersion` (from `.claude-plugin/plugin.json`), `targetDir`, `stylesDir`, `themeFile`, and a path-keyed `files` map matching the schema above.
 
 9. **Step S9 — Verify integration.** Run `verify_integration.py` and surface any missing-import reasons as a numbered fix-up list.
 
@@ -121,7 +121,7 @@ Without normalization, a Prettier or editor save would flip every file to `modif
 
 ## Plan-mode behaviour
 
-Both workflows write component TSX/SCSS, theme CSS, and the manifest, and they shell out to a dozen Python scripts. If the session is in plan mode when invoked, the skill exits plan mode before the first write step (S1 / U1).
+Both workflows write component TSX/SCSS, theme CSS, and the manifest, and they shell out to a dozen Python scripts. If the session is in plan mode when invoked, the skill exits plan mode before Step S1 / U1 — those are preflight/read steps (`detect_target.py`, `manifest_read.py`, `diff_status.py`) rather than writes, but plan mode would block the Bash invocations all the same.
 
 `--dry-run` is **not** a reason to remain in plan mode — the flag suppresses writes inside the workflow, but the workflow still has to run `detect_target.py`, `manifest_read.py`, and `diff_status.py` via Bash to produce the plan tree, and plan mode would block those.
 
