@@ -200,6 +200,7 @@ If a pair fails, the skill adjusts the foreground lightness by ±2% and retries,
 
 The skill follows a strict atomic write contract for all theme operations:
 
+0. Exit plan mode if the session is in plan mode — `validate_theme.py` runs via Bash and the temp / destination writes are also blocked under plan mode
 1. Compute the full new theme in memory
 2. Write to a temp file in the system temp directory
 3. Run `validate_theme.py` on the temp file

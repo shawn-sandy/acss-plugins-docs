@@ -37,9 +37,13 @@ Reference docs live under `plugins/acss-kit/skills/component-creator/references/
   catalogue entries and are **not** supported by `component-creator` yet.
 </Aside>
 
-## Steps A–I
+## Steps 0, A–I
 
-The skill is structured as a nine-step pipeline. Each step has explicit halt/confirm rules so the output is reproducible.
+The skill is structured as a ten-step pipeline. Each step has explicit halt/confirm rules so the output is reproducible.
+
+### Step 0 — Exit plan mode
+
+If the session is in plan mode, exit it before Step A. Step B runs `detect_target.py` and may invoke `/kit-add` to bootstrap a missing component or dependency, and Step C's file-mode output writes a standalone TSX file — all blocked by plan mode. The skill only stays in plan mode when the user asked for a description without running anything.
 
 ### Step A — Parse the description
 

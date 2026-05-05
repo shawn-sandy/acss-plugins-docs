@@ -69,25 +69,27 @@ Without normalization, a Prettier or editor save would flip every file to `modif
 
 <Steps>
 
-1. **Step S1 — Preflight.** Detect project root via `detect_target.py`; halt if missing. Confirm `cssPipeline` includes `sass` via `detect_stack.py`. Read any existing manifest via `manifest_read.py` — if present, route every file through the safe-update diff/skip logic before writing.
+1. **Step S0 — Exit plan mode.** If the session is in plan mode, exit it before any other work. The workflow shells out to `detect_target.py`, `detect_stack.py`, and `manifest_read.py` from Step S1 onward, and plan mode would block those Bash invocations even though they are read-only. The skill only stays in plan mode when the user explicitly asked for a description without running any scripts.
 
-2. **Step S2 — Enumerate the catalog.** Read `skills/components/references/components/catalog.md`. Every component named in the **Verification Status** table is in scope, plus the inline catalogue entries (Badge, Tag, Heading, Text/Paragraph, Details, Progress) that have a Generation Contract. Excludes `Form` (lives as a skill) and `UI (foundation)` (handled separately as `ui.tsx`).
+2. **Step S1 — Preflight.** Detect project root via `detect_target.py`; halt if missing. Confirm `cssPipeline` includes `sass` via `detect_stack.py`. Read any existing manifest via `manifest_read.py` — if present, route every file through the safe-update diff/skip logic before writing.
 
-3. **Step S3 — Resolve dep tree, dedupe.** For each in-scope component, walk its Generation Contract `dependencies:` recursively. Union all results into one ordered list, leaves first.
+3. **Step S2 — Enumerate the catalog.** Read `skills/components/references/components/catalog.md`. Every component named in the **Verification Status** table is in scope, plus the inline catalogue entries (Badge, Tag, Heading, Text/Paragraph, Details, Progress) that have a Generation Contract. Excludes `Form` (lives as a skill) and `UI (foundation)` (handled separately as `ui.tsx`).
 
-4. **Step S4 — Show the plan.** Display the full plan (foundation, components, styles, manifest) and wait for confirmation. If `--dry-run`, exit without writing.
+4. **Step S3 — Resolve dep tree, dedupe.** For each in-scope component, walk its Generation Contract `dependencies:` recursively. Union all results into one ordered list, leaves first.
 
-5. **Step S5 — Generate components bottom-up.** For each entry: load the reference doc, substitute placeholders, hash the rendered TSX with `hash_file.py --stdin` *before writing*, then write. Repeat for SCSS where the contract has one. Re-sync runs route `modified` files into a skipped list.
+5. **Step S4 — Show the plan.** Display the full plan (foundation, components, styles, manifest) and wait for confirmation. If `--dry-run`, exit without writing.
 
-6. **Step S6 — Foundation.** Copy `assets/foundation/ui.tsx` to `<targetDir>/ui.tsx`. Hash and record as `kind: "foundation"`. Skip if already on disk and `modified`.
+6. **Step S5 — Generate components bottom-up.** For each entry: load the reference doc, substitute placeholders, hash the rendered TSX with `hash_file.py --stdin` *before writing*, then write. Repeat for SCSS where the contract has one. Re-sync runs route `modified` files into a skipped list.
 
-7. **Step S7 — Styles** *(skipped under `--skip-styles`)*. Resolve seed colour (`--seed`, prior `acss-kit.theme.json`, or prompt). Run `generate_palette.py` then `tokens_to_css.py` to emit `<stylesDir>/theme/light.css` and `dark.css`. Write `acss-kit.theme.json` for re-runs. Hash all three and record. Run `validate_theme.py` and surface any WCAG failures (non-blocking).
+7. **Step S6 — Foundation.** Copy `assets/foundation/ui.tsx` to `<targetDir>/ui.tsx`. Hash and record as `kind: "foundation"`. Skip if already on disk and `modified`.
 
-8. **Step S8 — Write the manifest.** Pipe the assembled payload to `manifest_write.py`. The payload carries `projectRoot` (used to locate the write target — not persisted in the manifest itself), plus `pluginVersion` (from `.claude-plugin/plugin.json`), `targetDir`, `stylesDir`, `themeFile`, and a path-keyed `files` map matching the schema above.
+8. **Step S7 — Styles** *(skipped under `--skip-styles`)*. Resolve seed colour (`--seed`, prior `acss-kit.theme.json`, or prompt). Run `generate_palette.py` then `tokens_to_css.py` to emit `<stylesDir>/theme/light.css` and `dark.css`. Write `acss-kit.theme.json` for re-runs. Hash all three and record. Run `validate_theme.py` and surface any WCAG failures (non-blocking).
 
-9. **Step S9 — Verify integration.** Run `verify_integration.py` and surface any missing-import reasons as a numbered fix-up list.
+9. **Step S8 — Write the manifest.** Pipe the assembled payload to `manifest_write.py`. The payload carries `projectRoot` (used to locate the write target — not persisted in the manifest itself), plus `pluginVersion` (from `.claude-plugin/plugin.json`), `targetDir`, `stylesDir`, `themeFile`, and a path-keyed `files` map matching the schema above.
 
-10. **Step S10 — Summary.** Print created / skipped counts, the manifest path, and next-step hints (`/kit-update`, `/kit-update --check`).
+10. **Step S9 — Verify integration.** Run `verify_integration.py` and surface any missing-import reasons as a numbered fix-up list.
+
+11. **Step S10 — Summary.** Print created / skipped counts, the manifest path, and next-step hints (`/kit-update`, `/kit-update --check`).
 
 </Steps>
 
@@ -103,27 +105,29 @@ Without normalization, a Prettier or editor save would flip every file to `modif
 
 <Steps>
 
-1. **Step U1 — Read the manifest.** Run `manifest_read.py`. Halts on `exists: false` (telling the user to run `/kit-sync` first) or `schemaMismatch: true` (no fall-through to fresh-install — that would bypass drift protection on every tracked file).
+1. **Step U0 — Exit plan mode.** If the session is in plan mode, exit it before any other work. Even `--check` runs invoke `manifest_read.py` and `diff_status.py` via Bash to produce the report, and plan mode would block them. The skill only stays in plan mode when the user explicitly asked for a description without running any scripts.
 
-2. **Step U2 — Compute drift.** Run `diff_status.py`. Capture `clean[]`, `modified[]`, and `missing[]`. If a positional component filter was supplied, intersect each list with the requested set.
+2. **Step U1 — Read the manifest.** Run `manifest_read.py`. Halts on `exists: false` (telling the user to run `/kit-sync` first) or `schemaMismatch: true` (no fall-through to fresh-install — that would bypass drift protection on every tracked file).
 
-3. **Step U3 — Show the report.** Display counts plus the modified and missing lists. If `--check`, stop here.
+3. **Step U2 — Compute drift.** Run `diff_status.py`. Capture `clean[]`, `modified[]`, and `missing[]`. If a positional component filter was supplied, intersect each list with the requested set.
 
-4. **Step U4 — Regenerate clean + missing.** For each entry: re-run the bulk-install logic for that file's `kind` and `source`, hash the new content, write the file, stage a manifest update.
+4. **Step U3 — Show the report.** Display counts plus the modified and missing lists. If `--check`, stop here.
 
-5. **Step U5 — Handle modified.** Without `--force`, skip and add to the summary. With `--force`, copy to `<file>.bak`, regenerate, write, hash, update.
+5. **Step U4 — Regenerate clean + missing.** For each entry: re-run the bulk-install logic for that file's `kind` and `source`, hash the new content, write the file, stage a manifest update.
 
-6. **Step U6 — Rewrite the manifest.** Pipe the merged payload to `manifest_write.py`. Existing entries that were not touched keep their previous SHA — no spurious churn.
+6. **Step U5 — Handle modified.** Without `--force`, skip and add to the summary. With `--force`, copy to `<file>.bak`, regenerate, write, hash, update.
 
-7. **Step U7 — Summary.** Print updated / skipped / recreated counts and the manifest path.
+7. **Step U6 — Rewrite the manifest.** Pipe the merged payload to `manifest_write.py`. Existing entries that were not touched keep their previous SHA — no spurious churn.
+
+8. **Step U7 — Summary.** Print updated / skipped / recreated counts and the manifest path.
 
 </Steps>
 
 ## Plan-mode behaviour
 
-Both workflows write component TSX/SCSS, theme CSS, and the manifest, and they shell out to a dozen Python scripts. If the session is in plan mode when invoked, the skill exits plan mode before Step S1 / U1 — those are preflight/read steps (`detect_target.py`, `manifest_read.py`, `diff_status.py`) rather than writes, but plan mode would block the Bash invocations all the same.
+Both workflows write component TSX/SCSS, theme CSS, and the manifest, and they shell out to a dozen Python scripts. Exiting plan mode is therefore an explicit first step — **Step S0** for the bulk install workflow and **Step U0** for the safe-update workflow — so that the preflight/read scripts (`detect_target.py`, `manifest_read.py`, `diff_status.py`) can run via Bash. Plan mode would block those invocations even though they are read-only.
 
-`--dry-run` is **not** a reason to remain in plan mode — the flag suppresses writes inside the workflow, but the workflow still has to run `detect_target.py`, `manifest_read.py`, and `diff_status.py` via Bash to produce the plan tree, and plan mode would block those.
+`--dry-run` and `--check` are **not** reasons to remain in plan mode — those flags suppress writes inside the workflow, but the workflow still has to run `detect_target.py`, `manifest_read.py`, and `diff_status.py` via Bash to produce the plan tree or drift report, and plan mode would block those.
 
 The skill stays in plan mode only when the user explicitly asked for a description without running any scripts at all.
 

@@ -54,6 +54,10 @@ Supported field types:
 | radio, choose one                        | Radio group (using `Checkbox`) |
 | file, upload, attachment                 | `Input` (file)                 |
 
+## Plan-mode behaviour
+
+When `component-form` auto-triggers, exiting plan mode is the first action. Dependency generation invokes `/kit-add` (which writes TSX/SCSS files) and the form output itself is written to `src/forms/<FormName>.tsx`, both of which plan mode would block. The skill only stays in plan mode when the user asked for a description of the form without generating anything.
+
 ## Dependency generation
 
 After resolving the field list, the skill runs `/kit-add` for all required dependencies:

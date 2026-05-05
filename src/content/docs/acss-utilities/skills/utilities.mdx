@@ -102,6 +102,10 @@ validate_utilities.py
 [pass] write to src/styles/    OR   [fail] revert tokens.json
 ```
 
+## Plan-mode behaviour
+
+When any of `/utility-add`, `/utility-tune`, or `/utility-bridge` triggers a regeneration, exiting plan mode is the first action. `generate_utilities.py` and `validate_utilities.py` both run via Bash, and the final write to `src/styles/utilities.css` is blocked under plan mode. `/utility-list` is read-only and may stay in plan mode. The skill otherwise only stays in plan mode when the user asked for a description without running anything.
+
 ## Family concatenation order
 
 The skill enforces a **fixed family order** for stable specificity — the order is always the same regardless of which families are enabled:

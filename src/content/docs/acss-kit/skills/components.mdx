@@ -1,43 +1,78 @@
 ---
 title: components skill
-description: Deep dive into how the components skill generates React components — the generation contract, dependency resolution, and file output conventions.
+description:
+  Deep dive into how the components skill generates React components — the
+  generation contract, dependency resolution, and file output conventions.
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
 
-The `components` skill drives `/kit-add`. It defines the six-step generation workflow, the component reference system, and all the conventions that keep generated code consistent across every component.
+The `components` skill drives `/kit-add`. It defines the seven-step generation
+workflow, the component reference system, and all the conventions that keep
+generated code consistent across every component.
 
 ## Trigger
 
-The `components` skill is triggered by `/kit-add`. It can also be invoked by the `component-form` pilot skill when it needs to generate field-level dependencies.
+The `components` skill is triggered by `/kit-add`. It can also be invoked by the
+`component-form` pilot skill when it needs to generate field-level dependencies.
 
 ## Step 0 — Exit plan mode
 
-If the session is in plan mode, the skill calls `ExitPlanMode` before doing anything else. Every subsequent step writes files (`ui.tsx`, component TSX/SCSS), edits `.acss-target.json`, or runs Python scripts via Bash — plan mode blocks all of it.
+If the session is in plan mode, the skill calls `ExitPlanMode` before doing
+anything else. Every subsequent step writes files (`ui.tsx`, component
+TSX/SCSS), edits `.acss-target.json`, or runs Python scripts via Bash — plan
+mode blocks all of it.
 
-The skill stays in plan mode only when the user explicitly asked for a dry-run or preview ("show me the plan first", "what would `/kit-add` do", "don't generate yet"). In that case it narrates the dependency tree and file list without invoking Write/Edit/Bash and waits for approval.
+The skill stays in plan mode only when the user explicitly asked for a dry-run
+or preview ("show me the plan first", "what would `/kit-add` do", "don't
+generate yet"). In that case it narrates the dependency tree and file list
+without invoking Write/Edit/Bash and waits for approval.
 
 ## The six steps (A–F)
 
 <Steps>
 
-1. **Step A — Resolve component name.** The skill looks up the requested name in the component reference catalogue (`skills/components/references/catalog.md`). Names are normalized (case-insensitive, hyphenated or camelCase both accepted). If a name doesn't match, the skill lists the closest alternatives and stops.
+1. **Step 0 — Exit plan mode.** If the session is in plan mode, exit it before
+   any other work. Step B reads `package.json` and copies `ui.tsx`, and Step D
+   writes the generated component files — plan mode would block both. The skill
+   only stays in plan mode when the user asked for a description without running
+   anything.
 
-2. **Step B — Verify sass and copy `ui.tsx`.** Checks `devDependencies` in `package.json` for `sass`. If missing, halts with an install command. Then checks whether `ui.tsx` exists in the components directory — if not, copies `assets/foundation/ui.tsx` there. The foundation file is never overwritten on subsequent runs.
+2. **Step A — Resolve component name.** The skill looks up the requested name in
+   the component reference catalogue
+   (`skills/components/references/catalog.md`). Names are normalized
+   (case-insensitive, hyphenated or camelCase both accepted). If a name doesn't
+   match, the skill lists the closest alternatives and stops.
 
-3. **Step C — Resolve dependency tree.** Reads the component's spec doc for its `dependencies:` list, then recursively resolves each dependency's dependencies. The result is a flat, deduplicated list ordered from leaf to root (bottom-up).
+3. **Step B — Verify sass and copy `ui.tsx`.** Checks `devDependencies` in
+   `package.json` for `sass`. If missing, halts with an install command. Then
+   checks whether `ui.tsx` exists in the components directory — if not, copies
+   `assets/foundation/ui.tsx` there. The foundation file is never overwritten on
+   subsequent runs.
 
-4. **Step D — Generate bottom-up.** Starting from leaf components, each is generated in turn. The skill reads the component's reference spec, builds the TSX file in memory using the generation contract, then writes it. Components that already exist in the target directory are skipped.
+4. **Step C — Resolve dependency tree.** Reads the component's spec doc for its
+   `dependencies:` list, then recursively resolves each dependency's
+   dependencies. The result is a flat, deduplicated list ordered from leaf to
+   root (bottom-up).
 
-5. **Step E — Handle existing files.** When a file already exists, its import path is captured and used in parent components instead of re-generating it. The summary marks these as "skipped — existing file imported."
+5. **Step D — Generate bottom-up.** Starting from leaf components, each is
+   generated in turn. The skill reads the component's reference spec, builds the
+   TSX file in memory using the generation contract, then writes it. Components
+   that already exist in the target directory are skipped.
 
-6. **Step F — Display summary.** After all files are written, the skill prints a summary table and the import statement(s) to add to your code.
+6. **Step E — Handle existing files.** When a file already exists, its import
+   path is captured and used in parent components instead of re-generating it.
+   The summary marks these as "skipped — existing file imported."
+
+7. **Step F — Display summary.** After all files are written, the skill prints a
+   summary table and the import statement(s) to add to your code.
 
 </Steps>
 
 ## The generation contract
 
-Every component spec doc includes a **generation contract** — a declaration of exactly what files will be produced:
+Every component spec doc includes a **generation contract** — a declaration of
+exactly what files will be produced:
 
 ```
 Generation contract:
@@ -52,11 +87,14 @@ TypeScript interface:
   ButtonProps { children, variant?, size?, disabled?, onClick?, className? }
 ```
 
-The skill uses this contract to verify output before writing. If the generated file doesn't match the contract (wrong exports, missing types, wrong import paths), it retries once with corrections.
+The skill uses this contract to verify output before writing. If the generated
+file doesn't match the contract (wrong exports, missing types, wrong import
+paths), it retries once with corrections.
 
 ## Component reference docs
 
-Each component has a spec doc in `skills/components/references/components/<name>.md`. The spec includes:
+Each component has a spec doc in
+`skills/components/references/components/<name>.md`. The spec includes:
 
 - **Category** — simple / interactive / form / layout / complex
 - **Generation contract** — exact file names and import paths
@@ -90,7 +128,8 @@ Approved abbreviations:
 
 ## Inline type pattern
 
-Generated TypeScript interfaces are always inline in the component file — never imported from a shared types file:
+Generated TypeScript interfaces are always inline in the component file — never
+imported from a shared types file:
 
 ```tsx
 // ✓ Inline types — what the skill generates
@@ -103,7 +142,8 @@ export interface ButtonProps {
 import type { ButtonProps } from "../types/button";
 ```
 
-This keeps each component self-contained and makes it easy to copy a single file into any project.
+This keeps each component self-contained and makes it easy to copy a single file
+into any project.
 
 ## The `UI` polymorphic base
 
@@ -119,11 +159,15 @@ export function Button({ children, ...props }: ButtonProps) {
 }
 ```
 
-`UI` accepts an `as` prop and forwards all HTML attributes to the correct element. It also handles the `data-*` attribute pattern used for variants and states.
+`UI` accepts an `as` prop and forwards all HTML attributes to the correct
+element. It also handles the `data-*` attribute pattern used for variants and
+states.
 
 ## `aria-disabled` pattern
 
-The skill uses `aria-disabled="true"` instead of the `disabled` attribute for interactive components. This preserves keyboard focusability and screen reader announcement while visually appearing disabled:
+The skill uses `aria-disabled="true"` instead of the `disabled` attribute for
+interactive components. This preserves keyboard focusability and screen reader
+announcement while visually appearing disabled:
 
 ```tsx
 <UI
@@ -133,11 +177,13 @@ The skill uses `aria-disabled="true"` instead of the `disabled` attribute for in
 >
 ```
 
-The disabled visual state is styled via the CSS selector `[aria-disabled="true"]` in the component's SCSS.
+The disabled visual state is styled via the CSS selector
+`[aria-disabled="true"]` in the component's SCSS.
 
 ## Extending a generated component
 
-Generated components are meant to be edited. After running `/kit-add`, you own the files. Common extension patterns:
+Generated components are meant to be edited. After running `/kit-add`, you own
+the files. Common extension patterns:
 
 **Add a new variant** — add a `data-variant` value and its CSS:
 
@@ -148,7 +194,8 @@ Generated components are meant to be edited. After running `/kit-add`, you own t
 }
 ```
 
-**Add a prop** — extend the TypeScript interface and add the conditional attribute:
+**Add a prop** — extend the TypeScript interface and add the conditional
+attribute:
 
 ```tsx
 interface ButtonProps {
