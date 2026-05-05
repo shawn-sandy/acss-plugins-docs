@@ -1,0 +1,95 @@
+---
+title: /kit-add-html
+description: Generate static HTML versions of fpkit-style components — markup, SCSS, and (for stateful components) vanilla JS — for projects that don't use React.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+Generate **static HTML** versions of fpkit-style components for projects that don't use React — server-rendered apps, static sites, design-system docs, email templates, prototypes. The same component reference docs power both [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) (React TSX) and `/kit-add-html` (HTML + SCSS + vanilla JS).
+
+## Syntax
+
+```text
+/kit-add-html <component> [component2 ...]
+```
+
+## Arguments
+
+| Argument | Required | Description |
+|---|---|---|
+| `component` | Yes | One or more component names (space-separated). Case-insensitive. |
+
+## Examples
+
+```text
+/kit-add-html button
+/kit-add-html card alert
+/kit-add-html dialog
+/kit-add-html button card alert dialog
+```
+
+## Differences from `/kit-add`
+
+| Aspect | `/kit-add` (TSX) | `/kit-add-html` (HTML) |
+|---|---|---|
+| **Output** | `<Name>.tsx` files | `<name>.html` + `<name>.scss` + (stateful only) `<name>.js` |
+| **Target projects** | React-based | Server-rendered apps, static sites, email templates, prototypes |
+| **Template source** | `## TSX Template` block | `## HTML Template` + `## Vanilla JS` blocks |
+| **SCSS** | Per-component | Byte-identical to the TSX output |
+| **State helpers** | Inline React hooks | `_stateful.js` foundation + per-component ES module |
+| **Target config** | `.acss-target.json` | `.acss-html-target.json` |
+
+## Workflow
+
+The command delegates to the [`components-html` skill](/acss-plugins-docs/acss-kit/skills/components-html):
+
+<Steps>
+
+1. **Init check** — read or initialize `.acss-html-target.json` (default `componentsHtmlDir: components/html`); copy the `_stateful.js` foundation helper if missing.
+
+2. **Lookup** — find the component reference doc at `skills/components/references/components/<name>.md`.
+
+3. **Read sections** — `## HTML Template`, `## SCSS Template`, and (for stateful components) `## Vanilla JS`.
+
+4. **Resolve dependency tree** — walk the Generation Contract recursively (same algorithm as `/kit-add`).
+
+5. **Show the tree** — display every `.html` / `.scss` / `.js` file that will be created. Wait for confirmation.
+
+6. **Generate bottom-up** — leaf dependencies first, then composite components.
+
+7. **Skip existing** — never overwrite. Note skipped files in the summary.
+
+8. **Verify** — run `verify_html_integration.py` and report any pages missing `<link>` or `<script>` references. The skill never auto-edits your pages.
+
+</Steps>
+
+## First-run setup
+
+The first invocation in a project asks for the target directory (default `components/html`), writes `.acss-html-target.json` at the project root, and copies `_stateful.js` into the target dir. Commit `.acss-html-target.json` so subsequent runs skip the prompt.
+
+## Output
+
+| File | When emitted | Notes |
+|---|---|---|
+| `<componentsHtmlDir>/<name>.html` | Always | Fragment markup (no `<html>` / `<body>` wrapper). Slot placeholders are HTML comments — `<!-- slot: children -->`. |
+| `<componentsHtmlDir>/<name>.scss` | Always | Byte-identical to the TSX generator's SCSS. Compile with Sass or rename to `.css`. |
+| `<componentsHtmlDir>/<name>.js` | Stateful components only | Plain ES module exporting an idempotent `init()`. |
+| `<componentsHtmlDir>/_stateful.js` | First run | Vanilla-JS counterpart to React's `useDisabledState`. Imported by stateful component modules. |
+
+Stateful components (those that emit a `.js` file): **Button, Card** (interactive variant only)**, Alert, Dialog, Popover, Checkbox, Input, IconButton**.
+
+## Wiring it up
+
+After generation, the skill prints the integration steps:
+
+1. Compile the SCSS to CSS (or `@import` it from your existing Sass entrypoint), then add a `<link rel="stylesheet">` to your page `<head>`.
+2. Add `<script type="module" src=".../<name>.js"></script>` for stateful components.
+3. Paste the `<name>.html` markup into your page or template.
+
+<Aside type="note">
+`*.html` snippets are fragments meant to be copy-pasted, so the integration verifier doesn't expect them to be referenced from elsewhere — only `.scss` and `.js` artifacts are checked for missing references.
+</Aside>
+
+<Aside type="tip">
+For full output rules (HTML conventions, SCSS contract, vanilla-JS patterns, accessibility patterns), see the [`components-html` skill](/acss-plugins-docs/acss-kit/skills/components-html).
+</Aside>
