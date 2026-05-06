@@ -3,7 +3,7 @@ title: acss-kit Overview
 description: What acss-kit does, what it generates, and how the commands and skills fit together.
 ---
 
-import { CardGrid, Card, LinkCard } from '@astrojs/starlight/components';
+import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
 
 **acss-kit** is a Claude Code plugin that generates accessible React components and CSS themes for [fpkit/acss](https://github.com/shawn-sandy/acss) projects.
 
@@ -11,37 +11,43 @@ import { CardGrid, Card, LinkCard } from '@astrojs/starlight/components';
 
 <CardGrid>
   <Card title="Components" icon="puzzle">
-    Self-contained `.tsx` + `.scss` file pairs written to `src/components/fpkit/`. No runtime npm dependency — you own the source.
+    Self-contained `.tsx` + `.scss` file pairs written to
+    `src/components/fpkit/`. No runtime npm dependency — you own the source.
   </Card>
   <Card title="Themes" icon="seti:css">
-    OKLCH-derived CSS custom property files in `src/styles/theme/`. 18 semantic color roles, WCAG AA validated, light + dark.
+    OKLCH-derived CSS custom property files in `src/styles/theme/`. 18 semantic
+    color roles, WCAG AA validated, light + dark.
   </Card>
 </CardGrid>
 
 ## Commands
 
-| Command | What it does |
-|---|---|
-| [`/setup`](/acss-plugins-docs/acss-kit/commands/setup) | Bootstrap a project — install `ui.tsx`, configure the target, seed a starter theme |
-| [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) | Generate one or more components (with dependency resolution) |
-| [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) | Generate a single component from a natural-language description |
-| [`/kit-list`](/acss-plugins-docs/acss-kit/commands/kit-list) | Browse the component catalogue or inspect a specific component |
-| [`/theme-create`](/acss-plugins-docs/acss-kit/commands/theme-create) | Generate a full light/dark theme from a seed hex color |
-| [`/theme-brand`](/acss-plugins-docs/acss-kit/commands/theme-brand) | Scaffold a brand-specific theme override file |
-| [`/theme-extract`](/acss-plugins-docs/acss-kit/commands/theme-extract) | Extract brand colors from an image or Figma URL |
-| [`/theme-update`](/acss-plugins-docs/acss-kit/commands/theme-update) | Edit specific color roles in an existing theme file |
-| [`/style-tune`](/acss-plugins-docs/acss-kit/commands/style-tune) | Tune theme roles or component tokens with natural-language modifiers |
+| Command                                                                | What it does                                                                           |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [`/setup`](/acss-plugins-docs/acss-kit/commands/setup)                 | Bootstrap a project — install `ui.tsx`, configure the target, seed a starter theme     |
+| [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)             | Generate one or more components (with dependency resolution)                           |
+| [`/kit-add-html`](/acss-plugins-docs/acss-kit/commands/kit-add-html)   | Generate static HTML + SCSS + vanilla JS versions of components for non-React projects |
+| [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create)       | Generate a single component from a natural-language description                        |
+| [`/kit-list`](/acss-plugins-docs/acss-kit/commands/kit-list)           | Browse the component catalogue or inspect a specific component                         |
+| [`/kit-sync`](/acss-plugins-docs/acss-kit/commands/kit-sync)           | Bulk-install every component, foundation, and starter theme in one shot                |
+| [`/kit-update`](/acss-plugins-docs/acss-kit/commands/kit-update)       | Re-copy unmodified components after a plugin upgrade, preserving your edits            |
+| [`/theme-create`](/acss-plugins-docs/acss-kit/commands/theme-create)   | Generate a full light/dark theme from a seed hex color                                 |
+| [`/theme-brand`](/acss-plugins-docs/acss-kit/commands/theme-brand)     | Scaffold a brand-specific theme override file                                          |
+| [`/theme-extract`](/acss-plugins-docs/acss-kit/commands/theme-extract) | Extract brand colors from an image or Figma URL                                        |
+| [`/theme-update`](/acss-plugins-docs/acss-kit/commands/theme-update)   | Edit specific color roles in an existing theme file                                    |
+| [`/style-tune`](/acss-plugins-docs/acss-kit/commands/style-tune)       | Tune theme roles or component tokens with natural-language modifiers                   |
+| [`/prompt-book`](/acss-plugins-docs/acss-kit/commands/prompt-book)     | Print the copy-paste prompt catalogue for all slash commands                           |
 
 ## Skills
 
-| Skill | Triggered by | Purpose |
-|---|---|---|
-| `setup` | `/setup` | One-shot project bootstrap (ui.tsx, target, optional seed theme) |
-| `components` | `/kit-add` | Full component generation workflow (Steps A–F) |
-| `component-creator` | `/kit-create` or natural language ("create a primary pill button") | Generate a single component instance from a description |
-| `styles` | All `/theme-*` commands | OKLCH palette math, WCAG validation, role catalogue |
-| `component-form` | Natural language ("build a signup form") | Auto-generates accessible form components |
-| `style-tune` | `/style-tune` or natural language ("warmer button") | Adjusts visual feel via token edits + WCAG validation |
+| Skill               | Triggered by                                                       | Purpose                                                          |
+| ------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| `setup`             | `/setup`                                                           | One-shot project bootstrap (ui.tsx, target, optional seed theme) |
+| `components`        | `/kit-add`                                                         | Full component generation workflow (Steps A–F)                   |
+| `component-creator` | `/kit-create` or natural language ("create a primary pill button") | Generate a single component instance from a description          |
+| `styles`            | All `/theme-*` commands                                            | OKLCH palette math, WCAG validation, role catalogue              |
+| `component-form`    | Natural language ("build a signup form")                           | Auto-generates accessible form components                        |
+| `style-tune`        | `/style-tune` or natural language ("warmer button")                | Adjusts visual feel via token edits + WCAG validation            |
 
 ## Key design decisions
 
@@ -57,12 +63,15 @@ import { CardGrid, Card, LinkCard } from '@astrojs/starlight/components';
 
 ## Available components
 
-Components are organized into five categories:
+Components are organized into six categories:
 
-- **Simple:** Badge, Icon, Link, Divider
-- **Interactive:** Button, Checkbox, Toggle, Tabs
-- **Form:** Field, Input, Select, Textarea, FormGroup
-- **Layout:** Card, Alert, Banner
-- **Complex:** Dialog, Nav, Popover, Table, Toast
+| Category         | Components                                                               |
+| ---------------- | ------------------------------------------------------------------------ |
+| **Simple**       | Badge, Tag, Heading, Text, Link, List, Icon, Img                         |
+| **Interactive**  | Button, IconButton                                                       |
+| **Form**         | Field, Input, Checkbox                                                   |
+| **Layout**       | Card, Nav                                                                |
+| **Complex**      | Alert, Dialog, Popover, Table                                            |
+| **Form (skill)** | Auto-generated by the `component-form` skill on natural-language prompts |
 
 → See the [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue) for the full list with props and CSS tokens.
