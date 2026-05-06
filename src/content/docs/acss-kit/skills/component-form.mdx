@@ -3,48 +3,56 @@ title: component-form skill (pilot)
 description: Auto-generates accessible form components from natural language — no slash command required.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 `component-form` is a pilot skill that auto-triggers on natural language form requests. Instead of running `/kit-add form`, you describe the form you want and the skill resolves the right field types, generates the dependencies, and produces a complete, accessible form component.
 
 <Aside type="note">
-This is a **pilot skill** — it validates a per-component skill discovery pattern and may evolve. The generated output is stable; the natural language trigger vocabulary is what's being refined.
+  This is a **pilot skill** — it validates a per-component skill discovery
+  pattern and may evolve. The generated output is stable; the natural language
+  trigger vocabulary is what's being refined.
 </Aside>
+
+## Step 0 — Exit plan mode
+
+If the session is in plan mode, the skill calls `ExitPlanMode` before resolving the field list. The skill may delegate to `/kit-add field input checkbox` (which writes TSX/SCSS), Step C writes the form component file, and `detect_target.py` runs via Bash — plan mode blocks all of it.
+
+The skill stays in plan mode only when the user explicitly asked for a preview ("show me the field list first", "don't write the form yet"). In that case it narrates the resolved field list and the file that would be generated, then waits for approval — it does not invoke Write/Edit/Bash from a plan-mode session.
 
 ## Trigger phrases
 
 The skill activates when your message contains any of these patterns:
 
-| Phrase | Example |
-|---|---|
-| "create a ___ form" | "create a signup form" |
-| "build a ___ form" | "build a contact form" |
-| "generate a form" | "generate a login form with email and password" |
-| "make a form for" | "make a form for collecting user feedback" |
-| "I need a form that" | "I need a form that captures name, email, and message" |
+| Phrase                 | Example                                                |
+| ---------------------- | ------------------------------------------------------ |
+| "create a \_\_\_ form" | "create a signup form"                                 |
+| "build a \_\_\_ form"  | "build a contact form"                                 |
+| "generate a form"      | "generate a login form with email and password"        |
+| "make a form for"      | "make a form for collecting user feedback"             |
+| "I need a form that"   | "I need a form that captures name, email, and message" |
 
 ## Field resolution
 
 The skill infers the field list from your description. Given "create a signup form with name, email, and password":
 
-| Detected field | Resolved type | Component |
-|---|---|---|
-| `name` | text input | `Input` |
-| `email` | email input | `Input` (type="email") |
-| `password` | password input | `Input` (type="password") |
+| Detected field | Resolved type  | Component                 |
+| -------------- | -------------- | ------------------------- |
+| `name`         | text input     | `Input`                   |
+| `email`        | email input    | `Input` (type="email")    |
+| `password`     | password input | `Input` (type="password") |
 
 Supported field types:
 
-| Field description | Resolved to |
-|---|---|
-| text, name, first name, last name, title | `Input` (text) |
-| email, email address | `Input` (email) |
-| password, confirm password | `Input` (password) |
-| message, description, notes, bio | `Textarea` |
-| dropdown, select, pick | `Select` |
-| agree, accept, check | `Checkbox` |
-| radio, choose one | Radio group (using `Checkbox`) |
-| file, upload, attachment | `Input` (file) |
+| Field description                        | Resolved to                    |
+| ---------------------------------------- | ------------------------------ |
+| text, name, first name, last name, title | `Input` (text)                 |
+| email, email address                     | `Input` (email)                |
+| password, confirm password               | `Input` (password)             |
+| message, description, notes, bio         | `Textarea`                     |
+| dropdown, select, pick                   | `Select`                       |
+| agree, accept, check                     | `Checkbox`                     |
+| radio, choose one                        | Radio group (using `Checkbox`) |
+| file, upload, attachment                 | `Input` (file)                 |
 
 ## Plan-mode behaviour
 
@@ -75,11 +83,11 @@ The form component is written to `src/forms/<FormName>.tsx`. Example for "create
 
 ```tsx
 // src/forms/SignupForm.tsx
-import React, { useState } from 'react';
-import { Field } from '../components/fpkit/Field';
-import { Input } from '../components/fpkit/Input';
-import { Checkbox } from '../components/fpkit/Checkbox';
-import { Button } from '../components/fpkit/Button';
+import React, { useState } from "react";
+import { Field } from "../components/fpkit/Field";
+import { Input } from "../components/fpkit/Input";
+import { Checkbox } from "../components/fpkit/Checkbox";
+import { Button } from "../components/fpkit/Button";
 
 interface SignupFormValues {
   name: string;
@@ -97,9 +105,9 @@ interface SignupFormErrors {
 
 export function SignupForm() {
   const [values, setValues] = useState<SignupFormValues>({
-    name: '',
-    email: '',
-    password: '',
+    name: "",
+    email: "",
+    password: "",
     agreeToTerms: false,
   });
   const [errors, setErrors] = useState<SignupFormErrors>({});
@@ -107,10 +115,11 @@ export function SignupForm() {
 
   function validate(): SignupFormErrors {
     const e: SignupFormErrors = {};
-    if (!values.name.trim()) e.name = 'Name is required';
-    if (!values.email.includes('@')) e.email = 'Valid email required';
-    if (values.password.length < 8) e.password = 'Password must be at least 8 characters';
-    if (!values.agreeToTerms) e.agreeToTerms = 'You must agree to continue';
+    if (!values.name.trim()) e.name = "Name is required";
+    if (!values.email.includes("@")) e.email = "Valid email required";
+    if (values.password.length < 8)
+      e.password = "Password must be at least 8 characters";
+    if (!values.agreeToTerms) e.agreeToTerms = "You must agree to continue";
     return e;
   }
 
@@ -123,7 +132,7 @@ export function SignupForm() {
     setSubmitting(true);
     try {
       // TODO: replace with your submit logic
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise((r) => setTimeout(r, 1000));
     } finally {
       setSubmitting(false);
     }
@@ -143,10 +152,10 @@ export function SignupForm() {
           id="signup-name"
           type="text"
           value={values.name}
-          onChange={e => setValues(v => ({ ...v, name: e.target.value }))}
+          onChange={(e) => setValues((v) => ({ ...v, name: e.target.value }))}
           aria-required="true"
           aria-invalid={!!errors.name}
-          aria-describedby={errors.name ? 'signup-name-error' : undefined}
+          aria-describedby={errors.name ? "signup-name-error" : undefined}
         />
       </Field>
 
@@ -160,7 +169,7 @@ export function SignupForm() {
           id="signup-email"
           type="email"
           value={values.email}
-          onChange={e => setValues(v => ({ ...v, email: e.target.value }))}
+          onChange={(e) => setValues((v) => ({ ...v, email: e.target.value }))}
           aria-required="true"
           aria-invalid={!!errors.email}
         />
@@ -176,7 +185,9 @@ export function SignupForm() {
           id="signup-password"
           type="password"
           value={values.password}
-          onChange={e => setValues(v => ({ ...v, password: e.target.value }))}
+          onChange={(e) =>
+            setValues((v) => ({ ...v, password: e.target.value }))
+          }
           aria-required="true"
           aria-invalid={!!errors.password}
           aria-describedby="signup-password-hint"
@@ -190,17 +201,15 @@ export function SignupForm() {
         id="signup-agree"
         label="I agree to the terms of service"
         checked={values.agreeToTerms}
-        onChange={e => setValues(v => ({ ...v, agreeToTerms: e.target.checked }))}
+        onChange={(e) =>
+          setValues((v) => ({ ...v, agreeToTerms: e.target.checked }))
+        }
         error={errors.agreeToTerms}
         required
       />
 
-      <Button
-        type="submit"
-        variant="primary"
-        disabled={submitting}
-      >
-        {submitting ? 'Creating account…' : 'Create account'}
+      <Button type="submit" variant="primary" disabled={submitting}>
+        {submitting ? "Creating account…" : "Create account"}
       </Button>
     </form>
   );

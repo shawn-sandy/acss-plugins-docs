@@ -3,6 +3,8 @@ title: Utility Families
 description: Every utility family, its classes, and the CSS properties they map to.
 ---
 
+import { Aside } from "@astrojs/starlight/components";
+
 Run `/utility-list` in a Claude Code session to see the full family catalogue with current values based on your tokens configuration.
 
 ```text
@@ -14,17 +16,54 @@ Run `/utility-list` in a Claude Code session to see the full family catalogue wi
 
 ## Family quick reference
 
-| Family | Responsive | `!important` | Example |
-|---|---|---|---|
-| color-bg | no | no | `.bg-primary`, `.bg-surface` |
-| color-text | no | no | `.text-primary`, `.text-muted` |
-| color-border | no | no | `.border-primary` |
-| spacing | yes | no | `.m-4`, `.px-6`, `.gap-3` |
-| display | yes | yes | `.hide`, `.show`, `.sr-only` |
-| flex | yes | no | `.flex`, `.flex-col`, `.items-center` |
-| grid | yes | no | `.grid`, `.grid-cols-3` |
-| type | no | no | `.text-sm`, `.font-bold` |
-| radius | no | no | `.rounded-md`, `.rounded-full` |
-| shadow | no | no | `.shadow-sm`, `.shadow-lg` |
-| position | no | no | `.relative`, `.absolute` |
-| z-index | no | no | `.z-10`, `.z-50` |
+| Family       | Responsive | `!important` | Example                                                                 |
+| ------------ | ---------- | ------------ | ----------------------------------------------------------------------- |
+| color-bg     | no         | no           | `.bg-primary`, `.bg-surface`                                            |
+| color-text   | no         | no           | `.text-primary`, `.text-muted`                                          |
+| color-border | no         | no           | `.border-primary`                                                       |
+| spacing      | yes        | no           | `.m-4`, `.px-6`, `.gap-3` (logical-property-based — RTL/vertical-aware) |
+| display      | yes        | yes          | `.hide`, `.show`, `.sr-only`                                            |
+| flex         | yes        | no           | `.flex`, `.flex-col`, `.items-center`                                   |
+| grid         | yes        | no           | `.grid`, `.grid-cols-3`                                                 |
+| type         | no         | no           | `.text-sm`, `.font-bold`                                                |
+| radius       | no         | no           | `.rounded-md`, `.rounded-full`                                          |
+| shadow       | no         | no           | `.shadow-sm`, `.shadow-lg`                                              |
+| position     | no         | no           | `.relative`, `.absolute`                                                |
+| z-index      | no         | no           | `.z-10`, `.z-50`                                                        |
+
+## Logical-property spacing (v0.5.0+)
+
+<Aside type="caution">
+  **Breaking (behavior, not API):** as of v0.5.0, directional spacing utilities
+  emit CSS logical properties instead of physical ones. Class names are
+  unchanged. In the default LTR top-to-bottom writing mode the rendered layout
+  is identical to earlier versions. In RTL (`dir="rtl"`) or vertical writing
+  modes, spacing flips with the inline/block axis automatically. If your project
+  previously relied on physical-side semantics in those contexts, audit those
+  usages.
+</Aside>
+
+Directional margin and padding utilities now emit CSS logical properties so spacing follows the document's writing mode:
+
+| Prefix            | CSS property emitted                                 | LTR equivalent |
+| ----------------- | ---------------------------------------------------- | -------------- |
+| `mt` / `pt`       | `margin-block-start` / `padding-block-start`         | top            |
+| `mb` / `pb`       | `margin-block-end` / `padding-block-end`             | bottom         |
+| `ml` / `pl`       | `margin-inline-start` / `padding-inline-start`       | left           |
+| `mr` / `pr`       | `margin-inline-end` / `padding-inline-end`           | right          |
+| `mx` / `px`       | `margin-inline` / `padding-inline`                   | left + right   |
+| `my` / `py`       | `margin-block` / `padding-block`                     | top + bottom   |
+| `m` / `p` / `gap` | `margin` / `padding` / `gap` (already side-agnostic) | all sides      |
+
+Examples:
+
+| Class     | Sets                                 |
+| --------- | ------------------------------------ |
+| `.m-0`    | `margin: 0`                          |
+| `.m-4`    | `margin: 1rem`                       |
+| `.mt-2`   | `margin-block-start: 0.5rem`         |
+| `.px-6`   | `padding-inline: 1.5rem`             |
+| `.gap-3`  | `gap: 0.75rem`                       |
+| `.sm-p-4` | wrapped in `@media (width >= 30rem)` |
+
+For RTL consumers that relied on the physical `margin-left` / `margin-right` assignment: use an inline `style` attribute with a literal `margin-left` declaration (which is writing-mode-agnostic) when you specifically need the physical left side regardless of direction.
