@@ -2,12 +2,12 @@
 import { Icon } from '@astrojs/starlight/components';
 ---
 
-{/* Inlined to avoid FOUC. Defaults to dark when no stored preference exists. */}
+{/* Inlined to avoid FOUC. Defaults to light when no stored preference exists. */}
 <script is:inline>
 	window.StarlightThemeProvider = (() => {
 		const storedTheme =
 			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
-		const theme = storedTheme || 'dark';
+		const theme = storedTheme || 'light';
 		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
 		return {
 			updatePickers(theme = storedTheme || 'auto') {

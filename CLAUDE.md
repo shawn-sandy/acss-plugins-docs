@@ -20,8 +20,8 @@ Requires Node.js 22.
 
 - **Base path:** The site uses `base: '/acss-plugins-docs'` in `astro.config.mjs`. All internal links must include this prefix (e.g. `/acss-plugins-docs/getting-started/introduction/`).
 - **Sidebar is hardcoded:** When adding or renaming a docs page, you must also update the `sidebar` array in `astro.config.mjs` — Starlight does not auto-discover pages.
-- **Dark-first theme:** `src/styles/custom.css` sets dark values on `:root`. Light mode is an override in `:root[data-theme='light']`. Do not invert this; see the comments in that file for the Starlight gray-ramp contract.
-- **ThemeProvider override:** `src/components/ThemeProvider.astro` replaces Starlight's default and defaults new visitors to dark mode regardless of `prefers-color-scheme`. It is wired via `components:` in `astro.config.mjs`.
+- **Light-first theme:** `src/styles/custom.css` sets light values on `:root`. Dark mode is an override in `:root[data-theme='dark']`. This matches Starlight's upstream `props.css` contract (light = base, dark = override). Do not invert this.
+- **ThemeProvider override:** `src/components/ThemeProvider.astro` replaces Starlight's default and defaults new visitors to light mode. Visitors with a stored `starlight-theme` preference get their stored mode. It is wired via `components:` in `astro.config.mjs`.
 - **Astro 6 content schema:** Uses `docsLoader()` in `src/content.config.ts` — the old schema-only pattern will not work.
 
 ## Content authoring
