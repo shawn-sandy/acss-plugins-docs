@@ -3,7 +3,7 @@ title: /kit-add-html
 description: Generate static HTML versions of fpkit-style components — markup, SCSS, and (for stateful components) vanilla JS — for projects that don't use React.
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps } from "@astrojs/starlight/components";
 
 Generate **static HTML** versions of fpkit-style components for projects that don't use React — server-rendered apps, static sites, design-system docs, email templates, prototypes. The same component reference docs power both [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) (React TSX) and `/kit-add-html` (HTML + SCSS + vanilla JS).
 
@@ -15,9 +15,9 @@ Generate **static HTML** versions of fpkit-style components for projects that do
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `component` | Yes | One or more component names (space-separated). Case-insensitive. |
+| Argument    | Required | Description                                                      |
+| ----------- | -------- | ---------------------------------------------------------------- |
+| `component` | Yes      | One or more component names (space-separated). Case-insensitive. |
 
 ## Examples
 
@@ -30,14 +30,14 @@ Generate **static HTML** versions of fpkit-style components for projects that do
 
 ## Differences from `/kit-add`
 
-| Aspect | `/kit-add` (TSX) | `/kit-add-html` (HTML) |
-|---|---|---|
-| **Output** | `<Name>.tsx` files | `<name>.html` + `<name>.scss` + (stateful only) `<name>.js` |
-| **Target projects** | React-based | Server-rendered apps, static sites, email templates, prototypes |
-| **Template source** | `## TSX Template` block | `## HTML Template` + `## Vanilla JS` blocks |
-| **SCSS** | Per-component | Byte-identical to the TSX output |
-| **State helpers** | Inline React hooks | `_stateful.js` foundation + per-component ES module |
-| **Target config** | `.acss-target.json` | `.acss-html-target.json` |
+| Aspect              | `/kit-add` (TSX)        | `/kit-add-html` (HTML)                                          |
+| ------------------- | ----------------------- | --------------------------------------------------------------- |
+| **Output**          | `<Name>.tsx` files      | `<name>.html` + `<name>.scss` + (stateful only) `<name>.js`     |
+| **Target projects** | React-based             | Server-rendered apps, static sites, email templates, prototypes |
+| **Template source** | `## TSX Template` block | `## HTML Template` + `## Vanilla JS` blocks                     |
+| **SCSS**            | Per-component           | Byte-identical to the TSX output                                |
+| **State helpers**   | Inline React hooks      | `_stateful.js` foundation + per-component ES module             |
+| **Target config**   | `.acss-target.json`     | `.acss-html-target.json`                                        |
 
 ## Workflow
 
@@ -69,14 +69,14 @@ The first invocation in a project asks for the target directory (default `compon
 
 ## Output
 
-| File | When emitted | Notes |
-|---|---|---|
-| `<componentsHtmlDir>/<name>.html` | Always | Fragment markup (no `<html>` / `<body>` wrapper). Slot placeholders are HTML comments — `<!-- slot: children -->`. |
-| `<componentsHtmlDir>/<name>.scss` | Always | Byte-identical to the TSX generator's SCSS. Compile with Sass or rename to `.css`. |
-| `<componentsHtmlDir>/<name>.js` | Stateful components only | Plain ES module exporting an idempotent `init()`. |
-| `<componentsHtmlDir>/_stateful.js` | First run | Vanilla-JS counterpart to React's `useDisabledState`. Imported by stateful component modules. |
+| File                               | When emitted             | Notes                                                                                                              |
+| ---------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `<componentsHtmlDir>/<name>.html`  | Always                   | Fragment markup (no `<html>` / `<body>` wrapper). Slot placeholders are HTML comments — `<!-- slot: children -->`. |
+| `<componentsHtmlDir>/<name>.scss`  | Always                   | Byte-identical to the TSX generator's SCSS. Compile with Sass or rename to `.css`.                                 |
+| `<componentsHtmlDir>/<name>.js`    | Stateful components only | Plain ES module exporting an idempotent `init()`.                                                                  |
+| `<componentsHtmlDir>/_stateful.js` | First run                | Vanilla-JS counterpart to React's `useDisabledState`. Imported by stateful component modules.                      |
 
-Stateful components (those that emit a `.js` file): **Button, Card (interactive variant only), Alert, Dialog, Popover, Checkbox, Input, IconButton**.
+Stateful components (those that emit a `.js` file): **Button, Dialog, Popover, Checkbox, Input, IconButton**.
 
 ## Wiring it up
 
@@ -87,9 +87,13 @@ After generation, the skill prints the integration steps:
 3. Paste the `<name>.html` markup into your page or template.
 
 <Aside type="note">
-`*.html` snippets are fragments meant to be copy-pasted, so the integration verifier doesn't expect them to be referenced from elsewhere — only `.scss` and `.js` artifacts are checked for missing references.
+  `*.html` snippets are fragments meant to be copy-pasted, so the integration
+  verifier doesn't expect them to be referenced from elsewhere — only `.scss`
+  and `.js` artifacts are checked for missing references.
 </Aside>
 
 <Aside type="tip">
-For full output rules (HTML conventions, SCSS contract, vanilla-JS patterns, accessibility patterns), see the [`components-html` skill](/acss-plugins-docs/acss-kit/skills/components-html).
+  For full output rules (HTML conventions, SCSS contract, vanilla-JS patterns,
+  accessibility patterns), see the [`components-html`
+  skill](/acss-plugins-docs/acss-kit/skills/components-html).
 </Aside>
