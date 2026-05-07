@@ -16,11 +16,11 @@ This applies `flex-col` always, `flex-row` from `md` (48rem) upward, and `gap-8`
 ## Breakpoints
 
 | Prefix | min-width | px (at 16px base) |
-|---|---|---|
-| `sm` | 30rem | 480px |
-| `md` | 48rem | 768px |
-| `lg` | 62rem | 992px |
-| `xl` | 80rem | 1280px |
+| ------ | --------- | ----------------- |
+| `sm`   | 30rem     | 480px             |
+| `md`   | 48rem     | 768px             |
+| `lg`   | 62rem     | 992px             |
+| `xl`   | 80rem     | 1280px            |
 
 ## Families with responsive variants
 
@@ -36,3 +36,40 @@ To customize breakpoints or add/remove responsive support from a family:
 /utility-tune add an xs breakpoint at 20rem
 /utility-tune drop responsive variants from type utilities
 ```
+
+## Logical-property spacing (v0.5.0+)
+
+As of v0.5.0, directional spacing utilities emit CSS **logical properties** instead of physical properties:
+
+| Class   | Emits (v0.5.0+)            | Previously                          |
+| ------- | -------------------------- | ----------------------------------- |
+| `.mt-4` | `margin-block-start: ...`  | `margin-top: ...`                   |
+| `.mb-4` | `margin-block-end: ...`    | `margin-bottom: ...`                |
+| `.ml-4` | `margin-inline-start: ...` | `margin-left: ...`                  |
+| `.mr-4` | `margin-inline-end: ...`   | `margin-right: ...`                 |
+| `.mx-4` | `margin-inline: ...`       | `margin-left + margin-right: ...`   |
+| `.my-4` | `margin-block: ...`        | `margin-top + margin-bottom: ...`   |
+| `.px-4` | `padding-inline: ...`      | `padding-left + padding-right: ...` |
+| `.py-4` | `padding-block: ...`       | `padding-top + padding-bottom: ...` |
+
+**Class names are unchanged.** In the default LTR top-to-bottom writing mode the rendered layout is identical to previous versions. In RTL (`dir="rtl"`) or vertical writing modes, spacing automatically mirrors with the inline/block axis.
+
+If your project uses `dir="rtl"` or `writing-mode: vertical-*` and previously relied on physical-side semantics, audit those usages after upgrading.
+
+## Migrating from 0.1.x responsive class syntax
+
+acss-utilities 0.1.x used Tailwind-style colon syntax (`sm:hide`, `md:p-6`). From 0.2.0 onward, a plain hyphen prefix is used (`sm-hide`, `md-p-6`) to avoid CSS escaping in JSX.
+
+Use `migrate_classnames.py` for an automated migration:
+
+```bash
+# Dry run — preview what will change
+python3 plugins/acss-utilities/scripts/migrate_classnames.py src/
+
+# Apply changes
+python3 plugins/acss-utilities/scripts/migrate_classnames.py src/ --write
+```
+
+The script rewrites occurrences inside `className="..."`, `class="..."`, and `@apply` directives. It is idempotent — running it twice produces no further changes.
+
+See [`migrate_classnames.py`](/acss-plugins-docs/reference/python-scripts#migrate_classnamespy) for the full contract, flags, and known limitations.
