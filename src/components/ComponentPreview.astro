@@ -1,0 +1,43 @@
+---
+interface Props {
+  code: string;
+  label?: string;
+}
+const { code, label = "Component preview" } = Astro.props;
+---
+
+<div role="region" aria-label={label} class="comp-preview">
+  <div class="comp-preview-frame" set:html={code} />
+  <pre class="comp-preview-source"><code>{code}</code></pre>
+</div>
+
+<style>
+  .comp-preview {
+    margin-block: 1.5rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .comp-preview-frame {
+    padding: 1.5rem;
+    background: var(--color-background, var(--sl-color-bg));
+  }
+
+  .comp-preview-source {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    background: var(--sl-color-gray-7, #f8f8f8);
+    border-top: 1px solid var(--sl-color-gray-5);
+    font-size: 0.8rem;
+    overflow-x: auto;
+  }
+
+  .comp-preview-source code {
+    font-family: var(--sl-font-system-mono);
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+  }
+</style>

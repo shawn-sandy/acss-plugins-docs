@@ -3,9 +3,12 @@ title: OKLCH Theming
 description: Why acss-kit uses OKLCH, how to read OKLCH values, and how to work with them in your browser DevTools.
 ---
 
+import ColorSwatch from "~/components/ColorSwatch.astro";
+
 ## What is OKLCH?
 
 OKLCH is a perceptually uniform color space with three channels:
+
 - **L** — lightness (0% black, 100% white)
 - **C** — chroma / saturation (0 = gray, ~0.25 = vivid)
 - **H** — hue angle in degrees (0° red, 120° green, 240° blue, 270° indigo)
@@ -21,6 +24,25 @@ Browser support: All modern browsers (Chrome 111+, Firefox 113+, Safari 15.4+).
                     lightness  chroma  hue (indigo)
 */
 ```
+
+## Hue angle reference
+
+The semantic state roles each live at a fixed hue angle, chosen for perceptual distinctness regardless of the project's brand hue:
+
+<ColorSwatch roles={["danger", "warning", "info", "success"]} table={false} />
+
+| Role              | H°   | Perception                      |
+| ----------------- | ---- | ------------------------------- |
+| `--color-danger`  | 27°  | Red-orange — error, destructive |
+| `--color-warning` | 80°  | Amber — caution                 |
+| `--color-info`    | 240° | Blue — neutral information      |
+| `--color-success` | 155° | Green — positive outcome        |
+
+## Brand palette (indigo seed)
+
+The brand roles adapt to any seed hue. The defaults shown here use indigo (270°):
+
+<ColorSwatch roles={["primary", "primary-hover", "accent", "focus-ring"]} />
 
 ## Working in DevTools
 

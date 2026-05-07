@@ -3,6 +3,8 @@ title: Utility Families
 description: Every utility family, its classes, and the CSS properties they map to.
 ---
 
+import UtilityExample from "~/components/UtilityExample.astro";
+
 Run `/utility-list` in a Claude Code session to see the full family catalogue with current values based on your tokens configuration.
 
 ```text
@@ -14,17 +16,81 @@ Run `/utility-list` in a Claude Code session to see the full family catalogue wi
 
 ## Family quick reference
 
-| Family | Responsive | `!important` | Example |
-|---|---|---|---|
-| color-bg | no | no | `.bg-primary`, `.bg-surface` |
-| color-text | no | no | `.text-primary`, `.text-muted` |
-| color-border | no | no | `.border-primary` |
-| spacing | yes | no | `.m-4`, `.px-6`, `.gap-3` |
-| display | yes | yes | `.hide`, `.show`, `.sr-only` |
-| flex | yes | no | `.flex`, `.flex-col`, `.items-center` |
-| grid | yes | no | `.grid`, `.grid-cols-3` |
-| type | no | no | `.text-sm`, `.font-bold` |
-| radius | no | no | `.rounded-md`, `.rounded-full` |
-| shadow | no | no | `.shadow-sm`, `.shadow-lg` |
-| position | no | no | `.relative`, `.absolute` |
-| z-index | no | no | `.z-10`, `.z-50` |
+| Family       | Responsive | `!important` | Example                               |
+| ------------ | ---------- | ------------ | ------------------------------------- |
+| color-bg     | no         | no           | `.bg-primary`, `.bg-surface`          |
+| color-text   | no         | no           | `.text-primary`, `.text-muted`        |
+| color-border | no         | no           | `.border-primary`                     |
+| spacing      | yes        | no           | `.m-4`, `.px-6`, `.gap-3`             |
+| display      | yes        | yes          | `.hide`, `.show`, `.sr-only`          |
+| flex         | yes        | no           | `.flex`, `.flex-col`, `.items-center` |
+| grid         | yes        | no           | `.grid`, `.grid-cols-3`               |
+| type         | no         | no           | `.text-sm`, `.font-bold`              |
+| radius       | no         | no           | `.rounded-md`, `.rounded-full`        |
+| shadow       | no         | no           | `.shadow-sm`, `.shadow-lg`            |
+| position     | no         | no           | `.relative`, `.absolute`              |
+| z-index      | no         | no           | `.z-10`, `.z-50`                      |
+
+## color-bg family
+
+<UtilityExample class="bg-primary" property="--color-primary">
+  <span style="color:var(--color-text-inverse);font-size:0.875rem;padding:0.25rem 0.5rem;">
+    bg-primary
+  </span>
+</UtilityExample>
+
+<UtilityExample class="bg-surface" property="--color-surface">
+  <span style="font-size:0.875rem;padding:0.25rem 0.5rem;">bg-surface</span>
+</UtilityExample>
+
+<UtilityExample class="bg-success" property="--color-success">
+  <span style="color:var(--color-text-inverse);font-size:0.875rem;padding:0.25rem 0.5rem;">
+    bg-success
+  </span>
+</UtilityExample>
+
+<UtilityExample class="bg-danger" property="--color-danger">
+  <span style="color:var(--color-text-inverse);font-size:0.875rem;padding:0.25rem 0.5rem;">
+    bg-danger
+  </span>
+</UtilityExample>
+
+## color-text family
+
+<UtilityExample class="text-primary" property="--color-primary">
+  Text styled with .text-primary
+</UtilityExample>
+
+<UtilityExample class="text-muted" property="--color-text-muted">
+  Secondary text styled with .text-muted
+</UtilityExample>
+
+## spacing family
+
+<UtilityExample class="m-4">
+  <div style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:4px;padding:0.25rem 0.5rem;font-size:0.8rem;">
+    Element with .m-4 (1rem margin)
+  </div>
+</UtilityExample>
+
+## flex family
+
+<UtilityExample class="flex gap-3 items-center">
+  <div style="width:2rem;height:2rem;border-radius:0.25rem;background:var(--color-primary);"></div>
+  <div style="width:2rem;height:2rem;border-radius:0.25rem;background:var(--color-accent);"></div>
+  <div style="width:2rem;height:2rem;border-radius:0.25rem;background:var(--color-info);"></div>
+</UtilityExample>
+
+## radius family
+
+<UtilityExample class="rounded-md" property="border-radius">
+  <div style="background:var(--color-surface);border:1px solid var(--color-border);padding:0.5rem 1rem;display:inline-block;font-size:0.875rem;">
+    .rounded-md
+  </div>
+</UtilityExample>
+
+<UtilityExample class="rounded-full" property="border-radius">
+  <div style="background:var(--color-primary);color:var(--color-text-inverse);padding:0.25rem 1rem;display:inline-block;font-size:0.875rem;">
+    .rounded-full
+  </div>
+</UtilityExample>
