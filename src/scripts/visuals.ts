@@ -21,12 +21,12 @@ export function populateValues(root: Document | ParentNode = document): void {
     if (value) {
       el.textContent = value;
       el.removeAttribute("data-missing");
-    } else {
-      el.textContent = "—";
-      el.setAttribute("data-missing", "");
-      if (import.meta.env.DEV) {
-        console.warn(`[acss-docs] Token "${token}" not found on :root`);
-      }
+      return;
+    }
+    el.textContent = "—";
+    el.setAttribute("data-missing", "");
+    if (import.meta.env.DEV) {
+      console.warn(`[acss-docs] Token "${token}" not found on :root`);
     }
   });
 }
