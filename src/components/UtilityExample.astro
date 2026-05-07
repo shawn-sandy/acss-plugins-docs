@@ -1,0 +1,76 @@
+---
+interface Props {
+  class: string;
+  tag?: string;
+  property?: string;
+}
+const { class: cls, tag = "div", property } = Astro.props;
+const Tag = tag;
+---
+
+<div class="util-example">
+  <div class="util-example-preview">
+    <Tag class={cls}><slot>Example content</slot></Tag>
+  </div>
+  <div class="util-example-footer">
+    <pre class="util-example-source"><code>{`<${tag} class="${cls}">…</${tag}>`}</code></pre>
+    {
+      property && (
+        <div class="util-example-computed">
+          <code>{property}</code>:{" "}
+          <span data-token-value={property} aria-label={`Computed ${property}`}>
+            —
+          </span>
+        </div>
+      )
+    }
+  </div>
+</div>
+
+<script>
+  import { populateValues, watchThemeChanges } from "~/scripts/visuals";
+  populateValues(document);
+  watchThemeChanges(() => populateValues(document));
+</script>
+
+<style>
+  .util-example {
+    margin-block: 1rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+
+  .util-example-preview {
+    padding: 1.25rem;
+    background: var(--color-background, var(--sl-color-bg));
+  }
+
+  .util-example-footer {
+    background: var(--sl-color-gray-7, #f8f8f8);
+    border-top: 1px solid var(--sl-color-gray-5);
+  }
+
+  .util-example-source {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.8rem;
+    overflow-x: auto;
+  }
+
+  .util-example-source code {
+    font-family: var(--sl-font-system-mono);
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+  }
+
+  .util-example-computed {
+    padding: 0.4rem 1rem;
+    font-size: 0.75rem;
+    border-top: 1px solid var(--sl-color-gray-5);
+    color: var(--sl-color-gray-3);
+    font-family: var(--sl-font-system-mono);
+  }
+</style>

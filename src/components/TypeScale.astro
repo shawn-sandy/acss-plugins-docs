@@ -1,0 +1,78 @@
+---
+const tokens = ["xs", "sm", "base", "md", "lg", "xl", "2xl", "3xl", "4xl"];
+---
+
+<div class="type-scale">
+  {
+    tokens.map((t) => (
+      <div class="type-row">
+        <div class="type-meta">
+          <code class="type-name">--font-size-{t}</code>
+          <span
+            class="type-value"
+            data-token-value={`--font-size-${t}`}
+            aria-label={`Computed value for --font-size-${t}`}
+          >
+            —
+          </span>
+        </div>
+        <p
+          class="type-sample"
+          style={`font-size: min(var(--font-size-${t}), 3rem);`}
+        >
+          The quick brown fox
+        </p>
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  import { populateValues, watchThemeChanges } from "~/scripts/visuals";
+  populateValues(document);
+  watchThemeChanges(() => populateValues(document));
+</script>
+
+<style>
+  .type-scale {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-block: 1.5rem;
+  }
+
+  .type-row {
+    display: grid;
+    grid-template-columns: 14rem 1fr;
+    align-items: baseline;
+    gap: 1rem;
+    padding-block: 0.5rem;
+    border-bottom: 1px solid var(--sl-color-gray-6);
+  }
+
+  .type-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    flex-shrink: 0;
+  }
+
+  .type-name {
+    font-size: 0.75rem;
+    color: var(--sl-color-gray-2);
+  }
+
+  .type-value {
+    font-size: 0.7rem;
+    color: var(--sl-color-gray-3);
+    font-family: var(--sl-font-system-mono);
+  }
+
+  .type-sample {
+    margin: 0;
+    line-height: 1.2;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+</style>
