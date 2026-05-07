@@ -47,7 +47,7 @@ When adding or editing an MDX page that names a color role, font size, component
 
 - `ColorSwatch.astro` — `<ColorSwatch roles={['primary','danger']} />` — swatch grid with table. Accepts `role` (single) or `roles` (array). `table={false}` hides the table.
 - `TypeScale.astro` — `<TypeScale />` — renders all `--font-size-*` tokens with sample text.
-- `ComponentPreview.astro` — `<ComponentPreview code={`...html...`} />` — live HTML preview + code block. Wrap in `role="region"` automatically.
+- `ComponentPreview.astro` — ``<ComponentPreview code={`...html...`} />`` — live HTML preview + code block. Wrap in `role="region"` automatically.
 - `UtilityExample.astro` — `<UtilityExample class="bg-primary" property="--color-primary">...</UtilityExample>` — live element + code snippet + optional resolved value.
 
 **Shared runtime:** `src/scripts/visuals.ts` — resolves CSS token values client-side and keeps them in sync when the user toggles dark mode. Primitives import it automatically; do not duplicate this logic.

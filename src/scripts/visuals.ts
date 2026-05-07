@@ -21,17 +21,18 @@ export function populateValues(root: Document | ParentNode = document): void {
     if (value) {
       el.textContent = value;
       el.removeAttribute("data-missing");
-    } else {
-      el.textContent = "—";
-      el.setAttribute("data-missing", "");
-      if (import.meta.env.DEV) {
-        console.warn(`[acss-docs] Token "${token}" not found on :root`);
-      }
+      return;
+    }
+    el.textContent = "—";
+    el.setAttribute("data-missing", "");
+    if (import.meta.env.DEV) {
+      console.warn(`[acss-docs] Token "${token}" not found on :root`);
     }
   });
 }
 
-export function watchThemeChanges(callback: () => void): void {
+/** Returns a disposer — call it to disconnect the observer (e.g. on page swap with View Transitions). */
+export function watchThemeChanges(callback: () => void): () => void {
   const observer = new MutationObserver((mutations) => {
     for (const m of mutations) {
       if (m.attributeName === "data-theme") {
@@ -44,4 +45,5 @@ export function watchThemeChanges(callback: () => void): void {
     attributes: true,
     attributeFilter: ["data-theme"],
   });
+  return () => observer.disconnect();
 }

@@ -39,7 +39,7 @@ const roleList = roles ?? (role ? [role] : []);
       <thead>
         <tr>
           <th>Token</th>
-          <th>Light value</th>
+          <th>Value</th>
         </tr>
       </thead>
       <tbody>
@@ -83,7 +83,6 @@ const roleList = roles ?? (role ? [role] : []);
   }
 
   /* Striped pattern when token is unresolved */
-  :global([data-missing]) + .swatch-info .swatch-preview,
   .swatch-preview:has(+ .swatch-info [data-missing]) {
     background: repeating-linear-gradient(
       45deg,
