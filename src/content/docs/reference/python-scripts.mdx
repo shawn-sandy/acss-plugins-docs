@@ -3,7 +3,7 @@ title: Python Scripts Reference
 description: API reference for every Python script in acss-kit and acss-utilities — inputs, outputs, exit codes, and contract families.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 All scripts use **Python 3 stdlib only** — no pip dependencies. They follow one of two contract families.
 
@@ -12,6 +12,7 @@ All scripts use **Python 3 stdlib only** — no pip dependencies. They follow on
 ### Detector contract
 
 Used when a slash command needs to parse the script's output. The script:
+
 - Writes JSON to stdout
 - Returns a `reasons` array in the JSON
 - Exits 0 (match/success) or 1 (no match/failure)
@@ -20,6 +21,7 @@ Used when a slash command needs to parse the script's output. The script:
 ### Generator/Validator contract
 
 Used for pipeline transformers and human-readable validators. The script:
+
 - Writes data/CSS to stdout (or a file)
 - Writes error messages to stderr
 - Exits 0 (success), 1 (validation failure), or 2 (IO/usage error)
@@ -39,11 +41,13 @@ The `/setup`, `/kit-add`, and `/kit-create` workflows lean on four small detecto
 Inspects `package.json` to confirm the project is a viable React + TypeScript target and surfaces the React major version.
 
 **Inputs:**
+
 ```bash
 python3 detect_stack.py [--project-root=<path>]
 ```
 
 **Output (stdout):**
+
 ```json
 {
   "react": { "present": true, "version": "18.3.1", "major": 18 },
@@ -62,11 +66,13 @@ python3 detect_stack.py [--project-root=<path>]
 Identifies the project's package manager from the `packageManager` field, lockfile presence, and (as a fallback) the `engines` field.
 
 **Inputs:**
+
 ```bash
 python3 detect_package_manager.py [--project-root=<path>]
 ```
 
 **Output (stdout):**
+
 ```json
 {
   "manager": "pnpm",
@@ -88,11 +94,13 @@ python3 detect_package_manager.py [--project-root=<path>]
 Resolves the components output directory. Reads `.acss-target.json` first, then falls back to `src/components/fpkit/`, then to a heuristic on `src/`.
 
 **Inputs:**
+
 ```bash
 python3 detect_target.py [--project-root=<path>]
 ```
 
 **Output (stdout):**
+
 ```json
 {
   "source": "configured",
@@ -113,11 +121,13 @@ python3 detect_target.py [--project-root=<path>]
 Run after `/setup` (and any time afterwards) to confirm the project still wires acss-kit correctly: `ui.tsx` is present, theme files exist, theme imports are reachable from the entry stylesheet, and `.acss-target.json` matches reality.
 
 **Inputs:**
+
 ```bash
 python3 verify_integration.py [--project-root=<path>] [--strict]
 ```
 
 **Output (stdout):**
+
 ```json
 {
   "ok": true,
@@ -143,35 +153,37 @@ python3 verify_integration.py [--project-root=<path>] [--strict]
 Converts a hex seed color into a full semantic role palette using OKLCH math and WCAG 2.2 AA validation.
 
 **Inputs (CLI arguments):**
+
 ```bash
 python3 generate_palette.py <hex-color> [--mode=light|dark|both|brand]
 ```
 
-| Argument | Required | Description |
-|---|---|---|
-| `hex-color` | Yes | 6-digit hex (e.g., `#4f46e5`) |
-| `--mode` | No | `light` (default), `dark`, `both`, or `brand` |
+| Argument    | Required | Description                                   |
+| ----------- | -------- | --------------------------------------------- |
+| `hex-color` | Yes      | 6-digit hex (e.g., `#4f46e5`)                 |
+| `--mode`    | No       | `light` (default), `dark`, `both`, or `brand` |
 
 **Output (stdout):** JSON palette object
+
 ```json
 {
   "mode": "both",
   "seed": "#4f46e5",
   "seed_oklch": [0.55, 0.22, 270],
   "light": {
-    "--color-background":     "oklch(99% 0.004 270)",
-    "--color-primary":        "oklch(55% 0.22 270)",
-    "--color-danger":         "oklch(50% 0.22 27)",
+    "--color-background": "oklch(99% 0.004 270)",
+    "--color-primary": "oklch(55% 0.22 270)",
+    "--color-danger": "oklch(50% 0.22 27)",
     "...": "18 roles total"
   },
   "dark": {
-    "--color-background":     "oklch(12% 0.008 270)",
-    "--color-primary":        "oklch(72% 0.18 270)",
+    "--color-background": "oklch(12% 0.008 270)",
+    "--color-primary": "oklch(72% 0.18 270)",
     "...": "18 roles total"
   },
   "wcag": {
     "light": { "all_pass": true, "pairs": { "text/background": 14.2 } },
-    "dark":  { "all_pass": true, "pairs": { "text/background": 12.8 } }
+    "dark": { "all_pass": true, "pairs": { "text/background": 12.8 } }
   }
 }
 ```
@@ -188,15 +200,17 @@ python3 generate_palette.py <hex-color> [--mode=light|dark|both|brand]
 Extracts `--color-*` declarations from CSS theme files and emits a JSON token object.
 
 **Inputs:**
+
 ```bash
 python3 css_to_tokens.py <file.css> [file2.css ...]
 ```
 
 **Output (stdout):** JSON conforming to `assets/theme.schema.json`
+
 ```json
 {
   "light": { "--color-background": "oklch(99% 0.004 270)", "...": "..." },
-  "dark":  { "--color-background": "oklch(12% 0.008 270)", "...": "..." },
+  "dark": { "--color-background": "oklch(12% 0.008 270)", "...": "..." },
   "brand": {}
 }
 ```
@@ -215,6 +229,7 @@ python3 css_to_tokens.py <file.css> [file2.css ...]
 Converts a JSON palette (from `generate_palette.py`) to CSS theme files.
 
 **Inputs:**
+
 ```bash
 python3 tokens_to_css.py <palette.json> --out-light=<path> --out-dark=<path>
 ```
@@ -222,6 +237,7 @@ python3 tokens_to_css.py <palette.json> --out-light=<path> --out-dark=<path>
 **Output:** CSS files written to `--out-light` and `--out-dark` paths.
 
 **Features:**
+
 - Emits `:root` block for light, `[data-theme="dark"]` for dark
 - Adds section comment headers (`/* ── Backgrounds ── */`)
 - Sorts roles in canonical order (backgrounds → borders → text → brand → semantic)
@@ -239,6 +255,7 @@ python3 tokens_to_css.py <palette.json> --out-light=<path> --out-dark=<path>
 Validates WCAG 2.2 AA contrast ratios for all 10 semantic role pairs in a theme CSS file.
 
 **Inputs:**
+
 ```bash
 python3 validate_theme.py <theme.css>
 # or validate a directory:
@@ -246,6 +263,7 @@ python3 validate_theme.py src/styles/theme/
 ```
 
 **Output (stdout on failure):**
+
 ```
 WCAG validation — src/styles/theme/light.css
 
@@ -257,12 +275,15 @@ WCAG validation — src/styles/theme/light.css
 ```
 
 **Exit codes:**
+
 - 0 — all pairs pass
 - 1 — one or more pairs fail
 - 2 — file not found or parse error
 
 <Aside type="note">
-`validate_theme.py` resolves nested `var()` references up to 5 levels deep before computing contrast. This ensures brand files that reference base theme variables are validated correctly.
+  `validate_theme.py` resolves nested `var()` references up to 5 levels deep
+  before computing contrast. This ensures brand files that reference base theme
+  variables are validated correctly.
 </Aside>
 
 ---
@@ -275,27 +296,316 @@ WCAG validation — src/styles/theme/light.css
 Applies OKLCH deltas to a hex color and returns the resulting hex.
 
 **Inputs:**
+
 ```bash
 python3 oklch_shift.py <hex-color> [--hue=<delta>] [--chroma=<multiplier>] [--lightness=<delta>]
 ```
 
-| Flag | Type | Description |
-|---|---|---|
-| `--hue` | float (degrees) | Hue offset (e.g., `+20`, `-15`) |
-| `--chroma` | float (multiplier) | Chroma multiplier (e.g., `1.2` = 20% more saturated) |
-| `--lightness` | float (percentage points) | Lightness offset (e.g., `+5`, `-3`) |
+| Flag          | Type                      | Description                                          |
+| ------------- | ------------------------- | ---------------------------------------------------- |
+| `--hue`       | float (degrees)           | Hue offset (e.g., `+20`, `-15`)                      |
+| `--chroma`    | float (multiplier)        | Chroma multiplier (e.g., `1.2` = 20% more saturated) |
+| `--lightness` | float (percentage points) | Lightness offset (e.g., `+5`, `-3`)                  |
 
 **Output (stdout):** Resulting hex color string
+
 ```
 #6040e5
 ```
 
 **Stderr (on gamut clamp):**
+
 ```
 Warning: significant gamut clamping (>5%) on blue channel. Result may differ from expected.
 ```
 
 **Exit codes:** 0 = success, 1 = invalid input, 2 = severe gamut clamping (> 20%)
+
+---
+
+### acss-kit kit-sync scripts
+
+The `/kit-sync` and `/kit-update` commands use four scripts to manage the manifest at `.acss-kit/manifest.json`. All four follow the **Detector contract** where applicable (JSON to stdout, `reasons` array, exit 0/1) or the **Generator contract** for write operations.
+
+#### `hash_file.py`
+
+**Contract:** Generator  
+**Location:** `plugins/acss-kit/scripts/hash_file.py`
+
+Computes a normalized SHA256 hash of a file or stdin content using the kit-sync normalization rules: LF endings, trailing whitespace stripped per line, trailing blank lines collapsed to one. Used by `/kit-sync` before recording a file in the manifest and by `diff_status.py` when comparing on-disk content.
+
+**Inputs:**
+
+```bash
+python3 hash_file.py --path <path>
+# or via stdin:
+cat content | python3 hash_file.py --stdin
+```
+
+**Output (stdout):**
+
+```json
+{
+  "path": "/abs/path/to/file",
+  "sha256": "<hex>",
+  "normalizedBytes": 1234,
+  "reasons": []
+}
+```
+
+**Exit codes:** 0 = success, 1 = file not found (`--path`), 2 = IO/usage error
+
+---
+
+#### `manifest_read.py`
+
+**Contract:** Detector  
+**Location:** `plugins/acss-kit/scripts/manifest_read.py`
+
+Reads `.acss-kit/manifest.json` from a project root and emits its full contents as JSON. Used by both `/kit-sync` (re-sync detection) and `/kit-update` (drift baseline).
+
+**Inputs:**
+
+```bash
+python3 manifest_read.py [project_root]
+```
+
+**Output (stdout):**
+
+```json
+{
+  "exists": true,
+  "path": "/abs/.acss-kit/manifest.json",
+  "schemaVersion": 1,
+  "pluginVersion": "0.9.0",
+  "targetDir": "src/components/fpkit",
+  "stylesDir": "src/styles",
+  "themeFile": "acss-kit.theme.json",
+  "generatedAt": "2026-05-03T14:22:11Z",
+  "files": {
+    "<rel-path>": { "source": "...", "sha256": "...", "kind": "..." }
+  },
+  "reasons": []
+}
+```
+
+When the manifest is missing:
+
+```json
+{
+  "exists": false,
+  "path": "/abs/.acss-kit/manifest.json",
+  "files": {},
+  "reasons": ["Manifest not found. Run /kit-sync first."]
+}
+```
+
+**Exit codes:** 0 = manifest exists and parsed, 1 = manifest missing or invalid
+
+---
+
+#### `manifest_write.py`
+
+**Contract:** Generator  
+**Location:** `plugins/acss-kit/scripts/manifest_write.py`
+
+Atomically writes or merges `.acss-kit/manifest.json`. Reads a JSON payload from stdin describing entries to upsert, merges with any existing manifest (preserving entries not in the payload), and writes atomically (write-temp + rename). Used at the end of both the `/kit-sync` bulk install and `/kit-update` safe-update workflows.
+
+**Stdin payload shape:**
+
+```json
+{
+  "projectRoot": "/abs/path",
+  "pluginVersion": "0.9.0",
+  "targetDir": "src/components/fpkit",
+  "stylesDir": "src/styles",
+  "themeFile": "acss-kit.theme.json",
+  "files": [
+    {
+      "path": "src/components/fpkit/button.tsx",
+      "sha256": "<hex>",
+      "kind": "component",
+      "source": "ref:components/button.md#tsx-template",
+      "component": "button"
+    }
+  ],
+  "removePaths": []
+}
+```
+
+**Output (stdout):**
+
+```json
+{
+  "ok": true,
+  "path": "/abs/.acss-kit/manifest.json",
+  "filesWritten": 5,
+  "filesRemoved": 0,
+  "reasons": []
+}
+```
+
+**Exit codes:** 0 = success, 1 = malformed payload, 2 = IO error
+
+---
+
+#### `diff_status.py`
+
+**Contract:** Detector  
+**Location:** `plugins/acss-kit/scripts/diff_status.py`
+
+Computes drift between `.acss-kit/manifest.json` and the current on-disk state. Classifies every tracked file as `clean` (matches recorded hash), `modified` (hash differs), or `missing` (deleted). Used by `/kit-update` to determine which files to overwrite, skip, or recreate.
+
+**Inputs:**
+
+```bash
+python3 diff_status.py [project_root]
+```
+
+**Output (stdout):**
+
+```json
+{
+  "ok": true,
+  "projectRoot": "/abs/path",
+  "manifestPath": "/abs/.acss-kit/manifest.json",
+  "clean": [{ "path": "...", "kind": "...", "component": "..." }],
+  "modified": [
+    { "path": "...", "kind": "...", "currentSha": "...", "expectedSha": "..." }
+  ],
+  "missing": [{ "path": "...", "kind": "..." }],
+  "totals": { "clean": 3, "modified": 1, "missing": 0 },
+  "reasons": []
+}
+```
+
+**Exit codes:** 0 = diff computed (regardless of drift counts), 1 = manifest missing or unreadable
+
+---
+
+### acss-kit HTML scripts
+
+#### `detect_html_target.py`
+
+**Contract:** Detector  
+**Location:** `plugins/acss-kit/scripts/detect_html_target.py`
+
+Detects the target directory for static-HTML component output. Unlike `detect_target.py` (which requires a React project), this script works with any project type — static sites, server-rendered apps, or projects with no `package.json`. Reads `.acss-html-target.json` at the project root.
+
+**Inputs:**
+
+```bash
+python3 detect_html_target.py [project_root]
+```
+
+**Output (stdout):**
+
+```json
+{
+  "source": "configured",
+  "projectRoot": "/abs/path",
+  "componentsHtmlDir": "components/html",
+  "foundationPresent": true,
+  "reasons": []
+}
+```
+
+`source` values: `"configured"` (`.acss-html-target.json` found), `"none"` (no config file present; first-run prompt needed).  
+`foundationPresent` — whether `_stateful.js` has been copied to the target directory yet.
+
+**Exit codes:** 0 = configured (with or without foundation file), 1 = not configured
+
+---
+
+#### `verify_html_integration.py`
+
+**Contract:** Detector  
+**Location:** `plugins/acss-kit/scripts/verify_html_integration.py`
+
+Checks that every `.scss`/`.css` and `.js` artifact generated by `/kit-add-html` is referenced by at least one page in the project. `.html` snippet files are listed but not checked (they are copy-paste fragments, not entrypoints). Reads `.acss-html-target.json` for `componentsHtmlDir`.
+
+**Inputs:**
+
+```bash
+python3 verify_html_integration.py [project_root]
+```
+
+**Output (stdout):**
+
+```json
+{
+  "ok": true,
+  "projectRoot": "/abs/path",
+  "componentsHtmlDir": "components/html",
+  "checks": [
+    { "artifact": "button.scss", "kind": "style", "imported": true },
+    { "artifact": "dialog.js", "kind": "script", "imported": true },
+    { "artifact": "button.html", "kind": "snippet", "imported": null }
+  ],
+  "reasons": []
+}
+```
+
+When references are missing, `ok` is `false` and `reasons` contains suggested `<link>`/`<script>` snippets.
+
+**Exit codes:** 0 = all artifacts referenced (or only snippets), 1 = missing references
+
+---
+
+### acss-kit setup scripts
+
+#### `detect_css_entry.py`
+
+**Contract:** Detector  
+**Location:** `plugins/acss-kit/scripts/detect_css_entry.py`
+
+Used by `/setup` Step 7.5 to find the project's main CSS/SCSS entry file so theme `@import` lines can be appended idempotently. Walks a fixed candidate list in priority order and, for each file found, scans for existing imports of the theme/utility artifacts by basename.
+
+**Inputs:**
+
+```bash
+python3 detect_css_entry.py [project_root]
+```
+
+**Output (stdout):**
+
+At least one candidate found (exit 0):
+
+```json
+{
+  "source": "detected",
+  "projectRoot": "/abs/path",
+  "candidates": [
+    {
+      "path": "src/styles/index.scss",
+      "imports": {
+        "light.css": 3,
+        "dark.css": null,
+        "token-bridge.css": null,
+        "utilities.css": null
+      }
+    }
+  ],
+  "reasons": []
+}
+```
+
+In the `imports` map, a non-null value is the 1-based line number where that basename appears on an import-bearing line. `null` means the file is not yet imported.
+
+No candidate found (exit 1):
+
+```json
+{
+  "source": "none",
+  "projectRoot": "/abs/path",
+  "candidates": [],
+  "reasons": [
+    "No CSS or SCSS entry file found at any of the standard locations."
+  ]
+}
+```
+
+**Exit codes:** 0 = at least one candidate found, 1 = no candidate
 
 ---
 
@@ -309,15 +619,16 @@ Warning: significant gamut clamping (>5%) on blue channel. Result may differ fro
 Generates the full utility CSS bundle from `utilities.tokens.json`.
 
 **Inputs:**
+
 ```bash
 python3 generate_utilities.py [--tokens=<path>] [--out-dir=<dir>] [--families=<list>]
 ```
 
-| Flag | Default | Description |
-|---|---|---|
-| `--tokens` | `assets/utilities.tokens.json` | Token source file |
-| `--out-dir` | `assets/utilities/` | Directory for per-family partials |
-| `--families` | All enabled families | Comma-separated override |
+| Flag         | Default                        | Description                       |
+| ------------ | ------------------------------ | --------------------------------- |
+| `--tokens`   | `assets/utilities.tokens.json` | Token source file                 |
+| `--out-dir`  | `assets/utilities/`            | Directory for per-family partials |
+| `--families` | All enabled families           | Comma-separated override          |
 
 **Output:** Per-family CSS partials + concatenated `assets/utilities.css`
 
@@ -333,16 +644,19 @@ python3 generate_utilities.py [--tokens=<path>] [--out-dir=<dir>] [--families=<l
 Validates the committed utility bundle for integrity, bridge parity, and idempotency.
 
 **Checks:**
+
 1. **Bundle integrity** — valid CSS syntax
 2. **Bridge parity** — every `:root` alias also in `[data-theme="dark"]`
 3. **Idempotency** — regenerated bundle matches committed bundle byte-for-byte
 
 **Inputs:**
+
 ```bash
 python3 validate_utilities.py [--bundle=<path>] [--bridge=<path>]
 ```
 
 **Exit codes:**
+
 - 0 — all checks pass
 - 1 — integrity or parity failure
 - 2 — IO/usage error
@@ -357,11 +671,13 @@ python3 validate_utilities.py [--bundle=<path>] [--bridge=<path>]
 Detects the target styles directory for utility output.
 
 **Inputs:**
+
 ```bash
 python3 detect_utility_target.py [--project-root=<path>]
 ```
 
 **Output (stdout):** JSON
+
 ```json
 {
   "source": "configured",
@@ -373,3 +689,40 @@ python3 detect_utility_target.py [--project-root=<path>]
 `source` values: `"configured"` (.acss-target.json found), `"default"` (src/styles/ heuristic), `"none"` (no directory found)
 
 **Exit codes:** 0 = directory found, 1 = no directory found
+
+---
+
+### `migrate_classnames.py`
+
+**Contract:** Generator/Validator  
+**Location:** `plugins/acss-utilities/scripts/migrate_classnames.py`
+
+Migrates acss-utilities class names from the 0.1.x colon form (`sm:hide`, `md:p-6`) to the 0.2.0 hyphen form (`sm-hide`, `md-p-6`) in source files. By default performs a **dry run** and prints a unified diff per modified file. Pass `--write` to apply changes in place.
+
+**Inputs:**
+
+```bash
+python3 migrate_classnames.py <path> [<path>...] [--write] [--include=<glob>,...] [--exclude=<glob>,...] [--prefixes=sm,md,lg,xl,print]
+```
+
+| Flag         | Default             | Description                              |
+| ------------ | ------------------- | ---------------------------------------- |
+| `<path>`     | Required            | One or more files or directories to scan |
+| `--write`    | Dry run             | Apply changes in place                   |
+| `--include`  | All files           | Glob patterns to include                 |
+| `--exclude`  | None                | Glob patterns to exclude                 |
+| `--prefixes` | `sm,md,lg,xl,print` | Responsive prefixes to migrate           |
+
+**Output (stdout):** Unified diff per modified file (dry run), or file paths written (with `--write`).
+
+**Match strategy:** Conservative — rewrites only inside `className="..."`, `className={...}`, `class="..."`, and `@apply` directives. JSX template literals, Vue `:class` arrays, and Svelte `class:` directives are flagged as limitations and not automatically rewritten.
+
+**Idempotency:** Running the script twice on the same tree produces zero diffs on the second run.
+
+**Exit codes:** 0 = no changes needed (or all applied with `--write`), 1 = dry-run: changes pending, 2 = usage/IO error
+
+<Aside type="note">
+  `migrate_classnames.py` is a one-time migration tool for upgrading from
+  acss-utilities 0.1.x to 0.2.0. If your project was set up with 0.2.0 or later,
+  you do not need to run it.
+</Aside>
