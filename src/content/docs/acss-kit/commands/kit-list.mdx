@@ -3,7 +3,7 @@ title: /kit-list
 description: Browse the full component catalogue or inspect a specific component — read-only, no side effects.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 Browse the component catalogue or inspect a specific component's props, CSS tokens, dependencies, and generation contract. This command is entirely read-only — it never writes files.
 
@@ -15,9 +15,9 @@ Browse the component catalogue or inspect a specific component's props, CSS toke
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `component` | No | Component name to inspect. If omitted, shows the full catalogue. |
+| Argument    | Required | Description                                                      |
+| ----------- | -------- | ---------------------------------------------------------------- |
+| `component` | No       | Component name to inspect. If omitted, shows the full catalogue. |
 
 ## Examples
 
@@ -37,58 +37,44 @@ Inspect a specific component:
 
 ## Output: full catalogue
 
-Without a component name, `/kit-list` prints every available component organized by category:
+Without a component name, `/kit-list` prints every available component organized by category. As of v0.11.1, components whose static-HTML output has been **Verified** (i.e. `/kit-add-html` can generate them today) are marked `[HTML]`:
 
 ```
-acss-kit components  (v0.5.0)
+Available Components (acss-kit)
 
-Simple
-  badge        Display a small status or count label
-  icon         Inline SVG icon wrapper
-  link         Accessible anchor with consistent styling
-  divider      Horizontal or vertical rule
+Simple (no dependencies):
+  badge       — Status indicator with count or text
+  tag         — Categorical label with optional removal
+  heading     — Semantic heading (h1-h6) with styles
+  text        — Inline/block text with variants
 
-Interactive
-  button       Primary interactive control
-  checkbox     Controlled checkbox input
-  toggle       Binary on/off switch
-  tabs         Tab panel navigation
+Interactive (useDisabledState pattern):
+  button      — Primary interactive element (all variants)              [HTML]
+  link        — Accessible anchor with hover/visited states
 
-Form
-  field        Label + input + error message wrapper
-  input        Single-line text input
-  select       Dropdown select control
-  textarea     Multi-line text input
-  form-group   Field grouping with legend
+Layout:
+  card        — Compound component (Card.Title, Card.Content, Card.Footer)  [HTML]
+  nav         — Navigation landmark with compound Nav.List, Nav.Item
 
-Layout
-  card         Content container with optional header/footer
-  alert        Inline status message (info/success/warning/danger)
-  banner       Full-width announcement strip
+Complex (multiple dependencies):
+  alert       — Severity-aware notification (needs icon)                 [HTML]
+  dialog      — Modal dialog with focus trap (needs button, icon)        [HTML]
+  form        — Form controls (input, textarea, select, checkbox, toggle)
 
-Complex
-  dialog       Modal dialog with focus trap
-  nav          Navigation list with active state
-  popover      Floating content panel
-  table        Data table with sort and row selection
-  toast        Transient notification
-
-Run /kit-list <name> to inspect any component.
+Run /kit-add <component> to generate React components, or /kit-add-html <component> for static HTML versions of the [HTML]-marked entries.
 ```
+
+Components without `[HTML]` exist as React only — `/kit-add-html` will warn if you try to generate them.
 
 ## Output: component inspect
 
-With a component name, `/kit-list` shows the full specification:
+With a component name, `/kit-list` shows the full specification including a dedicated **HTML output** line:
 
 ```
-button  —  Primary interactive control
-─────────────────────────────────────────────
-Category:      interactive
-Dependencies:  none
-
-Generation contract:
-  Button.tsx     src/components/fpkit/Button.tsx
-  Button.scss    src/components/fpkit/Button.scss
+Component: Button
+File: button.tsx + button.scss
+Dependencies: none (simple component)
+HTML output: Verified (/kit-add-html can generate this component)
 
 Props:
   children   ReactNode         required  Button content
@@ -113,6 +99,8 @@ Usage:
   <Button variant="secondary">Cancel</Button>
   <Button disabled>Unavailable</Button>
 ```
+
+For a component without HTML support the line reads: `HTML output: Not yet — React only (/kit-add-html will warn)`.
 
 ## Reading the generation contract
 

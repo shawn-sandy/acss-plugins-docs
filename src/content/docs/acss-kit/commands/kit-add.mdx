@@ -47,7 +47,7 @@ When you run `/kit-add`, the `components` skill executes these steps:
 
 1. **Resolve component name** — looks up the component in the reference catalogue and finds its spec doc.
 
-2. **Verify sass and copy `ui.tsx`** — checks that `sass` is in `devDependencies`. If missing, stops and tells you how to install it. Copies the polymorphic `UI` base component to your components folder if it doesn't exist already.
+2. **Verify sass and copy `ui.tsx`** — checks that `sass` is in `devDependencies`. If missing, stops and tells you how to install it. Copies the polymorphic `UI` base component to your components folder if it doesn't exist already. On first run, also handles the foundation CSS install matrix (see [Foundation CSS install](#foundation-css-install) below).
 
 3. **Detect build stack** — runs `detect_stack.py` to classify framework, bundler, CSS pipeline, and entrypoint. Persists the result into `.acss-target.json` under a `stack` key. If Tailwind is detected, notes that fpkit components and Tailwind utilities coexist without conflict.
 
@@ -64,6 +64,24 @@ When you run `/kit-add`, the `components` skill executes these steps:
 9. **Verify integration** — runs `verify_integration.py` against the recorded entry point. Missing imports are surfaced as a numbered fix-up list. The plugin never auto-edits your entry file.
 
 </Steps>
+
+## Foundation CSS install
+
+Starting with `acss-kit` v0.11.0, a vendored `foundation.css` (CSS reset, base typography, and `@layer` cascade ordering) ships alongside `ui.tsx`. The skill applies the following install matrix on first run:
+
+| Project state                                                | Action                                                                                     |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| No `ui.tsx` + no `foundation.css` (fresh install)            | Copy both `ui.tsx` and `foundation.css` plus the `sass/` source tree; print an import hint |
+| `ui.tsx` present, `foundation.css` absent (existing install) | Prompt before copying — you can opt out to avoid the foundation layer                      |
+| Both `ui.tsx` and `foundation.css` present                   | Skip silently — nothing to do                                                              |
+
+The `foundation.css` file declares the `@layer` cascade order that all generated components rely on:
+
+```css
+@layer foundation, components, utilities, theme;
+```
+
+Import `foundation.css` before any component SCSS in your project entrypoint. See [`assets/foundation/SOURCE.md`](https://github.com/shawn-sandy/agentic-acss-plugins/blob/main/plugins/acss-kit/assets/foundation/SOURCE.md) for the upstream pin and the four documented patches (P1–P4) applied to the vendored copy.
 
 ## Output
 
