@@ -1,0 +1,148 @@
+---
+title: /color-scale
+description: Generate a 10-step OKLCH color scale from a hex value, CSS named color, or theme role name.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+Generate a 10-step OKLCH color scale (steps 50–900) from any seed color. Accepts a hex value, a CSS named color, or a theme role name resolved from the project's existing `light.css`. Output is a `:root { … }` CSS block with `var(--color-<name>-N, <hex>)` fallbacks plus a Markdown table of hex and OKLCH values per step.
+
+## Syntax
+
+```text
+/color-scale <color> [--name=<name>] [--format=css|json|both]
+```
+
+## Arguments
+
+| Argument   | Required | Description                                                                                                                   |
+| ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `color`    | Yes      | Seed color as `#rrggbb`, CSS named color (`red`, `cornflowerblue`), or theme role name (`background`, `primary`, `surface`)   |
+| `--name`   | No       | CSS variable prefix used in output (e.g. `--color-<name>-50`). Defaults to the role/color name, or `scale` for raw hex input. |
+| `--format` | No       | Output format: `css`, `json`, or `both` (default: `both`)                                                                     |
+
+## Examples
+
+Generate a scale from a hex color:
+
+```text
+/color-scale "#4f46e5"
+```
+
+Generate a scale from the project's `primary` theme role:
+
+```text
+/color-scale primary
+```
+
+Generate a scale from a CSS named color with a custom variable name:
+
+```text
+/color-scale cornflowerblue --name=blue
+```
+
+Output CSS only (ready to paste into a stylesheet):
+
+```text
+/color-scale "#4f46e5" --name=brand --format=css
+```
+
+## Workflow
+
+<Steps>
+
+1. **Resolve the seed color to hex.** The command accepts three input forms:
+   - **Hex** (`#rrggbb` or `#rgb`) — used directly.
+   - **Theme role name** (`primary`, `background`, `surface`, etc.) — looks up the project's `light.css`, greps for `--color-<role>:`, and extracts the hex fallback from the `var(--color-<role>, <hex>)` declaration. If no theme file is found, halts with: _"No theme file found. Run /theme-create first or pass a hex value directly."_
+   - **CSS named color** (`red`, `cornflowerblue`, `tomato`, etc.) — resolved to hex using the W3C CSS Color 4 named-color table.
+
+2. **Run `generate_color_scale.py`.** Calls `scripts/generate_color_scale.py <hex> --name=<name> --format=both` and captures stdout. On a non-zero exit code, prints the stderr message and halts.
+
+3. **Display results.** Output is presented in this order:
+   - **CSS block** — the `:root { … }` block ready to paste or write to a file.
+   - **Scale table** — a compact Markdown table of all 10 steps.
+
+4. **Write to file (optional).** If you ask to save the output, the command writes to the path you specify. Otherwise it displays only — no files are written unless you explicitly request it.
+
+</Steps>
+
+## Output format
+
+The default `--format=both` output contains two sections separated by a blank line — JSON first, then CSS:
+
+```text
+{
+  "name": "primary",
+  "seed": "#4f46e5",
+  "seed_oklch": { "L": 0.4823, "C": 0.2108, "H": 264.05 },
+  "steps": [
+    { "step": 50,  "hex": "#f5f3ff", "oklch": "oklch(0.965 0.0213 264.1)", "css_var": "--color-primary-50" },
+    ...
+    { "step": 900, "hex": "#1e1b4b", "oklch": "oklch(0.141 0.0812 264.1)", "css_var": "--color-primary-900" }
+  ]
+}
+
+:root {
+  --color-primary-50:  var(--color-primary-50,  #f5f3ff);
+  --color-primary-100: var(--color-primary-100, #ede9fe);
+  --color-primary-200: var(--color-primary-200, #ddd6fe);
+  --color-primary-300: var(--color-primary-300, #c4b5fd);
+  --color-primary-400: var(--color-primary-400, #a78bfa);
+  --color-primary-500: var(--color-primary-500, #8b5cf6);
+  --color-primary-600: var(--color-primary-600, #7c3aed);
+  --color-primary-700: var(--color-primary-700, #6d28d9);
+  --color-primary-800: var(--color-primary-800, #5b21b6);
+  --color-primary-900: var(--color-primary-900, #4c1d95);
+}
+```
+
+The displayed scale table:
+
+| Step | Hex       | OKLCH                       |
+| ---- | --------- | --------------------------- |
+| 50   | `#f5f3ff` | `oklch(0.965 0.0213 264.1)` |
+| 100  | `#ede9fe` | `oklch(0.935 0.0427 264.1)` |
+| …    | …         | …                           |
+| 900  | `#1e1b4b` | `oklch(0.141 0.0812 264.1)` |
+
+## Scale steps
+
+The 10 steps use perceptually distributed OKLCH lightness targets while preserving the seed's chroma and hue:
+
+| Step | Lightness target | Typical use                  |
+| ---- | ---------------- | ---------------------------- |
+| 50   | 0.970            | Near-white tint, backgrounds |
+| 100  | 0.935            | Light surface                |
+| 200  | 0.875            | Hover surface                |
+| 300  | 0.785            | Subtle border                |
+| 400  | 0.670            | Disabled state               |
+| 500  | 0.550            | Mid-tone                     |
+| 600  | 0.435            | Default interactive          |
+| 700  | 0.335            | Hover interactive            |
+| 800  | 0.235            | Active / pressed             |
+| 900  | 0.135            | Near-black, high contrast    |
+
+Colors that fall outside the sRGB gamut at a given lightness are clamped. The JSON output includes a `clamped` boolean and a `reasons` array per step so you can see where gamut clamping occurred.
+
+## CSS variable convention
+
+All output variables follow the `var(--x, <fallback>)` convention required by acss-kit. This means every variable is self-documenting — the fallback hex is the computed value at generation time, and the variable can be overridden at any `:root` scope without removing the safety net.
+
+## Error handling
+
+| Situation                                | Action                                                                                    |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Theme role not found in `light.css`      | Halt: `"--color-<role> not found in <file>. Check the role name or pass a hex directly."` |
+| No theme file in the project             | Halt: `"No theme file found. Run /theme-create first or pass a hex value directly."`      |
+| Invalid hex value                        | Halt: `"<value>" is not a valid hex color. Use #rrggbb or #rgb.`                          |
+| `generate_color_scale.py` exits non-zero | Print stderr and halt                                                                     |
+
+## Backing script
+
+`/color-scale` delegates to `scripts/generate_color_scale.py`. See the [Python Scripts reference](/acss-plugins-docs/reference/python-scripts#generate_color_scalepy) for the full CLI contract, JSON output shape, and exit codes.
+
+<Aside type="tip">
+  `/color-scale` is display-only by default — it never writes files unless you
+  ask. Use it to preview a palette before deciding whether to paste the CSS
+  block into a theme file or a design token sheet.
+</Aside>
