@@ -3,15 +3,15 @@ title: kit-sync skill
 description: Bulk-install every acss-kit component, foundation, and starter theme — and safely re-copy unmodified files after plugin upgrades — using a SHA256 manifest at .acss-kit/manifest.json.
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps } from "@astrojs/starlight/components";
 
 The `kit-sync` skill backs both [`/kit-sync`](/acss-plugins-docs/acss-kit/commands/kit-sync) (bulk install) and [`/kit-update`](/acss-plugins-docs/acss-kit/commands/kit-update) (safe re-copy). It exists because `/kit-add` is per-component and [`/setup`](/acss-plugins-docs/acss-kit/commands/setup) is one-time bootstrap — neither helps a developer who wants to vendor the entire kit at once or stay current with upstream changes without losing local edits.
 
-| | |
-|---|---|
-| **Triggered by** | `/kit-sync`, `/kit-update`, plus phrases like *"install all components"*, *"bulk copy the kit"*, *"sync the entire kit into my project"*, *"refresh anything I haven't touched"* |
-| **Output** | Component TSX/SCSS, `ui.tsx` foundation, theme CSS, and `.acss-kit/manifest.json` |
-| **Manifest** | `<projectRoot>/.acss-kit/manifest.json` — the source of truth for what was generated |
+|                  |                                                                                                                                                                                  |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-sync`, `/kit-update`, plus phrases like _"install all components"_, _"bulk copy the kit"_, _"sync the entire kit into my project"_, _"refresh anything I haven't touched"_ |
+| **Output**       | Component TSX/SCSS, `ui.tsx` foundation, theme CSS, and `.acss-kit/manifest.json`                                                                                                |
+| **Manifest**     | `<projectRoot>/.acss-kit/manifest.json` — the source of truth for what was generated                                                                                             |
 
 ## Manifest format
 
@@ -43,7 +43,7 @@ The `kit-sync` skill backs both [`/kit-sync`](/acss-plugins-docs/acss-kit/comman
 }
 ```
 
-`kind` is one of `foundation` (the verbatim `ui.tsx`), `component` (a tracked TSX/SCSS pair), `style` (a generated theme CSS file), or `theme` (the user's seed `theme.json`).
+`kind` is one of `foundation` (`ui.tsx`, `foundation.css`, and every file under `foundation/sass/`), `component` (a tracked TSX/SCSS pair), `style` (a generated theme CSS file), or `theme` (the user's seed `theme.json`).
 
 ## Hash normalization (load-bearing)
 
@@ -59,13 +59,13 @@ Without normalization, a Prettier or editor save would flip every file to `modif
 
 ### Flags
 
-| Flag | Effect |
-|---|---|
-| `--target=<dir>` | Override the components directory (default from `.acss-target.json`, fallback `src/components/fpkit`). |
-| `--styles-dir=<dir>` | Override the styles directory (default from `.acss-target.json`, fallback `src/styles`). |
-| `--seed=<hex>` | Seed colour for theme generation (default: prompt the developer). |
-| `--skip-styles` | Components-only sync; do not seed theme. |
-| `--dry-run` | Print the plan tree, do not write files or manifest. |
+| Flag                 | Effect                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------ |
+| `--target=<dir>`     | Override the components directory (default from `.acss-target.json`, fallback `src/components/fpkit`). |
+| `--styles-dir=<dir>` | Override the styles directory (default from `.acss-target.json`, fallback `src/styles`).               |
+| `--seed=<hex>`       | Seed colour for theme generation (default: prompt the developer).                                      |
+| `--skip-styles`      | Components-only sync; do not seed theme.                                                               |
+| `--dry-run`          | Print the plan tree, do not write files or manifest.                                                   |
 
 <Steps>
 
@@ -79,11 +79,17 @@ Without normalization, a Prettier or editor save would flip every file to `modif
 
 5. **Step S4 — Show the plan.** Display the full plan (foundation, components, styles, manifest) and wait for confirmation. If `--dry-run`, exit without writing.
 
-6. **Step S5 — Generate components bottom-up.** For each entry: load the reference doc, substitute placeholders, hash the rendered TSX with `hash_file.py --stdin` *before writing*, then write. Repeat for SCSS where the contract has one. Re-sync runs route `modified` files into a skipped list.
+6. **Step S5 — Generate components bottom-up.** For each entry: load the reference doc, substitute placeholders, hash the rendered TSX with `hash_file.py --stdin` _before writing_, then write. Repeat for SCSS where the contract has one. Re-sync runs route `modified` files into a skipped list.
 
-7. **Step S6 — Foundation.** Copy `assets/foundation/ui.tsx` to `<targetDir>/ui.tsx`. Hash and record as `kind: "foundation"`. Skip if already on disk and `modified`.
+7. **Step S6 — Foundation.** For each file in scope (`ui.tsx`, `foundation.css`, and every file under `foundation/sass/`), apply the following three-case matrix — the manifest-aware equivalent of the `/kit-add` Step A4 matrix:
 
-8. **Step S7 — Styles** *(skipped under `--skip-styles`)*. Resolve seed colour (`--seed`, prior `acss-kit.theme.json`, or prompt). Run `generate_palette.py` then `tokens_to_css.py` to emit `<stylesDir>/theme/light.css` and `dark.css`. Write `acss-kit.theme.json` for re-runs. Hash all three and record. Run `validate_theme.py` and surface any WCAG failures (non-blocking).
+   | Foundation file state                                                                       | Action                                                                                                                                                              |
+   | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | Absent from target dir **and** absent from manifest (fresh install)                         | Copy `ui.tsx`, `foundation.css`, and the full `foundation/sass/` tree; hash each file; record each as `kind: "foundation"` in the manifest; print an import hint    |
+   | `ui.tsx` present, `foundation.css` absent — regardless of manifest state (existing install) | Prompt the developer before copying — explains the CSS reset, `@layer` ordering, and spacing/shadow tokens; the developer can opt out to avoid the foundation layer |
+   | Both `ui.tsx` and `foundation.css` present and tracked in the manifest                      | If status is `clean`: overwrite and update the manifest hash. If status is `modified`: skip and add to the skipped summary                                          |
+
+8. **Step S7 — Styles** _(skipped under `--skip-styles`)_. Resolve seed colour (`--seed`, prior `acss-kit.theme.json`, or prompt). Run `generate_palette.py` then `tokens_to_css.py` to emit `<stylesDir>/theme/light.css` and `dark.css`. Write `acss-kit.theme.json` for re-runs. Hash all three and record. Run `validate_theme.py` and surface any WCAG failures (non-blocking).
 
 9. **Step S8 — Write the manifest.** Pipe the assembled payload to `manifest_write.py`. The payload carries `projectRoot` (used to locate the write target — not persisted in the manifest itself), plus `pluginVersion` (from `.claude-plugin/plugin.json`), `targetDir`, `stylesDir`, `themeFile`, and a path-keyed `files` map matching the schema above.
 
@@ -97,11 +103,11 @@ Without normalization, a Prettier or editor save would flip every file to `modif
 
 ### Flags
 
-| Flag | Effect |
-|---|---|
-| `<component>...` | Restrict the update to a list of components. Default: every entry in the manifest. |
-| `--check` | Report only — do not write. |
-| `--force` | Overwrite modified files. Each is backed up to `<file>.bak` before being overwritten. |
+| Flag             | Effect                                                                                |
+| ---------------- | ------------------------------------------------------------------------------------- |
+| `<component>...` | Restrict the update to a list of components. Default: every entry in the manifest.    |
+| `--check`        | Report only — do not write.                                                           |
+| `--force`        | Overwrite modified files. Each is backed up to `<file>.bak` before being overwritten. |
 
 <Steps>
 
@@ -132,14 +138,18 @@ Both workflows write component TSX/SCSS, theme CSS, and the manifest, and they s
 The skill stays in plan mode only when the user explicitly asked for a description without running any scripts at all.
 
 <Aside type="caution">
-The `Form` component is **not** vendored by `/kit-sync`. It lives behind the [`component-form` skill](/acss-plugins-docs/acss-kit/skills/component-form) and is generated on-demand from a natural-language prompt. Run [`/setup`](/acss-plugins-docs/acss-kit/commands/setup) plus a form-shaped prompt to bootstrap it.
+  The `Form` component is **not** vendored by `/kit-sync`. It lives behind the
+  [`component-form` skill](/acss-plugins-docs/acss-kit/skills/component-form)
+  and is generated on-demand from a natural-language prompt. Run
+  [`/setup`](/acss-plugins-docs/acss-kit/commands/setup) plus a form-shaped
+  prompt to bootstrap it.
 </Aside>
 
 ## When invoked outside a slash command
 
 If a user phrase auto-triggers this skill, pick the workflow that fits:
 
-- *"install everything"*, *"bulk copy"*, *"vendor the whole kit"* → bulk install workflow.
-- *"update unmodified"*, *"refresh clean components"*, *"safely re-copy"* → safe-update workflow.
+- _"install everything"_, _"bulk copy"_, _"vendor the whole kit"_ → bulk install workflow.
+- _"update unmodified"_, _"refresh clean components"_, _"safely re-copy"_ → safe-update workflow.
 
-When ambiguous, the skill asks once: *"Bulk install (writes everything) or safe update (only re-copies unmodified files)?"*
+When ambiguous, the skill asks once: _"Bulk install (writes everything) or safe update (only re-copies unmodified files)?"_

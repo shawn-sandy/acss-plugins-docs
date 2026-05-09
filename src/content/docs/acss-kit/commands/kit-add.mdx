@@ -67,13 +67,13 @@ When you run `/kit-add`, the `components` skill executes these steps:
 
 ## Foundation CSS install
 
-Starting with `acss-kit` v0.11.0, a vendored `foundation.css` (CSS reset, base typography, and `@layer` cascade ordering) ships alongside `ui.tsx`. The skill applies the following install matrix on first run:
+Starting with `acss-kit` v0.11.0, a vendored `foundation.css` (CSS reset, base typography, and `@layer` cascade ordering) ships alongside `ui.tsx`. The skill applies the following three-case install matrix on first run (Step A4):
 
-| Project state                                                | Action                                                                                     |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| No `ui.tsx` + no `foundation.css` (fresh install)            | Copy both `ui.tsx` and `foundation.css` plus the `sass/` source tree; print an import hint |
-| `ui.tsx` present, `foundation.css` absent (existing install) | Prompt before copying — you can opt out to avoid the foundation layer                      |
-| Both `ui.tsx` and `foundation.css` present                   | Skip silently — nothing to do                                                              |
+| Project state                                                | Action                                                                                                                                      |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| No `ui.tsx` + no `foundation.css` (fresh install)            | Copy both `ui.tsx` and `foundation.css` plus the entire `sass/` source tree; print an import hint                                           |
+| `ui.tsx` present, `foundation.css` absent (existing install) | Prompt before copying — explains the CSS reset, `@layer` ordering, and spacing/shadow tokens; you can opt out to avoid the foundation layer |
+| Both `ui.tsx` and `foundation.css` present                   | Skip silently — idempotent, nothing to do                                                                                                   |
 
 The `foundation.css` file declares the `@layer` cascade order that all generated components rely on:
 
