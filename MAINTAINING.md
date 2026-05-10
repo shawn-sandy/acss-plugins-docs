@@ -235,7 +235,12 @@ import {
   Don't use raw HTML where a Starlight component fits.
 </Aside>
 
-<Steps>1. First step 2. Second step</Steps>
+<Steps>
+
+1. First step
+2. Second step
+
+</Steps>
 
 <Tabs>
   <TabItem label="npm">npm install foo</TabItem>

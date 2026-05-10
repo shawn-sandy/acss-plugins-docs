@@ -183,8 +183,15 @@ Decision rules:
   else
     rm -f "$REPO_DIR/.claude/docs-sync-state.json"
   fi
+  if git -C "$REPO_DIR" ls-files --error-unmatch .claude/agent-memory/docs-sync-reviewer/MEMORY.md >/dev/null 2>&1; then
+    git -C "$REPO_DIR" checkout -- .claude/agent-memory/docs-sync-reviewer/MEMORY.md
+  else
+    rm -f "$REPO_DIR/.claude/agent-memory/docs-sync-reviewer/MEMORY.md"
+  fi
   test -z "$(git -C "$REPO_DIR" status --porcelain -- .claude/docs-sync-state.json)" \
     || { echo "no-drift cleanup left state file dirty" >&2; exit 1; }
+  test -z "$(git -C "$REPO_DIR" status --porcelain -- .claude/agent-memory/docs-sync-reviewer/MEMORY.md)" \
+    || { echo "no-drift cleanup left memory file dirty" >&2; exit 1; }
   ```
 
   Then report "no drift detected" and exit. The next run resolves `lastUpstreamSha` by merging both state refs (see step 2).
