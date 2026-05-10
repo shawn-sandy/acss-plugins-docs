@@ -484,6 +484,11 @@
       .checklist input[type="checkbox"]:hover {
         border-color: var(--accent);
       }
+      .checklist input[type="checkbox"]:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        border-color: var(--accent);
+      }
       .checklist input[type="checkbox"]:checked {
         background: var(--accent);
         border-color: var(--accent);
@@ -539,6 +544,12 @@
         font-family: inherit;
       }
       .reset-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .reset-btn:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
         border-color: var(--accent);
         color: var(--accent);
       }
@@ -1016,7 +1027,8 @@ last verified plugin roots. On each run:
                 If the dry-run reveals broken cache logic, revert with
                 <code
                   >git checkout -- .claude/agents/docs-sync-reviewer.md
-                  MAINTAINING.md &amp;&amp; rm -rf .claude/agent-memory/</code
+                  MAINTAINING.md &amp;&amp; rm -rf
+                  .claude/agent-memory/docs-sync-reviewer/</code
                 >
                 and re-examine before re-attempting.
               </li>
@@ -1241,8 +1253,8 @@ last verified plugin roots. On each run:
                 <input type="checkbox" id="c-fi-3" />
                 <label for="c-fi-3">
                   Rollback path verified: <code>git checkout</code> +
-                  <code>rm -rf .claude/agent-memory/</code> restores the
-                  pre-change state cleanly.
+                  <code>rm -rf .claude/agent-memory/docs-sync-reviewer/</code>
+                  restores the pre-change state cleanly.
                 </label>
               </li>
             </ul>

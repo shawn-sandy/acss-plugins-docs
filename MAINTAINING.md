@@ -316,11 +316,12 @@ Key tokens (override these, not the underlying Starlight defaults):
 
 ```css
 :root {
-  --sl-color-accent-low:  oklch(...);
-  --sl-color-accent:      oklch(...);
+  --sl-color-accent-low: oklch(...);
+  --sl-color-accent: oklch(...);
   --sl-color-accent-high: oklch(...);
-  --sl-color-gray-1..7:   oklch(...);
-  --sl-color-white / --sl-color-black;
+  --sl-color-gray-1..7: oklch(...);
+  --sl-color-white: oklch(...);
+  --sl-color-black: oklch(...);
 }
 
 :root[data-theme="light"] {

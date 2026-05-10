@@ -49,7 +49,7 @@ From the resolved layout (cache hit or fresh discovery), build the path mapping 
 
 Discovery failure handling — never guess at plugin locations or invent paths.
 
-The set of **expected plugins** is exactly `acss-kit` and `acss-utilities` — the two plugins this docs site documents. Any other plugin root present upstream (e.g. `style-agent`) may be cached for layout-discovery purposes but is treated as a "new plugin" per the Doc-to-source mapping rule and is **excluded** from the expected-plugin completeness checks below; its absence does not trigger partial-failure handling and its presence does not block global sync-state advancement.
+The set of **expected plugins** is exactly `acss-kit` and `acss-utilities` — the two plugins this docs site documents. This is the explicit form of previously-implicit behavior: every reference to "expected plugin" elsewhere in this prompt has always meant these two specifically (the only plugins with MDX pages in `src/content/docs/`), and writing it down here resolves ambiguity introduced by the layout cache, which can additionally hold roots for other upstream plugins. Any other plugin root present upstream (e.g. `style-agent`) may be cached for layout-discovery purposes but is treated as a "new plugin" per the Doc-to-source mapping rule and is **excluded** from the expected-plugin completeness checks below; its absence does not trigger partial-failure handling and its presence does not block global sync-state advancement.
 
 - **Total failure (no expected plugin roots found at all).** Abort layout diffing immediately. Skip steps 3–9. Apply the **Notification-PR dedup rule** for the `claude/docs-sync-discovery-*` prefix. If no matching PR is open, create one on a fresh `claude/docs-sync-discovery-<date>` branch with no doc edits; include the failure notice, the discovery commands and their empty output, upstream HEAD SHA and run timestamp, remediation steps, and a "do not merge — notification only" note. Do not advance any sync-state file.
 
@@ -135,10 +135,7 @@ Decision rules:
 
 7. **Verify the build before pushing.**
 
-   Invoke the `build-check` skill. If it reports a failure:
-   1. Attempt one automatic fix pass on the identified file(s) using the build's error message as the guide.
-   2. Invoke `build-check` again. If it now passes, continue.
-   3. If the second check still fails, abort the run. Apply the **Notification-PR dedup rule** for `claude/docs-sync-build-failure-*`. If no matching PR exists, open one on a fresh branch with: the full build log, the proposed MDX edits (as a code block, not committed), the upstream SHA range being audited, and a "do not merge — notification only" note.
+   Invoke the `build-check` skill. The skill owns the build/propose-fix/re-run loop; do not duplicate that logic here. If `build-check` ultimately reports failure (its own fix pass did not resolve the error), abort the run and apply the **Notification-PR dedup rule** for `claude/docs-sync-build-failure-*`. If no matching PR exists, open one on a fresh branch with: the full build log, the proposed MDX edits (as a code block, not committed), the upstream SHA range being audited, and a "do not merge — notification only" note.
 
    Never push a commit that fails the build. Never silence build output.
 
