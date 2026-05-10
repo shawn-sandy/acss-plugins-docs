@@ -20,7 +20,7 @@ The `kit-sync` skill backs both [`/kit-sync`](/acss-plugins-docs/acss-kit/comman
 ```json
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.9.0",
+  "pluginVersion": "0.11.0",
   "targetDir": "src/components/fpkit",
   "stylesDir": "src/styles",
   "themeFile": "acss-kit.theme.json",
@@ -29,13 +29,25 @@ The `kit-sync` skill backs both [`/kit-sync`](/acss-plugins-docs/acss-kit/comman
     "src/components/fpkit/ui.tsx": {
       "source": "asset:foundation/ui.tsx",
       "sha256": "<hex>",
-      "pluginVersion": "0.9.0",
+      "pluginVersion": "0.11.0",
       "kind": "foundation"
     },
-    "src/components/fpkit/Button.tsx": {
+    "src/components/fpkit/foundation.css": {
+      "source": "asset:foundation/foundation.css",
+      "sha256": "<hex>",
+      "pluginVersion": "0.11.0",
+      "kind": "foundation"
+    },
+    "src/components/fpkit/foundation/sass/_index.scss": {
+      "source": "asset:foundation/sass/_index.scss",
+      "sha256": "<hex>",
+      "pluginVersion": "0.11.0",
+      "kind": "foundation"
+    },
+    "src/components/fpkit/button.tsx": {
       "source": "ref:components/button.md#tsx-template",
       "sha256": "<hex>",
-      "pluginVersion": "0.9.0",
+      "pluginVersion": "0.11.0",
       "kind": "component",
       "component": "button"
     }
