@@ -1,0 +1,1385 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plan — Add memory: project to docs-sync-reviewer</title>
+    <style>
+      :root {
+        --bg: #fbfaf7;
+        --surface: #ffffff;
+        --ink: #1d1d1b;
+        --ink-soft: #4a4a47;
+        --ink-faint: #767672;
+        --rule: #e6e2d8;
+        --accent: #b85c2c;
+        --accent-soft: #fcefe5;
+        --code-bg: #f3efe6;
+        --code-ink: #2c2620;
+        --callout-bg: #fff8eb;
+        --callout-rule: #e0b87a;
+        --new-bg: #ecf6ec;
+        --new-rule: #79b27a;
+        --edit-bg: #eef2f8;
+        --edit-rule: #6b8bb6;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #16140f;
+          --surface: #1f1c16;
+          --ink: #ece8df;
+          --ink-soft: #b9b4a6;
+          --ink-faint: #87827a;
+          --rule: #322d23;
+          --accent: #e5905f;
+          --accent-soft: #3a261a;
+          --code-bg: #2a2620;
+          --code-ink: #e5e0d3;
+          --callout-bg: #2e2715;
+          --callout-rule: #9a7a36;
+          --new-bg: #1c2a1d;
+          --new-rule: #4d7a4f;
+          --edit-bg: #1d2532;
+          --edit-rule: #4f6f95;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui,
+          sans-serif;
+        font-size: 16px;
+        line-height: 1.65;
+        -webkit-font-smoothing: antialiased;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(0, 760px) 240px;
+        gap: 4rem;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 3rem 2rem 6rem;
+      }
+      @media (max-width: 960px) {
+        .layout {
+          grid-template-columns: 1fr;
+          gap: 2rem;
+        }
+        nav.toc {
+          position: static !important;
+          max-height: none !important;
+        }
+      }
+      header.hero {
+        grid-column: 1 / -1;
+        border-bottom: 1px solid var(--rule);
+        padding-bottom: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .eyebrow {
+        font-size: 0.78rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+      }
+      h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+        margin: 0 0 0.5rem;
+        letter-spacing: -0.01em;
+      }
+      .subtitle {
+        color: var(--ink-soft);
+        margin: 0;
+        font-size: 1.05rem;
+      }
+      .meta-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-top: 1.25rem;
+        font-size: 0.86rem;
+        color: var(--ink-faint);
+      }
+      .meta-strip strong {
+        color: var(--ink-soft);
+        font-weight: 600;
+      }
+      main {
+        min-width: 0;
+      }
+      h2 {
+        font-size: 1.4rem;
+        margin: 3rem 0 1rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid var(--rule);
+        letter-spacing: -0.005em;
+        scroll-margin-top: 1.5rem;
+      }
+      h3 {
+        font-size: 1.05rem;
+        margin: 2rem 0 0.5rem;
+        color: var(--ink);
+      }
+      p {
+        margin: 0 0 1rem;
+        color: var(--ink-soft);
+      }
+      p strong,
+      li strong {
+        color: var(--ink);
+      }
+      ul,
+      ol {
+        padding-left: 1.4rem;
+        color: var(--ink-soft);
+      }
+      li {
+        margin-bottom: 0.4rem;
+      }
+      li > ul,
+      li > ol {
+        margin-top: 0.4rem;
+      }
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      code {
+        font-family:
+          "JetBrains Mono", "Fira Code", "SF Mono", ui-monospace, Menlo,
+          Consolas, monospace;
+        font-size: 0.86em;
+        background: var(--code-bg);
+        color: var(--code-ink);
+        padding: 0.12em 0.38em;
+        border-radius: 4px;
+      }
+      pre {
+        background: var(--code-bg);
+        color: var(--code-ink);
+        padding: 1rem 1.25rem;
+        border-radius: 8px;
+        overflow-x: auto;
+        font-size: 0.86em;
+        line-height: 1.55;
+        margin: 0.6rem 0 1.2rem;
+        border: 1px solid var(--rule);
+      }
+      pre code {
+        background: none;
+        padding: 0;
+        font-size: 1em;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0 1.5rem;
+        font-size: 0.92rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.6rem 0.85rem;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+      th {
+        background: var(--surface);
+        color: var(--ink);
+        font-weight: 600;
+        border-bottom: 2px solid var(--rule);
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      .callout {
+        border-left: 4px solid var(--callout-rule);
+        background: var(--callout-bg);
+        padding: 1rem 1.2rem;
+        margin: 1.25rem 0;
+        border-radius: 0 8px 8px 0;
+        color: var(--ink-soft);
+      }
+      .callout strong {
+        color: var(--ink);
+      }
+      .callout p:last-child {
+        margin-bottom: 0;
+      }
+      blockquote {
+        margin: 1.25rem 0;
+        padding: 0.85rem 1.2rem;
+        border-left: 4px solid var(--accent);
+        background: var(--accent-soft);
+        color: var(--ink-soft);
+        font-style: italic;
+        border-radius: 0 8px 8px 0;
+      }
+      blockquote p {
+        margin: 0;
+        color: inherit;
+      }
+
+      /* Step list — visual scaffolding for numbered procedure */
+      ol.steps {
+        list-style: none;
+        padding: 0;
+        counter-reset: step;
+      }
+      ol.steps > li {
+        position: relative;
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 10px;
+        padding: 1.2rem 1.4rem 1rem 3.4rem;
+        margin-bottom: 1rem;
+        counter-increment: step;
+      }
+      ol.steps > li::before {
+        content: counter(step);
+        position: absolute;
+        top: 1.1rem;
+        left: 1rem;
+        width: 1.8rem;
+        height: 1.8rem;
+        background: var(--accent);
+        color: #fff;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+      }
+      ol.steps > li > .step-title {
+        font-weight: 600;
+        color: var(--ink);
+        margin: 0 0 0.4rem;
+        display: block;
+        font-size: 1.02rem;
+      }
+      ol.steps > li > p,
+      ol.steps > li > ul {
+        color: var(--ink-soft);
+      }
+      .why {
+        margin-top: 0.5rem;
+        padding: 0.55rem 0.9rem;
+        background: var(--code-bg);
+        border-radius: 6px;
+        font-size: 0.9rem;
+        color: var(--ink-soft);
+      }
+      .why::before {
+        content: "Why";
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: var(--accent);
+        text-transform: uppercase;
+        margin-right: 0.6rem;
+      }
+
+      /* File status badges in Critical files list */
+      .file-list {
+        list-style: none;
+        padding: 0;
+      }
+      .file-list li {
+        display: flex;
+        gap: 0.85rem;
+        align-items: baseline;
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        padding: 0.7rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+      }
+      .badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.18rem 0.5rem;
+        border-radius: 4px;
+        flex-shrink: 0;
+        border: 1px solid transparent;
+      }
+      .badge.new {
+        background: var(--new-bg);
+        color: var(--new-rule);
+        border-color: var(--new-rule);
+      }
+      .badge.edit {
+        background: var(--edit-bg);
+        color: var(--edit-rule);
+        border-color: var(--edit-rule);
+      }
+      .badge.read {
+        background: var(--code-bg);
+        color: var(--ink-faint);
+        border-color: var(--rule);
+      }
+      .file-list code {
+        font-size: 0.9em;
+      }
+      .file-list .desc {
+        color: var(--ink-soft);
+        display: block;
+        margin-top: 0.2rem;
+        font-size: 0.92rem;
+      }
+
+      /* Verification cards */
+      .verify-grid {
+        display: grid;
+        gap: 0.75rem;
+        margin: 1rem 0 1.5rem;
+      }
+      .verify-card {
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-left: 4px solid var(--accent);
+        padding: 0.9rem 1.1rem;
+        border-radius: 8px;
+      }
+      .verify-card h4 {
+        margin: 0 0 0.4rem;
+        font-size: 0.95rem;
+        color: var(--ink);
+      }
+      .verify-card ul {
+        margin: 0;
+      }
+
+      /* Sticky TOC */
+      nav.toc {
+        position: sticky;
+        top: 2rem;
+        align-self: start;
+        max-height: calc(100vh - 4rem);
+        overflow-y: auto;
+        font-size: 0.9rem;
+        border-left: 1px solid var(--rule);
+        padding-left: 1.25rem;
+      }
+      nav.toc h5 {
+        margin: 0 0 0.6rem;
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        font-weight: 600;
+      }
+      nav.toc ol {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        counter-reset: toc;
+      }
+      nav.toc li {
+        margin-bottom: 0.45rem;
+        counter-increment: toc;
+      }
+      nav.toc a {
+        color: var(--ink-soft);
+        display: block;
+        line-height: 1.35;
+      }
+      nav.toc a:hover {
+        color: var(--accent);
+      }
+
+      hr {
+        border: none;
+        border-top: 1px solid var(--rule);
+        margin: 3rem 0;
+      }
+
+      details {
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        margin: 1rem 0;
+      }
+      details > summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--ink);
+        padding: 0.4rem 0;
+      }
+      details[open] > summary {
+        margin-bottom: 0.5rem;
+      }
+
+      /* Verification checklist */
+      .checklist {
+        background: var(--surface);
+        border: 1px solid var(--rule);
+        border-radius: 10px;
+        padding: 0.5rem 0;
+        margin: 1rem 0 1.5rem;
+      }
+      .checklist-group {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--rule);
+      }
+      .checklist-group:last-child {
+        border-bottom: none;
+      }
+      .checklist-group h4 {
+        margin: 0 0 0.5rem;
+        font-size: 0.78rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .checklist-group ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .checklist-group li {
+        display: flex;
+        gap: 0.65rem;
+        align-items: flex-start;
+        padding: 0.45rem 0;
+        border-bottom: 1px dashed var(--rule);
+        margin: 0;
+      }
+      .checklist-group li:last-child {
+        border-bottom: none;
+      }
+      .checklist input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        flex-shrink: 0;
+        width: 1.15rem;
+        height: 1.15rem;
+        margin-top: 0.2rem;
+        border: 1.5px solid var(--ink-faint);
+        border-radius: 4px;
+        background: transparent;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.15s ease;
+      }
+      .checklist input[type="checkbox"]:hover {
+        border-color: var(--accent);
+      }
+      .checklist input[type="checkbox"]:checked {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+      .checklist input[type="checkbox"]:checked::after {
+        content: "";
+        position: absolute;
+        left: 4px;
+        top: 0px;
+        width: 5px;
+        height: 10px;
+        border: solid #fff;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+      }
+      .checklist label {
+        flex: 1;
+        cursor: pointer;
+        color: var(--ink-soft);
+        line-height: 1.45;
+        font-size: 0.95rem;
+      }
+      .checklist input[type="checkbox"]:checked + label {
+        color: var(--ink-faint);
+        text-decoration: line-through;
+      }
+      .checklist label code {
+        font-size: 0.85em;
+      }
+      .checklist-progress {
+        padding: 0.6rem 1.25rem;
+        background: var(--code-bg);
+        border-top: 1px solid var(--rule);
+        font-size: 0.85rem;
+        color: var(--ink-faint);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 0 0 9px 9px;
+      }
+      .checklist-progress strong {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .reset-btn {
+        background: transparent;
+        border: 1px solid var(--rule);
+        color: var(--ink-soft);
+        font-size: 0.78rem;
+        padding: 0.25rem 0.7rem;
+        border-radius: 4px;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .reset-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <header class="hero">
+        <div class="eyebrow">Implementation Plan · 2026-05-10</div>
+        <h1>
+          Add <code>memory: project</code> to docs-sync-reviewer for layout
+          caching
+        </h1>
+        <p class="subtitle">
+          Wire the native sub-agent memory mechanism into the docs-sync-reviewer
+          so the upstream-plugin layout discovery runs once and is cached across
+          invocations.
+        </p>
+        <div class="meta-strip">
+          <span><strong>Status:</strong> Awaiting approval</span>
+          <span><strong>Scope:</strong> Refactor — no behavior change</span>
+          <span><strong>Files touched:</strong> 3 edited · 1 new</span>
+          <span><strong>Risk:</strong> Low (cache miss → existing flow)</span>
+        </div>
+      </header>
+
+      <main>
+        <div class="callout">
+          <p>
+            <strong>Filename note.</strong> The auto-generated random plan
+            filename should be renamed to
+            <code>add-project-memory-to-docs-sync-reviewer.md</code> during
+            implementation — kebab-case and descriptive, matching the lessons
+            recorded in the prior plan-interview.
+          </p>
+        </div>
+
+        <h2 id="context">Context</h2>
+        <p>
+          The just-merged optimization plan
+          (<code>docs/plans/optimize-docs-sync-reviewer-subagent.md</code>)
+          listed three out-of-scope follow-ups. The user has now selected the
+          first one:
+        </p>
+        <blockquote>
+          <p>
+            Add <code>memory: project</code> to the agent to cache discovered
+            upstream plugin layout across runs.
+          </p>
+        </blockquote>
+        <p>
+          Today the agent runs two <code>find</code> commands against the
+          freshly cloned upstream on <strong>every</strong> invocation to
+          determine whether plugin sources live under
+          <code>plugins/&lt;plugin&gt;/...</code> or
+          <code>&lt;plugin&gt;/...</code> at the root. The layout is stable
+          across runs — it only changes when the upstream maintainer reorganizes
+          the plugins repo. Re-running discovery every time burns latency and
+          tokens for a result that almost never differs.
+        </p>
+        <p>
+          <code>memory: project</code> is the native sub-agent mechanism for
+          this. The cache file lives at
+          <code>.claude/agent-memory/docs-sync-reviewer/MEMORY.md</code>, is
+          committed to version control (so every collaborator and CI run shares
+          the same cached layout), and the first 200 lines / 25&nbsp;KB are
+          auto-injected into the agent's prompt at spawn — making the read free.
+        </p>
+        <div class="callout">
+          <p>
+            <strong>Intended outcome.</strong> The agent skips the
+            <code>find</code> discovery on subsequent runs when the cached paths
+            still resolve, and falls back to full discovery when they don't. No
+            behavior change in the failure or drift paths — only a faster happy
+            path.
+          </p>
+        </div>
+
+        <h2 id="approach">Recommended approach</h2>
+        <p>
+          Add <code>memory: project</code> to the agent's frontmatter, define a
+          small <code>MEMORY.md</code> schema, seed it from a one-time discovery
+          against current upstream HEAD, and add a short
+          <em>"Use cache before re-discovering"</em> preamble to the existing
+          <strong>Doc-to-source mapping</strong> section. The existing
+          total-failure / partial-failure handling already covers the "cache
+          points at paths that no longer exist" case — we just route through it
+          on cache miss.
+        </p>
+
+        <h3 id="critical-files">Critical files</h3>
+        <ul class="file-list">
+          <li>
+            <span class="badge edit">Edit</span>
+            <span>
+              <code>.claude/agents/docs-sync-reviewer.md</code>
+              <span class="desc">
+                Add <code>memory: project</code> to frontmatter; replace the
+                discovery paragraph with a cache-first flow that falls through
+                to the existing <code>find</code> block on miss.
+              </span>
+            </span>
+          </li>
+          <li>
+            <span class="badge new">New</span>
+            <span>
+              <code>.claude/agent-memory/docs-sync-reviewer/MEMORY.md</code>
+              <span class="desc">
+                Seeded cache file, committed to version control.
+              </span>
+            </span>
+          </li>
+          <li>
+            <span class="badge read">Verify</span>
+            <span>
+              <code>.gitignore</code>
+              <span class="desc">
+                Confirm no rule excludes
+                <code>.claude/agent-memory/</code> — project-scoped memory must
+                be committed. If a rule exists, narrow it.
+              </span>
+            </span>
+          </li>
+          <li>
+            <span class="badge edit">Edit</span>
+            <span>
+              <code>MAINTAINING.md</code>
+              <span class="desc">
+                Add an <code>### Upstream layout cache</code> subsection under
+                the existing docs-sync section explaining where the cache lives,
+                when it gets updated, and how to invalidate it manually.
+              </span>
+            </span>
+          </li>
+        </ul>
+
+        <h2 id="steps">Steps</h2>
+        <ol class="steps">
+          <li>
+            <span class="step-title">
+              Run a one-time upstream discovery to capture seed values.
+            </span>
+            <ul>
+              <li>
+                Clone the upstream repo to a tempdir and run the two
+                <code>find</code> commands from the agent's existing discovery
+                block.
+              </li>
+              <li>
+                Record: each plugin root path (relative to the clone root, e.g.
+                <code>plugins/acss-kit</code>), and the upstream HEAD short SHA.
+              </li>
+            </ul>
+            <div class="why">
+              Seeding from a real discovery guarantees the initial cache matches
+              reality. The user explicitly chose seed-now over
+              let-agent-populate.
+            </div>
+          </li>
+
+          <li>
+            <span class="step-title">
+              Confirm <code>.claude/agent-memory/</code> is not gitignored.
+            </span>
+            <ul>
+              <li>
+                <code
+                  >git check-ignore
+                  .claude/agent-memory/docs-sync-reviewer/MEMORY.md</code
+                >
+                should print nothing.
+              </li>
+              <li>
+                If it is ignored, add a narrower negation rule
+                (<code>!.claude/agent-memory/</code>) — do not broaden by
+                removing existing ignore patterns.
+              </li>
+            </ul>
+            <div class="why">
+              Project-scoped memory is committed by design; an inherited ignore
+              would silently turn it into local-only memory and defeat the
+              cross-collaborator sharing benefit.
+            </div>
+          </li>
+
+          <li>
+            <span class="step-title">
+              Create
+              <code>.claude/agent-memory/docs-sync-reviewer/MEMORY.md</code>
+              with this schema.
+            </span>
+            <pre><code>---
+name: docs-sync-reviewer cache
+description: Cached upstream agentic-acss-plugins layout. Agent uses
+  this to skip the find-based discovery pass when cached paths still
+  resolve in a fresh clone.
+---
+
+# Upstream layout cache
+
+- **verified-at-sha:** `&lt;short-sha&gt;`
+- **verified-at:** `&lt;ISO-8601 UTC&gt;`
+
+## Plugin roots
+
+| Plugin         | Path under upstream clone root |
+| -------------- | ------------------------------ |
+| acss-kit       | `plugins/acss-kit`             |
+| acss-utilities | `plugins/acss-utilities`       |
+
+## Invalidation
+
+- The agent overwrites this file after any successful full-discovery run.
+- To force a re-discovery, delete this file or set `verified-at-sha` to an
+  empty string and commit.
+- This file is data, not prose — keep it short. Sub-agent runtime injects
+  only the first 200 lines / 25 KB.</code></pre>
+            <div class="why">
+              A table is easy for both humans and the agent to parse. The
+              invalidation block tells future maintainers how to flush the cache
+              without reading the agent prompt.
+            </div>
+          </li>
+
+          <li>
+            <span class="step-title">
+              Add <code>memory: project</code> to the agent frontmatter.
+            </span>
+            <ul>
+              <li>
+                Insert between <code>model:</code> and <code>skills:</code>
+                so it groups with other runtime configuration.
+              </li>
+              <li>Resulting frontmatter:</li>
+            </ul>
+            <pre><code>---
+name: docs-sync-reviewer
+description: When the user asks to sync, audit, or check for drift between this docs site and the upstream `agentic-acss-plugins` plugin source.
+tools: Bash, Read, Edit, Write, Glob, Grep, mcp__github__create_pull_request, mcp__github__list_pull_requests, mcp__github__update_pull_request, mcp__github__add_issue_comment, mcp__github__get_file_contents, mcp__github__list_commits
+model: sonnet
+memory: project
+skills: [build-check]
+---</code></pre>
+            <div class="why">
+              This is the single config flag that wires up auto-injection, the
+              per-agent memory directory, and Read/Write/Edit auto-permission
+              for that directory.
+            </div>
+          </li>
+
+          <li>
+            <span class="step-title">
+              Replace the discovery paragraph in
+              <code>.claude/agents/docs-sync-reviewer.md</code>
+              (currently lines 23–28) with a cache-first flow.
+            </span>
+            <p>
+              Replace the bold sentence and <code>find</code> block with the
+              following — the existing <code>find</code> block stays; it's
+              reused on cache miss:
+            </p>
+            <pre><code>**Discover the upstream layout — cache first, then fall back to find.**
+The plugins repo may organize sources under `plugins/&lt;plugin&gt;/...` or
+`&lt;plugin&gt;/...` at the root. Your auto-injected `MEMORY.md` lists the
+last verified plugin roots. On each run:
+
+1. For every plugin root recorded in `MEMORY.md`, test that
+   `"$tmpdir/upstream/&lt;path&gt;"` exists. If all paths resolve, use the
+   cached layout and skip the `find` pass.
+2. If any cached path is missing — or `MEMORY.md` is empty/unseeded —
+   run the full discovery against the cloned upstream:
+
+   ```bash
+   find "$tmpdir/upstream" -maxdepth 4 -type d \( -name commands -o -name skills -o -name scripts \) | sort
+   find "$tmpdir/upstream" -maxdepth 3 -type f \( -name 'plugin.json' -o -name 'plugin.yml' -o -name 'README.md' \) | sort
+   ```
+3. After a successful discovery whose result differs from the cache (or
+   whose cache was empty), overwrite
+   `.claude/agent-memory/docs-sync-reviewer/MEMORY.md` with the new
+   plugin-root table and the upstream HEAD short SHA. Stage this file
+   alongside any drift-PR commit; if no drift PR is opened on this run,
+   leave it unstaged — the next drift PR or no-drift run will pick it up.</code></pre>
+            <div class="why">
+              Keeps the existing failure semantics (cache miss → full discovery
+              → existing total/partial-failure handling already covers the
+              "still nothing" case). The "stage alongside drift-PR commit" rule
+              keeps cache updates atomic with the runs that observed them.
+            </div>
+          </li>
+
+          <li>
+            <span class="step-title">
+              Update the Hard rules to mention the cache file alongside the sync
+              state file.
+            </span>
+            <p>
+              Add a bullet near the existing "no-drift run persists state" rule:
+            </p>
+            <blockquote>
+              <p>
+                The upstream layout cache at
+                <code>.claude/agent-memory/docs-sync-reviewer/MEMORY.md</code>
+                is updated only when discovery results actually change. On
+                no-drift runs that also re-verified the cache, include the cache
+                update in the same state-only commit pushed to
+                <code>docs-sync-state</code> (it gets included via
+                <code>git add -A</code> on that branch worktree's working tree).
+              </p>
+            </blockquote>
+            <div class="why">
+              Keeps the cache-update path consistent with the sync-state-update
+              path and avoids leaving uncommitted cache changes in the working
+              tree.
+            </div>
+          </li>
+
+          <li>
+            <span class="step-title">
+              Add an <code>### Upstream layout cache</code> subsection to
+              <code>MAINTAINING.md</code>.
+            </span>
+            <ul>
+              <li>
+                Place under the existing docs-sync section, after
+                <code>### Sync state files</code>.
+              </li>
+              <li>
+                Content: location of the cache file, what triggers an update
+                (cache miss + successful discovery), how to manually invalidate
+                (delete the file or blank out
+                <code>verified-at-sha</code>), and a note that the cache is a
+                property of the upstream repo layout, not the local machine —
+                which is why it's committed.
+              </li>
+            </ul>
+            <div class="why">
+              One of the lessons from the prior plan-interview was that
+              operational guidance lives in <code>MAINTAINING.md</code>, not the
+              agent prompt. New users finding
+              <code>.claude/agent-memory/</code> should be able to learn what it
+              is from the maintainer doc, not from reading the agent's runtime
+              prompt.
+            </div>
+          </li>
+
+          <li>
+            <span class="step-title">
+              Walk through every operational scenario end-to-end and confirm
+              semantics are unchanged.
+            </span>
+            <table>
+              <thead>
+                <tr>
+                  <th>Scenario</th>
+                  <th>Cache result</th>
+                  <th>Behavior</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>First run on a fresh clone with seeded cache</td>
+                  <td>Hit</td>
+                  <td>Skip <code>find</code>, proceed normally.</td>
+                </tr>
+                <tr>
+                  <td>Fresh checkout, no <code>.claude/agent-memory/</code></td>
+                  <td>Empty</td>
+                  <td>Full discovery, write cache, proceed normally.</td>
+                </tr>
+                <tr>
+                  <td>
+                    Upstream renames <code>plugins/acss-kit</code> →
+                    <code>acss-kit</code>
+                  </td>
+                  <td>Miss</td>
+                  <td>Full discovery rewrites cache, proceed normally.</td>
+                </tr>
+                <tr>
+                  <td>Upstream deletes one plugin</td>
+                  <td>Partial</td>
+                  <td>
+                    Falls through to existing
+                    <strong>partial failure</strong> branch (Discovery Issues
+                    section in PR).
+                  </td>
+                </tr>
+                <tr>
+                  <td>Upstream deletes both plugins</td>
+                  <td>Total miss</td>
+                  <td>
+                    Falls through to existing
+                    <strong>total failure</strong> branch (notification PR via
+                    <code>claude/docs-sync-discovery-*</code>).
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="why">
+              This is a refactor, not a new feature — the only observable change
+              should be "the find commands didn't run" on the happy path.
+            </div>
+          </li>
+        </ol>
+
+        <h2 id="verification">Verification</h2>
+        <div class="verify-grid">
+          <div class="verify-card">
+            <h4>Static checks</h4>
+            <ul>
+              <li>
+                <code>npm run build</code> — markdown changes don't get
+                validated by the build, but confirms unrelated edits weren't
+                introduced.
+              </li>
+              <li>
+                Read <code>.claude/agents/docs-sync-reviewer.md</code> and
+                confirm: <code>memory: project</code> in frontmatter; the
+                discovery section now opens with a cache-first flow; the
+                <code>find</code> block is preserved as the fallback.
+              </li>
+              <li>
+                Read
+                <code>.claude/agent-memory/docs-sync-reviewer/MEMORY.md</code>
+                and confirm it parses as valid YAML frontmatter + Markdown body,
+                with seeded plugin roots matching what
+                <code>find</code> actually returns against current upstream
+                HEAD.
+              </li>
+              <li>
+                Confirm <code>git status</code> shows the new
+                <code>MEMORY.md</code> as a tracked new file (not ignored).
+              </li>
+            </ul>
+          </div>
+          <div class="verify-card">
+            <h4>Behavioral check (dry-run)</h4>
+            <ul>
+              <li>
+                Invoke the agent in plan mode: <code>claude</code> → "Use the
+                docs-sync-reviewer subagent to audit drift since the last sync,
+                but do not push or open a PR."
+              </li>
+              <li>
+                Confirm the agent's plan reports
+                <em>"cache hit — skipping discovery"</em> or equivalent and does
+                not narrate the <code>find</code> commands.
+              </li>
+              <li>
+                Then manually move the cache file aside (<code
+                  >mv … /tmp/cache-backup.md</code
+                >), re-invoke, and confirm the agent now plans full discovery
+                and writes a fresh cache. Restore when done.
+              </li>
+            </ul>
+          </div>
+          <div class="verify-card">
+            <h4>Diff review</h4>
+            <ul>
+              <li>
+                <code
+                  >git diff main -- .claude/agents/docs-sync-reviewer.md
+                  .claude/agent-memory/docs-sync-reviewer/MEMORY.md
+                  MAINTAINING.md</code
+                >
+                and confirm: agent edits scoped to frontmatter + the discovery
+                paragraph + one Hard-rules bullet; <code>MEMORY.md</code> is a
+                clean new file; <code>MAINTAINING.md</code> adds only the
+                <code>### Upstream layout cache</code> subsection.
+              </li>
+            </ul>
+          </div>
+          <div class="verify-card">
+            <h4>Rollback</h4>
+            <ul>
+              <li>
+                If the dry-run reveals broken cache logic, revert with
+                <code
+                  >git checkout -- .claude/agents/docs-sync-reviewer.md
+                  MAINTAINING.md &amp;&amp; rm -rf .claude/agent-memory/</code
+                >
+                and re-examine before re-attempting.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <h2 id="checklist">Verification checklist</h2>
+        <p>
+          Tick off each item as you execute the plan. Progress is tracked
+          locally in your browser via <code>localStorage</code>; reload the page
+          and your checks persist. Use the <em>Reset</em> button to start a
+          fresh run.
+        </p>
+        <div class="checklist" id="verification-checklist">
+          <div class="checklist-group">
+            <h4>Pre-flight</h4>
+            <ul>
+              <li>
+                <input type="checkbox" id="c-pre-1" />
+                <label for="c-pre-1">
+                  Working tree is clean (<code>git status</code> shows no
+                  unrelated edits).
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-pre-2" />
+                <label for="c-pre-2">
+                  On a feature branch named
+                  <code>feat/agent-memory-cache-2026-05-10</code> or similar —
+                  not on <code>main</code>.
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-pre-3" />
+                <label for="c-pre-3">
+                  <code
+                    >git check-ignore
+                    .claude/agent-memory/docs-sync-reviewer/MEMORY.md</code
+                  >
+                  prints nothing (no inherited ignore rule).
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <div class="checklist-group">
+            <h4>Step 1 — Seed discovery</h4>
+            <ul>
+              <li>
+                <input type="checkbox" id="c-s1-1" />
+                <label for="c-s1-1">
+                  Cloned upstream
+                  <code>agentic-acss-plugins</code> to a tempdir.
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-s1-2" />
+                <label for="c-s1-2">
+                  Ran both <code>find</code> commands; captured plugin-root
+                  paths and upstream HEAD short SHA.
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <div class="checklist-group">
+            <h4>Step 2 — Cache file</h4>
+            <ul>
+              <li>
+                <input type="checkbox" id="c-s2-1" />
+                <label for="c-s2-1">
+                  Created
+                  <code>.claude/agent-memory/docs-sync-reviewer/MEMORY.md</code>
+                  with the schema (frontmatter + verified-at-sha + plugin roots
+                  table + invalidation block).
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-s2-2" />
+                <label for="c-s2-2">
+                  Plugin-root paths in <code>MEMORY.md</code> match the output
+                  of <code>find</code> from Step 1 exactly.
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-s2-3" />
+                <label for="c-s2-3">
+                  <code>git status</code> shows <code>MEMORY.md</code> as a
+                  tracked new file (not ignored).
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <div class="checklist-group">
+            <h4>Step 3 — Agent prompt edits</h4>
+            <ul>
+              <li>
+                <input type="checkbox" id="c-s3-1" />
+                <label for="c-s3-1">
+                  <code>memory: project</code> added to frontmatter, between
+                  <code>model:</code> and <code>skills:</code>.
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-s3-2" />
+                <label for="c-s3-2">
+                  Discovery paragraph replaced with cache-first flow; the
+                  original <code>find</code> block is preserved as the fallback.
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-s3-3" />
+                <label for="c-s3-3">
+                  Hard-rules section has the new bullet about cache updates
+                  riding along on no-drift state commits.
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <div class="checklist-group">
+            <h4>Step 4 — Maintainer docs</h4>
+            <ul>
+              <li>
+                <input type="checkbox" id="c-s4-1" />
+                <label for="c-s4-1">
+                  <code>### Upstream layout cache</code> subsection added to
+                  <code>MAINTAINING.md</code>, placed after
+                  <code>### Sync state files</code>.
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-s4-2" />
+                <label for="c-s4-2">
+                  Subsection covers: location, what triggers an update, manual
+                  invalidation, and why the cache is committed (not local).
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <div class="checklist-group">
+            <h4>Static checks</h4>
+            <ul>
+              <li>
+                <input type="checkbox" id="c-st-1" />
+                <label for="c-st-1">
+                  <code>npm run build</code> passes with no new errors.
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-st-2" />
+                <label for="c-st-2">
+                  <code>git diff main</code> is scoped to the four expected
+                  files only — no incidental edits.
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-st-3" />
+                <label for="c-st-3">
+                  <code>MEMORY.md</code> parses as valid YAML frontmatter +
+                  Markdown body (no parser warnings).
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <div class="checklist-group">
+            <h4>Behavioral dry-run</h4>
+            <ul>
+              <li>
+                <input type="checkbox" id="c-be-1" />
+                <label for="c-be-1">
+                  Invoked the agent in plan mode against current upstream HEAD;
+                  agent reports cache hit and skips
+                  <code>find</code>.
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-be-2" />
+                <label for="c-be-2">
+                  Moved <code>MEMORY.md</code> aside, re-invoked, agent reports
+                  cache miss and plans full discovery + cache rewrite. Restored
+                  the file when done.
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-be-3" />
+                <label for="c-be-3">
+                  Edited <code>MEMORY.md</code> to reference a non-existent
+                  plugin path, re-invoked, agent falls through to existing
+                  partial-failure / total-failure handling correctly.
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <div class="checklist-group">
+            <h4>Sign-off</h4>
+            <ul>
+              <li>
+                <input type="checkbox" id="c-fi-1" />
+                <label for="c-fi-1">
+                  Plan filename renamed from random
+                  <code>review-…-shimmering-charm.md</code> to
+                  <code>add-project-memory-to-docs-sync-reviewer.md</code>.
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-fi-2" />
+                <label for="c-fi-2">
+                  All changes committed in a single conventional commit (e.g.
+                  <code
+                    >feat(agent): cache discovered upstream layout in project
+                    memory</code
+                  >).
+                </label>
+              </li>
+              <li>
+                <input type="checkbox" id="c-fi-3" />
+                <label for="c-fi-3">
+                  Rollback path verified: <code>git checkout</code> +
+                  <code>rm -rf .claude/agent-memory/</code> restores the
+                  pre-change state cleanly.
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <div class="checklist-progress">
+            <span
+              ><strong id="checklist-count">0</strong> of
+              <span id="checklist-total">0</span> complete</span
+            >
+            <button class="reset-btn" type="button" id="checklist-reset">
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <h2 id="next-steps">Next steps</h2>
+        <p>
+          Out of scope for this plan, but listed for continuity with the prior
+          plan's Recommended next steps:
+        </p>
+        <ul>
+          <li>
+            Wire a scheduled invocation (GitHub Actions cron + headless SDK)
+            once the agent is leaner — the cache makes scheduled runs cheaper,
+            which strengthens the case for cron.
+          </li>
+          <li>
+            Consider a <code>--from-upstream</code> mode for
+            <code>docs-add</code> that copies upstream front-matter
+            automatically.
+          </li>
+        </ul>
+
+        <h2 id="decisions">Resolved decisions</h2>
+        <p>
+          Both open decisions were resolved during planning, so no unresolved
+          questions remain:
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Decision</th>
+              <th>Choice</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Memory scope</td>
+              <td><code>project</code> (committed, shared)</td>
+              <td>
+                Layout is a property of the upstream repo, not the local machine
+                — committing means every collaborator and CI run share the same
+                cached layout.
+              </td>
+            </tr>
+            <tr>
+              <td>Cache seeding</td>
+              <td>Seed now from one-time discovery run</td>
+              <td>
+                Faster first agent run; guaranteed accurate because the seed
+                comes from a real <code>find</code> against current upstream
+                HEAD.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </main>
+
+      <nav class="toc" aria-label="On this page">
+        <h5>On this page</h5>
+        <ol>
+          <li><a href="#context">Context</a></li>
+          <li><a href="#approach">Recommended approach</a></li>
+          <li><a href="#critical-files">Critical files</a></li>
+          <li><a href="#steps">Steps</a></li>
+          <li><a href="#verification">Verification</a></li>
+          <li><a href="#checklist">Verification checklist</a></li>
+          <li><a href="#next-steps">Next steps</a></li>
+          <li><a href="#decisions">Resolved decisions</a></li>
+        </ol>
+      </nav>
+    </div>
+    <script>
+      (function () {
+        var KEY = "docs-sync-memory-plan-checklist-v1";
+        var root = document.getElementById("verification-checklist");
+        if (!root) return;
+        var boxes = root.querySelectorAll('input[type="checkbox"]');
+        var counter = document.getElementById("checklist-count");
+        var total = document.getElementById("checklist-total");
+        var reset = document.getElementById("checklist-reset");
+        if (total) total.textContent = boxes.length;
+
+        var stored = {};
+        try {
+          stored = JSON.parse(localStorage.getItem(KEY) || "{}");
+        } catch (e) {
+          stored = {};
+        }
+
+        function refresh() {
+          var done = 0;
+          boxes.forEach(function (b) {
+            if (b.checked) done++;
+          });
+          if (counter) counter.textContent = done;
+        }
+
+        boxes.forEach(function (b) {
+          if (stored[b.id]) b.checked = true;
+          b.addEventListener("change", function () {
+            stored[b.id] = b.checked;
+            try {
+              localStorage.setItem(KEY, JSON.stringify(stored));
+            } catch (e) {}
+            refresh();
+          });
+        });
+
+        if (reset) {
+          reset.addEventListener("click", function () {
+            boxes.forEach(function (b) {
+              b.checked = false;
+            });
+            stored = {};
+            try {
+              localStorage.removeItem(KEY);
+            } catch (e) {}
+            refresh();
+          });
+        }
+
+        refresh();
+      })();
+    </script>
+  </body>
+</html>
