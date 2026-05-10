@@ -58,7 +58,7 @@ Add `memory: project` to the agent's frontmatter, define a small MEMORY.md schem
    ## Invalidation
 
    - The agent overwrites this file after a successful full-discovery run whose result differs from the cache.
-   - To force a re-discovery, delete this file or set `verified-at-sha` to an empty string and commit.
+   - To force a re-discovery, delete this file and commit.
    - This file is data, not prose — keep it short. Sub-agent runtime injects only the first 200 lines / 25 KB.
    ```
 
@@ -105,7 +105,7 @@ Add `memory: project` to the agent's frontmatter, define a small MEMORY.md schem
 
 7. **Add an `### Upstream layout cache` subsection to `MAINTAINING.md`.**
    - Place under the existing docs-sync section, after `### Sync state files`.
-   - Content: location of the cache file, what triggers an update (cache miss + successful discovery), how to manually invalidate (delete the file or blank out `verified-at-sha`), and a note that the cache is a property of the upstream repo layout, not the local machine — which is why it's committed.
+   - Content: location of the cache file, what triggers an update (cache miss + successful discovery), how to manually invalidate (delete the file), and a note that the cache is a property of the upstream repo layout, not the local machine — which is why it's committed.
    - Why: one of the lessons from the prior plan-interview was that operational guidance lives in `MAINTAINING.md`, not the agent prompt. New users finding `.claude/agent-memory/` should be able to learn what it is from the maintainer doc, not from reading the agent's runtime prompt.
 
 8. **Walk through every operational scenario end-to-end and confirm semantics are unchanged.**
