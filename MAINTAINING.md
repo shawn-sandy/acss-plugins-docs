@@ -30,9 +30,9 @@ If you're a **consumer** of the docs (just reading or linking to them), see [`RE
 
 `acss-plugins-docs` is the **public developer documentation** for two Claude Code plugins maintained in a separate repository:
 
-| Plugin           | What it does                                                  |
-| ---------------- | ------------------------------------------------------------- |
-| `acss-kit`       | Generates accessible React components and OKLCH CSS themes.   |
+| Plugin           | What it does                                                   |
+| ---------------- | -------------------------------------------------------------- |
+| `acss-kit`       | Generates accessible React components and OKLCH CSS themes.    |
 | `acss-utilities` | Generates atomic CSS utility classes with responsive variants. |
 
 - **Plugin source repo (upstream):** <https://github.com/shawn-sandy/agentic-acss-plugins>
@@ -198,8 +198,8 @@ description: Generate an accessible React button with /kit-add.
 ```mdx
 ---
 title: acss-plugins
-template: splash       # Only for landing pages with no sidebar / TOC
-hero:                  # Only valid with template: splash
+template: splash # Only for landing pages with no sidebar / TOC
+hero: # Only valid with template: splash
   tagline: Short pitch
   actions:
     - text: Get Started
@@ -207,7 +207,7 @@ hero:                  # Only valid with template: splash
       icon: right-arrow
       variant: primary
 sidebar:
-  order: 1             # Override sort order if not explicit in astro.config
+  order: 1 # Override sort order if not explicit in astro.config
   badge:
     text: New
     variant: tip
@@ -219,16 +219,23 @@ The full schema is documented at <https://starlight.astro.build/reference/frontm
 ### Starlight components you'll see in MDX
 
 ```mdx
-import { Aside, Steps, Tabs, TabItem, Card, CardGrid, Icon, FileTree, Code } from '@astrojs/starlight/components';
+import {
+  Aside,
+  Steps,
+  Tabs,
+  TabItem,
+  Card,
+  CardGrid,
+  Icon,
+  FileTree,
+  Code,
+} from "@astrojs/starlight/components";
 
 <Aside type="caution">
   Don't use raw HTML where a Starlight component fits.
 </Aside>
 
-<Steps>
-1. First step
-2. Second step
-</Steps>
+<Steps>1. First step 2. Second step</Steps>
 
 <Tabs>
   <TabItem label="npm">npm install foo</TabItem>
@@ -267,20 +274,20 @@ The sidebar is **manually curated**, not auto-generated. Top-level groups and it
 ```js
 sidebar: [
   {
-    label: 'acss-kit',
+    label: "acss-kit",
     items: [
-      { label: 'Overview', slug: 'acss-kit/overview' },
+      { label: "Overview", slug: "acss-kit/overview" },
       {
-        label: 'Commands',
+        label: "Commands",
         items: [
-          { label: '/kit-add', slug: 'acss-kit/commands/kit-add' },
+          { label: "/kit-add", slug: "acss-kit/commands/kit-add" },
           // ...
         ],
       },
     ],
   },
   // ...
-]
+];
 ```
 
 Rules:
@@ -304,14 +311,14 @@ Key tokens (override these, not the underlying Starlight defaults):
 
 ```css
 :root {
-  --sl-color-accent-low:  oklch(...)
-  --sl-color-accent:      oklch(...)
-  --sl-color-accent-high: oklch(...)
-  --sl-color-gray-1..7:   oklch(...)
-  --sl-color-white / --sl-color-black
+  --sl-color-accent-low: oklch(...) --sl-color-accent: oklch(...)
+    --sl-color-accent-high: oklch(...) --sl-color-gray-1..7: oklch(...)
+    --sl-color-white / --sl-color-black;
 }
 
-:root[data-theme='light'] { /* light mode inversions */ }
+:root[data-theme="light"] {
+  /* light mode inversions */
+}
 ```
 
 When changing colors, change **both** the dark-mode `:root` block and the `:root[data-theme='light']` block — Starlight's contract requires both populated.
@@ -387,11 +394,31 @@ The agent merges both at the per-plugin level, taking the newer `lastSyncedAt` p
   "lastUpstreamSha": "<full-sha>",
   "lastSyncedAt": "<ISO-8601 UTC>",
   "plugins": {
-    "acss-kit":       { "lastUpstreamSha": "...", "lastSyncedAt": "..." },
+    "acss-kit": { "lastUpstreamSha": "...", "lastSyncedAt": "..." },
     "acss-utilities": { "lastUpstreamSha": "...", "lastSyncedAt": "..." }
   }
 }
 ```
+
+### Upstream layout cache
+
+The agent caches the discovered upstream plugin layout (which subdirectories actually hold `commands/`, `skills/`, `scripts/`) in a project-scoped memory file:
+
+- **Location:** `.claude/agent-memory/docs-sync-reviewer/MEMORY.md`
+- **Why committed:** the cache describes upstream-repo structure, not anything about your local machine — every collaborator and CI run benefits from the same cache. `memory: project` (set in the agent's frontmatter) is the mechanism that wires this up.
+
+**When the cache updates.** The agent only overwrites this file when a fresh `find`-based discovery returns a result that differs from the cache. On every other run it's read-only — the runtime injects its first 200 lines / 25 KB into the agent's prompt automatically, so cache hits are free.
+
+**How updates ride along with commits.** A cache update produced during a drift run is included in the drift PR's commit. A cache update during a no-drift run is included in the state-only commit pushed to the `docs-sync-state` branch (the worktree's `git add -A` picks it up).
+
+**Manual invalidation.** Two options if you need to force a fresh discovery:
+
+- Delete the file: `rm .claude/agent-memory/docs-sync-reviewer/MEMORY.md` and commit.
+- Or blank out the `verified-at-sha` value to an empty string and commit.
+
+The agent treats either signal as cache-empty and runs full discovery on the next invocation.
+
+**Schema.** A short YAML frontmatter block plus a Markdown body. Open the file to see the canonical shape — it lists each plugin and its path under the upstream clone root, plus the SHA and timestamp at which the layout was last verified.
 
 ### When to invoke it
 
@@ -481,14 +508,14 @@ Use `sidebar.order` in the page front-matter, **or** simply place it first in th
 
 The dev server is forgiving; the production build is strict. Common causes:
 
-| Symptom                                                  | Likely cause                                                   |
-| -------------------------------------------------------- | -------------------------------------------------------------- |
-| `Could not parse expression with acorn`                  | Unescaped `{` or `}` in MDX prose. Wrap in backticks.          |
-| `MDX file is missing required frontmatter property`      | Missing `title:` or `description:`.                            |
-| `Unable to resolve link`                                 | Internal link without `/acss-plugins-docs/` prefix.            |
-| `slug "..." cannot be found`                             | Sidebar entry references a slug whose MDX file doesn't exist.  |
-| `Component is not exported by @astrojs/starlight/...`    | Starlight upgraded; component path or name changed.            |
-| `EACCES`/`EPERM` on `dist/`                              | Stale `dist/` from a previous root-owned run. `rm -rf dist/`.  |
+| Symptom                                               | Likely cause                                                  |
+| ----------------------------------------------------- | ------------------------------------------------------------- |
+| `Could not parse expression with acorn`               | Unescaped `{` or `}` in MDX prose. Wrap in backticks.         |
+| `MDX file is missing required frontmatter property`   | Missing `title:` or `description:`.                           |
+| `Unable to resolve link`                              | Internal link without `/acss-plugins-docs/` prefix.           |
+| `slug "..." cannot be found`                          | Sidebar entry references a slug whose MDX file doesn't exist. |
+| `Component is not exported by @astrojs/starlight/...` | Starlight upgraded; component path or name changed.           |
+| `EACCES`/`EPERM` on `dist/`                           | Stale `dist/` from a previous root-owned run. `rm -rf dist/`. |
 
 ### Page renders blank
 
