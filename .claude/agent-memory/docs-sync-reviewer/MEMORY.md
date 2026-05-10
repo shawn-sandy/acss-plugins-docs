@@ -18,8 +18,8 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 ## Invalidation
 
-- The agent overwrites this file after any successful full-discovery run whose result differs from the cache.
-- To force a re-discovery, delete this file or set `verified-at-sha` to an empty string and commit.
+- The agent overwrites this file after a successful full-discovery run whose result differs from the cache.
+- To force a re-discovery, delete this file and commit.
 - This file is data, not prose — keep it short. Sub-agent runtime injects only the first 200 lines / 25 KB into the agent's prompt.
 
 ## Notes

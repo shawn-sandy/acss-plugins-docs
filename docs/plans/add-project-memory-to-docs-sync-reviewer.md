@@ -132,7 +132,7 @@ Add `memory: project` to the agent's frontmatter, define a small MEMORY.md schem
 - **Diff review:**
   - `git diff main -- .claude/agents/docs-sync-reviewer.md .claude/agent-memory/docs-sync-reviewer/MEMORY.md MAINTAINING.md` and confirm: agent edits are scoped to frontmatter + the discovery paragraph + one Hard-rules bullet; MEMORY.md is a clean new file; MAINTAINING.md adds only the `### Upstream layout cache` subsection.
 
-- **Rollback:** if the dry-run reveals broken cache logic, revert with `git checkout -- .claude/agents/docs-sync-reviewer.md MAINTAINING.md && rm -rf .claude/agent-memory/` and re-examine before re-attempting.
+- **Rollback:** if the dry-run reveals broken cache logic, revert with `git checkout -- .claude/agents/docs-sync-reviewer.md MAINTAINING.md && rm -rf .claude/agent-memory/docs-sync-reviewer/` and re-examine before re-attempting.
 
 ## Next Steps
 
