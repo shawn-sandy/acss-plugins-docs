@@ -292,7 +292,7 @@ sidebar: [
     ],
   },
   // ...
-];
+],
 ```
 
 Rules:
@@ -409,7 +409,7 @@ The agent merges both at the per-plugin level, taking the newer `lastSyncedAt` p
 
 ### Upstream layout cache
 
-The agent caches the discovered upstream plugin layout (which subdirectories actually hold `commands/`, `skills/`, `scripts/`) in a project-scoped memory file:
+The agent caches the discovered upstream plugin root paths (the directory each plugin lives under in the upstream repo, e.g. `plugins/acss-kit`) in a project-scoped memory file:
 
 - **Location:** `.claude/agent-memory/docs-sync-reviewer/MEMORY.md`
 - **Why committed:** the cache describes upstream-repo structure, not anything about your local machine — every collaborator and CI run benefits from the same cache. `memory: project` (set in the agent's frontmatter) is the mechanism that wires this up.
@@ -418,12 +418,7 @@ The agent caches the discovered upstream plugin layout (which subdirectories act
 
 **How updates ride along with commits.** A cache update produced during a drift run is included in the drift PR's commit. A cache update during a no-drift run is included in the state-only commit pushed to the `docs-sync-state` branch (the worktree's `git add -A` picks it up).
 
-**Manual invalidation.** Two options if you need to force a fresh discovery:
-
-- Delete the file: `rm .claude/agent-memory/docs-sync-reviewer/MEMORY.md` and commit.
-- Or blank out the `verified-at-sha` value to an empty string and commit.
-
-The agent treats either signal as cache-empty and runs full discovery on the next invocation.
+**Manual invalidation.** Delete the file (`rm .claude/agent-memory/docs-sync-reviewer/MEMORY.md`) and commit. The agent treats a missing cache file as cache-empty and runs full discovery on the next invocation.
 
 **Schema.** A short YAML frontmatter block plus a Markdown body. Open the file to see the canonical shape — it lists each plugin and its path under the upstream clone root, plus the SHA and timestamp at which the layout was last verified.
 

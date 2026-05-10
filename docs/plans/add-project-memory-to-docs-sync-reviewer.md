@@ -2,7 +2,7 @@
 
 ## Context
 
-The just-merged optimization plan (`docs/plans/optimize-docs-sync-reviewer-subagent.md`) listed three out-of-scope follow-ups. The user has now selected the first one:
+The companion optimization plan (`docs/plans/optimize-docs-sync-reviewer-subagent.md`, included in this PR) listed three out-of-scope follow-ups. The user has now selected the first one:
 
 > Add `memory: project` to the agent to cache discovered upstream plugin layout across runs.
 

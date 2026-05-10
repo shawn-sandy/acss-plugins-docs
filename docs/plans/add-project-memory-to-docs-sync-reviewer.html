@@ -578,10 +578,10 @@
 
         <h2 id="context">Context</h2>
         <p>
-          The just-merged optimization plan
-          (<code>docs/plans/optimize-docs-sync-reviewer-subagent.md</code>)
-          listed three out-of-scope follow-ups. The user has now selected the
-          first one:
+          The companion optimization plan
+          (<code>docs/plans/optimize-docs-sync-reviewer-subagent.md</code>,
+          included in this PR) listed three out-of-scope follow-ups. The user
+          has now selected the first one:
         </p>
         <blockquote>
           <p>
@@ -751,9 +751,8 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses
 
 ## Invalidation
 
-- The agent overwrites this file after any successful full-discovery run.
-- To force a re-discovery, delete this file or set `verified-at-sha` to an
-  empty string and commit.
+- The agent overwrites this file after a successful full-discovery run whose result differs from the cache.
+- To force a re-discovery, delete this file and commit.
 - This file is data, not prose — keep it short. Sub-agent runtime injects
   only the first 200 lines / 25 KB.</code></pre>
             <div class="why">
@@ -820,7 +819,8 @@ last verified plugin roots. On each run:
    `.claude/agent-memory/docs-sync-reviewer/MEMORY.md` with the new
    plugin-root table and the upstream HEAD short SHA. Stage this file
    alongside any drift-PR commit; if no drift PR is opened on this run,
-   leave it unstaged — the next drift PR or no-drift run will pick it up.</code></pre>
+   the no-drift state-only commit will pick it up via the worktree's
+   `git add -A` (see Step 6).</code></pre>
             <div class="why">
               Keeps the existing failure semantics (cache miss → full discovery
               → existing total/partial-failure handling already covers the

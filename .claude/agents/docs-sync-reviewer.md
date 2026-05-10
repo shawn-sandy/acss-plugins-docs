@@ -31,7 +31,7 @@ The docs mirror the plugin layout. When upstream changes, locate the correspondi
    find "$tmpdir/upstream" -maxdepth 3 -type f \( -name 'plugin.json' -o -name 'plugin.yml' -o -name 'README.md' \) | sort
    ```
 
-3. After a successful discovery whose result differs from the cache (or whose cache was empty), overwrite `.claude/agent-memory/docs-sync-reviewer/MEMORY.md` with the new plugin-root table and the upstream HEAD short SHA. Stage this file alongside any drift-PR commit; if no drift PR is opened on this run, the cache update will ride along on the no-drift state commit (see Hard rules).
+3. After a successful discovery whose result differs from the cache (or whose cache was empty), overwrite `.claude/agent-memory/docs-sync-reviewer/MEMORY.md` with the new plugin-root table, the upstream HEAD short SHA in `verified-at-sha:`, and the current UTC ISO-8601 timestamp in `verified-at:`. Preserve the existing YAML frontmatter (`name:`, `description:`) intact. Stage this file alongside any drift-PR commit; if no drift PR is opened on this run, the cache update will ride along on the no-drift state commit (see Hard rules).
 
 From the resolved layout (cache hit or fresh discovery), build the path mapping for this run. The mapping rules below use `<plugin-root>/...` — substitute the actual prefix (e.g. `plugins/acss-kit/` or `acss-kit/`).
 
@@ -47,11 +47,13 @@ From the resolved layout (cache hit or fresh discovery), build the path mapping 
 | Top-level README / architecture                              | `src/content/docs/contributing/architecture.mdx`                 |
 | New plugin (neither acss-kit nor acss-utilities)             | NEW top-level section — flag for human decision, do not auto-add |
 
-Discovery failure handling — never guess at plugin locations or invent paths:
+Discovery failure handling — never guess at plugin locations or invent paths.
 
-- **Total failure (no plugin roots found at all).** Abort layout diffing immediately. Skip steps 3–9. Apply the **Notification-PR dedup rule** for the `claude/docs-sync-discovery-*` prefix. If no matching PR is open, create one on a fresh `claude/docs-sync-discovery-<date>` branch with no doc edits; include the failure notice, the discovery commands and their empty output, upstream HEAD SHA and run timestamp, remediation steps, and a "do not merge — notification only" note. Do not advance any sync-state file.
+The set of **expected plugins** is exactly `acss-kit` and `acss-utilities` — the two plugins this docs site documents. Any other plugin root present upstream (e.g. `style-agent`) may be cached for layout-discovery purposes but is treated as a "new plugin" per the Doc-to-source mapping rule and is **excluded** from the expected-plugin completeness checks below; its absence does not trigger partial-failure handling and its presence does not block global sync-state advancement.
 
-- **Partial failure (some plugin roots found, others missing).** Continue the workflow for discovered plugins and produce the normal drift PR (steps 3–9). Add a **Discovery Issues** section to the PR body listing each expected plugin that was not located, the patterns searched, and a request for human investigation. Advance sync state only for the discovered plugins.
+- **Total failure (no expected plugin roots found at all).** Abort layout diffing immediately. Skip steps 3–9. Apply the **Notification-PR dedup rule** for the `claude/docs-sync-discovery-*` prefix. If no matching PR is open, create one on a fresh `claude/docs-sync-discovery-<date>` branch with no doc edits; include the failure notice, the discovery commands and their empty output, upstream HEAD SHA and run timestamp, remediation steps, and a "do not merge — notification only" note. Do not advance any sync-state file.
+
+- **Partial failure (some expected plugin roots found, others missing).** Continue the workflow for discovered expected plugins and produce the normal drift PR (steps 3–9). Add a **Discovery Issues** section to the PR body listing each expected plugin that was not located, the patterns searched, and a request for human investigation. Advance sync state only for the discovered expected plugins.
 
 If a command or skill is **added** upstream and has no corresponding MDX page, invoke the `docs-add` skill with the appropriate `<section>` and `<slug>` derived from the upstream source path. This creates the MDX file and updates the `astro.config.mjs` sidebar.
 
