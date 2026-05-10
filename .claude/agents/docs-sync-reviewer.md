@@ -168,7 +168,12 @@ Decision rules:
   git -C "$REPO_DIR" worktree add -B docs-sync-state "$worktree_dir" origin/docs-sync-state 2>/dev/null \
     || git -C "$REPO_DIR" worktree add --orphan docs-sync-state "$worktree_dir"
   cp "$REPO_DIR/.claude/docs-sync-state.json" "$worktree_dir/docs-sync-state.json"
-  git -C "$worktree_dir" add docs-sync-state.json
+  if [ -f "$REPO_DIR/.claude/agent-memory/docs-sync-reviewer/MEMORY.md" ]; then
+    mkdir -p "$worktree_dir/.claude/agent-memory/docs-sync-reviewer"
+    cp "$REPO_DIR/.claude/agent-memory/docs-sync-reviewer/MEMORY.md" \
+      "$worktree_dir/.claude/agent-memory/docs-sync-reviewer/MEMORY.md"
+  fi
+  git -C "$worktree_dir" add -A
   git -C "$worktree_dir" commit -m "chore(docs-sync): no drift, bump state to <short-sha>"
   git -C "$worktree_dir" push -u origin docs-sync-state
   git -C "$REPO_DIR" worktree remove "$worktree_dir"

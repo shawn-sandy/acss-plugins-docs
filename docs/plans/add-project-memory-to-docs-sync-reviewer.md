@@ -1,7 +1,5 @@
 # Add `memory: project` to docs-sync-reviewer for layout caching
 
-> Note: this file's auto-generated random filename should be renamed to `add-project-memory-to-docs-sync-reviewer.md` during implementation (kebab-case, descriptive — matching the lessons recorded in the prior plan-interview).
-
 ## Context
 
 The just-merged optimization plan (`docs/plans/optimize-docs-sync-reviewer-subagent.md`) listed three out-of-scope follow-ups. The user has now selected the first one:
@@ -59,7 +57,7 @@ Add `memory: project` to the agent's frontmatter, define a small MEMORY.md schem
 
    ## Invalidation
 
-   - The agent overwrites this file after any successful full-discovery run.
+   - The agent overwrites this file after a successful full-discovery run whose result differs from the cache.
    - To force a re-discovery, delete this file or set `verified-at-sha` to an empty string and commit.
    - This file is data, not prose — keep it short. Sub-agent runtime injects only the first 200 lines / 25 KB.
    ```
@@ -96,13 +94,9 @@ Add `memory: project` to the agent's frontmatter, define a small MEMORY.md schem
         ```
      ````
 
-     3. After a successful discovery whose result differs from the cache (or whose cache was empty), overwrite `.claude/agent-memory/docs-sync-reviewer/MEMORY.md` with the new plugin-root table and the upstream HEAD short SHA. Stage this file alongside any drift-PR commit; if no drift PR is opened on this run, leave it unstaged — the next drift PR or no-drift run will pick it up.
+     3. After a successful discovery whose result differs from the cache (or whose cache was empty), overwrite `.claude/agent-memory/docs-sync-reviewer/MEMORY.md` with the new plugin-root table and the upstream HEAD short SHA. Stage this file alongside any drift-PR commit; if no drift PR is opened on this run, the no-drift state-only commit will pick it up via the worktree's `git add -A` (see Step 6).
 
-     ```
-
-     ```
-
-   - Why: keeps the existing failure semantics (cache miss → full discovery → existing total/partial-failure handling already covers the "still nothing" case). The "stage alongside drift-PR commit" rule keeps cache updates atomic with the runs that observed them.
+   - Why: keeps the existing failure semantics (cache miss → full discovery → existing total/partial-failure handling already covers the "still nothing" case). The "stage alongside drift-PR commit" rule keeps cache updates atomic with the runs that observed them; the no-drift fallback explicitly copies `MEMORY.md` into the orphan-branch worktree before committing so updates are never silently dropped.
 
 6. **Update the Hard rules to mention the cache file alongside the sync state file.**
    - Add a bullet near the existing "no-drift run persists state" rule:
