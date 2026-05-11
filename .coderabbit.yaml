@@ -38,6 +38,9 @@ reviews:
         - Front-matter must have both `title` and `description` fields.
         - MDX component imports should use `~/components/` path aliases, not relative paths.
         - Do not duplicate token-resolution logic — that lives in `src/scripts/visuals.ts`.
+        - The sidebar in `astro.config.mjs` is hardcoded — Starlight does not auto-discover pages.
+          When a page is added, renamed, or deleted, a matching sidebar entry must be added,
+          updated, or removed in `astro.config.mjs`. Flag PRs where this is out of sync.
 
     - path: "astro.config.mjs"
       instructions: |
