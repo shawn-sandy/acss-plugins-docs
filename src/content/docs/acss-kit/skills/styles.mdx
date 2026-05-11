@@ -3,7 +3,7 @@ title: styles skill
 description: The OKLCH palette algorithm, 18 semantic color roles, WCAG validation logic, and light/dark theme structure.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 The `styles` skill drives all four `/theme-*` commands. It defines the OKLCH palette math, the 18 semantic color role catalogue, the WCAG contrast pair validation contract, and the file format for theme output.
 
@@ -20,6 +20,7 @@ All palette math uses OKLCH (Oklab Lightness Chroma Hue) rather than HSL or RGB.
 - **Hue independence** — you can independently adjust lightness without shifting the perceived color identity
 
 The three channels:
+
 - **L** — lightness (0% = black, 100% = white)
 - **C** — chroma / saturation (0 = gray, higher = more saturated; typical brand colors: 0.12–0.25)
 - **H** — hue angle in degrees (0° = red, 120° = green, 240° = blue, 270° = indigo)
@@ -33,6 +34,7 @@ Given seed hex `#4f46e5`:
 2. **Primary** → use seed as `--color-primary` base. Run lightness search: find highest L where contrast ratio ≥ 4.5:1 against background (L 99%). Binary search between L 30% and L 70%.
 
 3. **Backgrounds (light mode):**
+
    ```
    --color-background:     L 99%, C seed*0.02, H seed  (near-white, hue-tinted)
    --color-surface:        L 97%, C seed*0.03, H seed
@@ -40,6 +42,7 @@ Given seed hex `#4f46e5`:
    ```
 
 4. **Text:**
+
    ```
    --color-text:          L 16%  (near-black, finds highest L with 4.5:1 vs background)
    --color-text-inverse:  L 99%  (same as background — white on colored surfaces)
@@ -48,12 +51,14 @@ Given seed hex `#4f46e5`:
    ```
 
 5. **Borders:**
+
    ```
    --color-border:        L 88%, C seed*0.05, H seed  (3.0:1 vs background — non-text threshold)
    --color-border-strong: L 72%, C seed*0.07, H seed
    ```
 
 6. **Semantic hues** (derived from seed chroma):
+
    ```
    --color-danger:   H 27°  (red)
    --color-warning:  H 80°  (amber)
@@ -63,6 +68,7 @@ Given seed hex `#4f46e5`:
    ```
 
 7. **State colors:**
+
    ```
    --color-primary-hover: L primary - 5, same C and H
    --color-focus-ring:    L primary + 8, C primary - 0.02, same H
@@ -80,69 +86,69 @@ Given seed hex `#4f46e5`:
 
 ### Background roles
 
-| Role | Light L | Dark L | Usage |
-|---|---|---|---|
-| `--color-background` | 99% | 12% | Page canvas |
-| `--color-surface` | 97% | 16% | Cards, panels |
-| `--color-surface-raised` | 95% | 20% | Dropdowns, modals |
+| Role                     | Light L | Dark L | Usage             |
+| ------------------------ | ------- | ------ | ----------------- |
+| `--color-background`     | 99%     | 12%    | Page canvas       |
+| `--color-surface`        | 97%     | 16%    | Cards, panels     |
+| `--color-surface-raised` | 95%     | 20%    | Dropdowns, modals |
 
 ### Border roles
 
-| Role | Light L | Dark L | Usage |
-|---|---|---|---|
-| `--color-border` | 88% | 30% | Default borders |
-| `--color-border-strong` | 72% | 45% | Emphasized/active borders |
+| Role                    | Light L | Dark L | Usage                     |
+| ----------------------- | ------- | ------ | ------------------------- |
+| `--color-border`        | 88%     | 30%    | Default borders           |
+| `--color-border-strong` | 72%     | 45%    | Emphasized/active borders |
 
 ### Text roles
 
-| Role | Light L | Dark L | Usage |
-|---|---|---|---|
-| `--color-text` | 16% | 94% | Body text |
-| `--color-text-inverse` | 99% | 12% | Text on colored backgrounds |
-| `--color-text-muted` | 48% | 68% | Secondary / captions |
-| `--color-text-disabled` | 68% | 45% | Disabled state |
+| Role                    | Light L | Dark L | Usage                       |
+| ----------------------- | ------- | ------ | --------------------------- |
+| `--color-text`          | 16%     | 94%    | Body text                   |
+| `--color-text-inverse`  | 99%     | 12%    | Text on colored backgrounds |
+| `--color-text-muted`    | 48%     | 68%    | Secondary / captions        |
+| `--color-text-disabled` | 68%     | 45%    | Disabled state              |
 
 ### Brand roles
 
-| Role | H° | Usage |
-|---|---|---|
-| `--color-primary` | seed | Primary actions, links |
+| Role                    | H°   | Usage                  |
+| ----------------------- | ---- | ---------------------- |
+| `--color-primary`       | seed | Primary actions, links |
 | `--color-primary-hover` | seed | Hover state on primary |
-| `--color-focus-ring` | seed | Keyboard focus outline |
+| `--color-focus-ring`    | seed | Keyboard focus outline |
 
 ### Semantic roles
 
-| Role | H° | Usage |
-|---|---|---|
-| `--color-danger` | 27 | Errors, destructive actions |
-| `--color-warning` | 80 | Warnings, caution |
-| `--color-info` | 240 | Informational messages |
-| `--color-success` | 155 | Positive outcomes |
+| Role              | H°  | Usage                       |
+| ----------------- | --- | --------------------------- |
+| `--color-danger`  | 27  | Errors, destructive actions |
+| `--color-warning` | 80  | Warnings, caution           |
+| `--color-info`    | 240 | Informational messages      |
+| `--color-success` | 155 | Positive outcomes           |
 
 ### Optional roles (generated when hue range allows)
 
-| Role | H° | Usage |
-|---|---|---|
-| `--color-accent` | seed +30° | Secondary brand accent |
-| `--color-accent-hover` | seed +30° | Hover on accent |
+| Role                   | H°        | Usage                    |
+| ---------------------- | --------- | ------------------------ |
+| `--color-accent`       | seed +30° | Secondary brand accent   |
+| `--color-accent-hover` | seed +30° | Hover on accent          |
 | `--color-brand-accent` | seed -30° | Decorative brand element |
 
 ## WCAG 2.2 AA contrast validation
 
 The skill validates 10 contrast pairs against 4.5:1 (text) or 3.0:1 (non-text):
 
-| Pair | Minimum | Category |
-|---|---|---|
-| `text` / `background` | 4.5:1 | Text |
-| `primary` / `background` | 4.5:1 | Text / interactive |
-| `text-inverse` / `primary` | 4.5:1 | Text on brand |
-| `danger` / `background` | 4.5:1 | Text |
-| `success` / `background` | 4.5:1 | Text |
-| `warning` / `background` | 3.0:1 | Non-text indicator |
-| `info` / `background` | 4.5:1 | Text |
-| `text-muted` / `background` | 4.5:1 | Text |
-| `border` / `background` | 3.0:1 | Non-text indicator |
-| `text` / `surface` | 4.5:1 | Text on card |
+| Pair                        | Minimum | Category           |
+| --------------------------- | ------- | ------------------ |
+| `text` / `background`       | 4.5:1   | Text               |
+| `primary` / `background`    | 4.5:1   | Text / interactive |
+| `text-inverse` / `primary`  | 4.5:1   | Text on brand      |
+| `danger` / `background`     | 4.5:1   | Text               |
+| `success` / `background`    | 4.5:1   | Text               |
+| `warning` / `background`    | 3.0:1   | Non-text indicator |
+| `info` / `background`       | 4.5:1   | Text               |
+| `text-muted` / `background` | 4.5:1   | Text               |
+| `border` / `background`     | 3.0:1   | Non-text indicator |
+| `text` / `surface`          | 4.5:1   | Text on card       |
 
 If a pair fails, the skill adjusts the foreground lightness by ±2% and retries, up to 8 iterations. If it still can't pass, it reports the failure and the closest achievable ratio.
 
@@ -151,36 +157,48 @@ If a pair fails, the skill adjusts the foreground lightness by ±2% and retries,
 ```css
 :root {
   /* ── Backgrounds ──────────────────────── */
-  --color-background:      oklch(99% 0.004 270);
-  --color-surface:         oklch(97% 0.006 270);
-  --color-surface-raised:  oklch(95% 0.008 270);
+  --color-background: oklch(99% 0.004 270);
+  --color-surface: oklch(97% 0.006 270);
+  --color-surface-raised: oklch(95% 0.008 270);
 
   /* ── Borders ──────────────────────────── */
-  --color-border:          oklch(88% 0.014 270);
-  --color-border-strong:   oklch(72% 0.018 270);
+  --color-border: oklch(88% 0.014 270);
+  --color-border-strong: oklch(72% 0.018 270);
 
   /* ── Text ─────────────────────────────── */
-  --color-text:            oklch(16% 0.012 270);
-  --color-text-inverse:    oklch(99% 0.004 270);
-  --color-text-muted:      oklch(48% 0.014 270);
-  --color-text-disabled:   oklch(68% 0.010 270);
+  --color-text: oklch(16% 0.012 270);
+  --color-text-inverse: oklch(99% 0.004 270);
+  --color-text-muted: oklch(48% 0.014 270);
+  --color-text-disabled: oklch(68% 0.01 270);
 
   /* ── Brand ────────────────────────────── */
-  --color-primary:         oklch(55% 0.22 270);
-  --color-primary-hover:   oklch(48% 0.22 270);
-  --color-focus-ring:      oklch(63% 0.20 270);
+  --color-primary: oklch(55% 0.22 270);
+  --color-primary-hover: oklch(48% 0.22 270);
+  --color-focus-ring: oklch(63% 0.2 270);
 
   /* ── Semantic ─────────────────────────── */
-  --color-danger:          oklch(50% 0.22 27);
-  --color-warning:         oklch(56% 0.18 80);
-  --color-info:            oklch(55% 0.18 240);
-  --color-success:         oklch(48% 0.18 155);
+  --color-danger: oklch(50% 0.22 27);
+  --color-warning: oklch(56% 0.18 80);
+  --color-info: oklch(55% 0.18 240);
+  --color-success: oklch(48% 0.18 155);
 }
 ```
 
 <Aside type="note">
-Values are stored in `oklch()` notation, not hex. This preserves the perceptual relationship between roles and allows the browser to interpolate them smoothly in animations and transitions.
+  Values are stored in `oklch()` notation, not hex. This preserves the
+  perceptual relationship between roles and allows the browser to interpolate
+  them smoothly in animations and transitions.
 </Aside>
+
+## CSS layer ordering
+
+Theme files participate in the canonical `@layer` cascade. `foundation.css` declares the layer order at the top of every consumer project:
+
+```css
+@layer foundation, components, utilities, theme;
+```
+
+Generated `light.css`, `dark.css`, and `brand-*.css` must be imported **after** `foundation.css`. The cascade outcome — **theme > utilities > components > foundation** — means `--color-*` values from theme files always win over any primitive tokens declared in `@layer foundation`. This is by design: the foundation layer intentionally omits `--color-*` semantic roles (patch P1) so theme files hold the only source of truth for every `--color-*` variable.
 
 ## Atomic write contract
 
@@ -192,3 +210,39 @@ The skill follows a strict atomic write contract for all theme operations:
 3. Run `validate_theme.py` on the temp file
 4. Only if all checks pass → copy temp file to the real destination
 5. On any failure → discard temp file, report errors, leave real file unchanged
+
+## `/color-scale` workflow
+
+`/color-scale` is documented in the [`styles` skill](/acss-plugins-docs/acss-kit/skills/styles) and backed by [`generate_color_scale.py`](/acss-plugins-docs/reference/python-scripts#generate_color_scalepy). The skill routes `/color-scale` inputs through three resolution stages before calling the script.
+
+### Input resolution
+
+| Input type                                                 | Resolution                                                                                                    |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Hex value (`#rrggbb` or `#rgb`)                            | Used directly                                                                                                 |
+| Theme role name (`primary`, `background`, `surface`, etc.) | Look up project's `light.css`, grep for `--color-<role>:`, extract hex fallback. Halt if no theme file found. |
+| CSS named color (`red`, `cornflowerblue`, etc.)            | Resolve to hex via the W3C CSS Color 4 named-color table                                                      |
+| Anything else                                              | Halt with usage hint                                                                                          |
+
+Default `--name` when not supplied:
+
+- Theme role input → role name (e.g. `primary` → `--color-primary-50`)
+- Named color input → color name (e.g. `red` → `--color-red-50`)
+- Hex input → `scale`
+
+### Workflow
+
+1. Resolve `<color>` to a 6-digit hex value per the table above.
+2. Run `generate_color_scale.py <hex> --name=<name> --format=both`. If non-zero exit, print stderr and halt.
+3. Parse the JSON section (before the first blank line) to extract the 10 `steps` entries.
+4. Display the CSS block, then a Markdown scale table.
+5. Write to file only if the user explicitly requests it — display-only by default.
+
+### Error handling
+
+| Situation                                | Action                                                                                    |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Resolved hex is invalid                  | Halt: `"<value>" is not a valid hex color. Use #rrggbb or #rgb.`                          |
+| Theme role not found in CSS              | Halt: `"--color-<role> not found in <file>. Check the role name or pass a hex directly."` |
+| No theme file in the project             | Halt: `"No theme file found. Run /theme-create first or pass a hex value directly."`      |
+| `generate_color_scale.py` exits non-zero | Print stderr and halt                                                                     |
