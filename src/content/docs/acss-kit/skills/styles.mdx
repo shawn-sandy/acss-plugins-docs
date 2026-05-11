@@ -4,6 +4,7 @@ description: The OKLCH palette algorithm, 18 semantic color roles, WCAG validati
 ---
 
 import { Aside } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
 
 The `styles` skill drives all four `/theme-*` commands. It defines the OKLCH palette math, the 18 semantic color role catalogue, the WCAG contrast pair validation contract, and the file format for theme output.
 
@@ -125,6 +126,8 @@ Given seed hex `#4f46e5`:
 | `--color-info`    | 240 | Informational messages      |
 | `--color-success` | 155 | Positive outcomes           |
 
+<ColorSwatch roles={["danger", "warning", "info", "success"]} />
+
 ### Optional roles (generated when hue range allows)
 
 | Role                   | H°        | Usage                    |
@@ -217,12 +220,12 @@ The skill follows a strict atomic write contract for all theme operations:
 
 ### Input resolution
 
-| Input type                                                 | Resolution                                                                                                    |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Hex value (`#rrggbb` or `#rgb`)                            | Used directly                                                                                                 |
-| Theme role name (`primary`, `background`, `surface`, etc.) | Look up project's `light.css`, grep for `--color-<role>:`, extract hex fallback. Halt if no theme file found. |
-| CSS named color (`red`, `cornflowerblue`, etc.)            | Resolve to hex via the W3C CSS Color 4 named-color table                                                      |
-| Anything else                                              | Halt with usage hint                                                                                          |
+| Input type                                                 | Resolution                                                                                                                                                 |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hex value (`#rrggbb` or `#rgb`)                            | Used directly                                                                                                                                              |
+| Theme role name (`primary`, `background`, `surface`, etc.) | Look up project's `light.css`, grep for `--color-<role>:`, parse the `oklch(...)` value and convert to hex before generation. Halt if no theme file found. |
+| CSS named color (`red`, `cornflowerblue`, etc.)            | Resolve to hex via the W3C CSS Color 4 named-color table                                                                                                   |
+| Anything else                                              | Halt with usage hint                                                                                                                                       |
 
 Default `--name` when not supplied:
 

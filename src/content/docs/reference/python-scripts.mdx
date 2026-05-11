@@ -4,6 +4,7 @@ description: API reference for every Python script in acss-kit and acss-utilitie
 ---
 
 import { Aside } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
 
 All scripts use **Python 3 stdlib only** — no pip dependencies. They follow one of two contract families.
 
@@ -179,14 +180,16 @@ JSON shape:
       "hex": "#f5f3ff",
       "oklch": "oklch(0.965 0.0213 264.1)",
       "css_var": "--color-primary-50",
-      "clamped": false
+      "clamped": false,
+      "reasons": []
     },
     {
       "step": 900,
       "hex": "#1e1b4b",
       "oklch": "oklch(0.141 0.0812 264.1)",
       "css_var": "--color-primary-900",
-      "clamped": false
+      "clamped": true,
+      "reasons": ["P3 gamut exceeded at chroma 0.24; clamped to sRGB boundary"]
     }
   ]
 }
@@ -194,7 +197,11 @@ JSON shape:
 
 CSS output uses the `var(--x, <fallback>)` convention required by acss-kit.
 
-**Exit codes:** 0 = success, 1 = invalid hex or named-color argument, 2 = IO/usage error
+The scale is generated from a single seed color — below is an example of the `primary` role that `/color-scale` would expand into a 10-step scale:
+
+<ColorSwatch roles={["primary"]} table={false} />
+
+**Exit codes:** 0 = success, 1 = invalid hex argument, 2 = IO/usage error
 
 ---
 

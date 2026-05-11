@@ -54,6 +54,13 @@ When adding or editing an MDX page that names a color role, font size, component
 
 **Token source:** `src/styles/acss-tokens.css` — defines all `--color-*` and `--font-size-*` custom properties that power the visual primitives. After an upstream `acss-kit` or `acss-utilities` plugin release, re-run `/kit-sync` or update this file manually (see `CONTRIBUTING.md`).
 
+## Docs sync policy
+
+When running `/docs-sync` or the docs-sync-reviewer agent:
+
+- **Always create docs for new plugins/agents** discovered upstream — do not flag them for human review and skip. Every new top-level plugin or agent must get a corresponding docs section (MDX page + sidebar entry) in the same PR.
+- Add the new plugin's section under the appropriate content directory (e.g. `src/content/docs/<plugin-name>/`) and wire it into the sidebar in `astro.config.mjs`.
+
 ## Git conventions
 
 - Branch pattern: `type/kebab-description-YYYY-MM-DD` (e.g. `feat/new-component-docs-2026-05-04`)

@@ -1,0 +1,108 @@
+---
+title: css-to-class skill
+description: How the css-to-class skill parses multi-class input, resolves declarations from project CSS files, and emits a single semantic CSS class.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `css-to-class` skill drives [`/css-to-class`](/acss-plugins-docs/style-agent/commands/css-to-class). It owns all the behavior described in that command — argument handling, name generation, CSS discovery, declaration resolution, HTML refactoring, and summary output. The command is a thin shell that delegates everything here.
+
+|                   |                                                                            |
+| ----------------- | -------------------------------------------------------------------------- |
+| **Triggered by**  | `/css-to-class`                                                            |
+| **Allowed tools** | `Read`, `Glob`, `Grep`, `Bash`, `AskUserQuestion`                          |
+| **Output**        | A CSS class block in chat + refactored HTML with the single new class name |
+
+## Input forms
+
+| Form             | Example                                                                |
+| ---------------- | ---------------------------------------------------------------------- |
+| HTML element     | `<div class="testimonial flex-grid py-8 items-center" data-flex-grid>` |
+| Plain class list | `testimonial flex-grid py-8 items-center`                              |
+| Quoted string    | `"flex py-4 items-center justify-between"`                             |
+
+## Name rules
+
+- Max **20 characters**, **kebab-case** only (`[a-z][a-z0-9-]*`).
+- If `name` is supplied, it is sanitised in order: lowercase → spaces/underscores replaced with `-` → non-`[a-z0-9-]` characters stripped → leading hyphens and digits stripped → trailing hyphens stripped → consecutive hyphens collapsed → truncated to 20 characters. If the result is empty, `AskUserQuestion` is used.
+- If `name` is omitted, the auto-name algorithm runs (see below). When the result is ambiguous, `AskUserQuestion` is used with the suggestion pre-filled.
+
+### Auto-name algorithm
+
+1. Tokenise the class string on whitespace. Deduplicate (preserve order).
+2. Partition tokens into **semantic** and **utility**. Utility prefixes include: `py-`, `px-`, `pt-`, `pb-`, `pl-`, `pr-`, `mt-`, `mb-`, `ml-`, `mr-`, `mx-`, `my-`, `m-`, `p-`, `gap-`, `text-`, `bg-`, `border-`, `rounded-`, `w-`, `h-`, `min-`, `max-`, `flex-`, `grid-`, `col-`, `row-`, `items-`, `justify-`, `self-`, `place-`, `order-`, `z-`, `opacity-`, `shadow-`, `ring-`, `sr-`, `not-sr-`. Single well-known no-hyphen keywords (`flex`, `hidden`, `block`, `inline`) are also classified as utility.
+3. Build the candidate: primary is the first semantic token (or first utility token stripped of any trailing `-N` numeric suffix); secondary is the first remaining token that adds distinct meaning. Join with `-`. Truncate to 20 characters.
+4. If the result is empty or a single character, use `custom-class` and warn.
+
+## Workflow
+
+<Steps>
+
+1. **Parse input.** Accept a pasted HTML snippet or a bare class string. Extract the `class="…"` value via regex when HTML is present. Tokenise and deduplicate.
+
+2. **Determine the class name.** Apply the name rules. When the class list is all-utility or the generated name is ambiguous, use `AskUserQuestion` with the suggestion pre-filled.
+
+3. **Discover CSS files.** Run:
+
+   ```bash
+   find . -name "*.css" -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/dist/*" -not -path "*/build/*"
+   ```
+
+   If no `.css` files are found, all tokens will be unresolved.
+
+4. **Resolve declarations.** For each class token, apply CSS identifier escaping (`:` → `\:`, leading digit → hex escape, etc.) to build its selector form. Grep the discovered files for a matching selector. A token is **resolved** if at least one CSS file contains a matching selector with declarations; otherwise it is **unresolved**.
+
+   Declarations inside at-rules (`@media`, `@supports`, `@layer`) must be emitted with their at-rule wrapper preserved.
+
+5. **Emit the CSS class block.** Write a single class with resolved declarations inlined and unresolved tokens as `/* <token>: add declarations manually */` placeholder comments. Multiple tokens sharing the same at-rule are grouped into one nested block.
+
+6. **Emit the refactored HTML.** Replace the full `class="…"` value with the new single class name. All other attributes (`data-*`, `id`, `aria-*`) are preserved unchanged.
+
+7. **Print a summary.** Reports: original class count, chosen name (provided or auto-generated), resolved declaration count, unresolved tokens, and any name coercion warnings.
+
+</Steps>
+
+## CSS identifier escaping
+
+Before grepping, each class token is escaped to its selector form:
+
+- `:` → `\:`
+- `&` → `\&`, `.` → `\.`, `%` → `\%`
+- A leading digit is hex-escaped: `2xl:flex` → `\32 xl\:flex` (the space terminates the hex escape sequence)
+
+This correctly handles Tailwind variant tokens (`hover:bg-red-500` → `.hover\:bg-red-500`) and breakpoint-prefixed tokens (`2xl:*` → `.\32 xl\:*`).
+
+## Example output
+
+Given `<div class="testimonial flex-grid py-8 items-center" data-flex-grid>`:
+
+**Extracted CSS class:**
+
+```css
+/* extracted: testimonial flex-grid py-8 items-center */
+.testimonial-grid {
+  /* testimonial: add declarations manually */
+  /* flex-grid: add declarations manually */
+  padding-block: 2rem;
+  align-items: center;
+}
+```
+
+**Refactored HTML:**
+
+```html
+<div class="testimonial-grid" data-flex-grid></div>
+```
+
+<Aside type="tip">
+  The skill reads your project's actual CSS files, so resolved declarations
+  reflect the exact property/value pairs your styles define — not guesses. Run
+  it on any element whose class list has grown unwieldy.
+</Aside>
+
+<Aside type="note">
+  This skill is the inverse of the [`inline-style-to-class`
+  skill](/acss-plugins-docs/style-agent/skills/inline-style-to-class), which
+  lifts inline styles out into a named class. Use both together to keep markup
+  clean and stylesheets organised.
+</Aside>

@@ -19,7 +19,7 @@ The `components` skill is triggered by `/kit-add`. It can also be invoked by the
 
 2. **Step A — Resolve component name.** The skill looks up the requested name in the component reference catalogue (`skills/components/references/catalog.md`). Names are normalized (case-insensitive, hyphenated or camelCase both accepted). If a name doesn't match, the skill lists the closest alternatives and stops.
 
-3. **Step B — Verify sass and copy `ui.tsx` and `foundation.css`.** Checks `devDependencies` in `package.json` for `sass`. If missing, halts with an install command. Then applies the three-case foundation install matrix (see [Foundation CSS install](#foundation-css-install) below).
+3. **Step B — Verify sass and copy `ui.tsx` and `foundation.css`.** Checks `devDependencies` in `package.json` for `sass`. If missing, halts with an install command. Then applies the three-case foundation install matrix (see [Foundation CSS install](/acss-plugins-docs/acss-kit/skills/components#foundation-css-install) below).
 
 4. **Step C — Resolve dependency tree.** Reads the component's spec doc for its `dependencies:` list, then recursively resolves each dependency's dependencies. The result is a flat, deduplicated list ordered from leaf to root (bottom-up).
 

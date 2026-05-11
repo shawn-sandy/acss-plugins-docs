@@ -4,6 +4,7 @@ description: Generates a single component instance from a natural-language descr
 ---
 
 import { Aside } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 The `component-creator` skill powers [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create). It also auto-triggers on natural-language phrases, so the slash command is optional.
 
@@ -31,6 +32,23 @@ Reference docs live under `plugins/acss-kit/skills/component-creator/references/
   Badge, Tag, Heading, Text/Paragraph, Details, and Progress live as inline
   catalogue entries and are **not** supported by `component-creator` yet.
 </Aside>
+
+<ComponentPreview
+  code={`<div style="display:flex;flex-wrap:wrap;gap:.75rem;align-items:flex-start">
+  <button>Button</button>
+  <button style="display:inline-flex;align-items:center;gap:.4rem">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="7"/></svg>
+    IconButton
+  </button>
+  <div role="alert" style="padding:.5rem 1rem;border-left:3px solid currentColor">Alert message</div>
+  <div style="padding:1rem;border:1px solid #ccc;border-radius:4px;min-width:10rem">
+    <strong>Card</strong><p style="margin:.25rem 0 0">Card body text</p>
+  </div>
+  <a href="#">Link</a>
+  <input type="text" placeholder="Input" style="padding:.25rem .5rem" />
+  <label style="display:flex;gap:.4rem;align-items:center"><input type="checkbox" /> Checkbox</label>
+</div>`}
+/>
 
 ## Steps 0, A–I
 

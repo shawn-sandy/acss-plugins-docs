@@ -1,0 +1,131 @@
+---
+title: /inline-style-to-class
+description: Convert an inline style attribute, JSX style object, or <style> block into a single named CSS class and append it to the project stylesheet.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+Migrate inline styles to a reusable, maintainable CSS class. Accepts an HTML `style` attribute, a JSX `style={{ ... }}` object, or a `<style>` block — detects the project stylesheet automatically and appends the new class to it.
+
+## Syntax
+
+```text
+/inline-style-to-class [name]
+```
+
+## Arguments
+
+| Argument | Required | Description                                                                                                                                                     |
+| -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`   | No       | The CSS class name to use for the output. Max 20 characters, kebab-case. If omitted, a name is auto-generated from the element tag and first declared property. |
+
+## Input forms
+
+| Form                  | Example                                                           |
+| --------------------- | ----------------------------------------------------------------- |
+| HTML inline attribute | `<div style="background: var(--surface-1); padding: 1rem">`       |
+| JSX style object      | `<Button style={{ backgroundColor: theme.primary, padding: 8 }}>` |
+| `<style>` block       | `<style>.hero { color: red; padding: 2rem; }</style>`             |
+
+## Examples
+
+Convert an HTML inline style, providing a name:
+
+```text
+/inline-style-to-class card-hero
+```
+
+Paste a JSX element and let the name be auto-generated:
+
+```jsx
+<Button style={{ backgroundColor: theme.primary, padding: 8 }}>
+```
+
+Convert a `<style>` block:
+
+```html
+<style>
+  .hero {
+    color: red;
+    padding: 2rem;
+  }
+</style>
+```
+
+## Workflow
+
+<Steps>
+
+1. **Parse input.** Detect the form of the input:
+   - **HTML inline attribute** — match `style="..."` or `style='...'`; split on `;`; parse `property: value` pairs. Extract the surrounding element tag if present.
+   - **JSX style object** — match `style={{...}}`; extract the object literal body; convert camelCase keys to kebab-case. Numeric literal values get a "verify unit" warning. JS expression values become `/* unresolved: <expr> */` placeholders.
+   - **`<style>` block** — extract content between `<style>` and `</style>`; parse rules. If multiple rules are present, ask via `AskUserQuestion` whether to merge all declarations or pick a specific rule.
+
+2. **Determine the class name.** Apply the name rules. Use the `[name]` argument if provided. Otherwise apply the auto-name algorithm (element tag abbreviation + first-property role hint). If the generated name is ambiguous or 3 characters or fewer, ask via `AskUserQuestion` with the suggestion pre-filled.
+
+3. **Discover the target stylesheet.** Search for stylesheets in priority order: `src/**/*.{css,scss,sass}`, then `styles/**`, then `app/**`, then repo root. If exactly one candidate exists, use it. If multiple candidates exist and one is a clear entry file (`globals`, `main`, `index`, `styles`, `app`, or `base`), use that one. Otherwise prompt to pick. If no stylesheet is found, emit the CSS block to chat only.
+
+4. **Build the CSS class block.** Emit using the detected syntax flavor (CSS, SCSS, or Sass-indented) and indentation. Unresolved JSX expressions become `/* <property>: unresolved — was JS expression */` comments. Numeric values without units are preserved with an inline `/* verify unit */` comment.
+
+5. **Append to the target stylesheet.** Use `Edit` to append the class block, preceded by one blank line, preserving any trailing newline the file already had.
+
+6. **Emit refactored source.** Produce a clean version of the original input with the inline style removed:
+   - **HTML** — remove `style="..."` entirely if all declarations migrated; add the new class to the existing `class` attribute (or create one). All other attributes are preserved unchanged.
+   - **JSX** — same logic using `className`. Partially-migrated objects preserve remaining key/value pairs in the style prop.
+   - **`<style>` block** — emit a comment noting the rule was extracted; the `<style>` block is not rewritten automatically.
+
+7. **Print a summary.** Reports the class name (provided or auto-generated), any coercion warnings, the target stylesheet path, declaration count migrated, unresolved JS expression count, and numeric unit warnings.
+
+</Steps>
+
+## Output
+
+Given `<div style="background: var(--surface-1); padding: 1rem">`, the command produces:
+
+**Appended to stylesheet:**
+
+```css
+/* from: style attr on <div> */
+.div-bg {
+  background: var(--surface-1);
+  padding: 1rem;
+}
+```
+
+**Refactored HTML:**
+
+```html
+<div class="div-bg"></div>
+```
+
+## Name rules
+
+- Max **20 characters**, **kebab-case** only (`[a-z][a-z0-9-]*`).
+- If `name` is supplied, it is sanitised: lowercased, spaces and underscores replaced with `-`, invalid characters stripped, leading hyphens and digits stripped, trailing hyphens stripped, consecutive hyphens collapsed, truncated to 20 characters. If the result is empty, `AskUserQuestion` is used.
+- If `name` is omitted, the auto-name algorithm derives a tag abbreviation (`button` → `btn`, `div` → `div`, etc.) and a role hint from the first property (`background` → `bg`, `padding` → `pad`, `font-size` → `type`, etc.), then joins them: `div-bg`, `btn-pad`. Names of 3 characters or fewer trigger `AskUserQuestion` with the suggestion pre-filled.
+
+## JSX camelCase conversion
+
+JSX style object keys are converted from camelCase to kebab-case before emitting:
+
+```jsx
+// Input
+style={{ backgroundColor: theme.primary, fontSize: 16 }}
+
+// Output CSS
+background-color: /* unresolved — was JS expression */
+font-size: 16; /* verify unit */
+```
+
+<Aside type="tip">
+  Run `/inline-style-to-class` whenever you need to migrate a one-off inline
+  style into a reusable class. The command detects your project's stylesheet
+  automatically and appends to it — no manual copy-paste required.
+</Aside>
+
+<Aside type="note">
+  This command is the inverse of
+  [`/css-to-class`](/acss-plugins-docs/style-agent/commands/css-to-class), which
+  collapses many utility classes into one. Use both together to keep markup
+  clean and stylesheets organised.
+</Aside>

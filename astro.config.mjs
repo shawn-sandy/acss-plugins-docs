@@ -183,6 +183,38 @@ export default defineConfig({
           ],
         },
         {
+          label: "style-agent",
+          items: [
+            { label: "Overview", slug: "style-agent/overview" },
+            {
+              label: "Commands",
+              items: [
+                {
+                  label: "/css-to-class",
+                  slug: "style-agent/commands/css-to-class",
+                },
+                {
+                  label: "/inline-style-to-class",
+                  slug: "style-agent/commands/inline-style-to-class",
+                },
+              ],
+            },
+            {
+              label: "Skills",
+              items: [
+                {
+                  label: "css-to-class skill",
+                  slug: "style-agent/skills/css-to-class",
+                },
+                {
+                  label: "inline-style-to-class skill",
+                  slug: "style-agent/skills/inline-style-to-class",
+                },
+              ],
+            },
+          ],
+        },
+        {
           label: "Recipes",
           items: [
             {
