@@ -1,0 +1,81 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+early_access: false
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
+  auto_title_placeholder: "@coderabbitai"
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  sequence_diagrams: false
+  changed_files_summary: true
+
+  path_filters:
+    - "!dist/**"
+    - "!node_modules/**"
+    - "!.astro/**"
+    - "!package-lock.json"
+
+  path_instructions:
+    - path: "src/content/docs/**/*.mdx"
+      instructions: |
+        This is an Astro Starlight documentation page for the acss-kit and acss-utilities Claude Code plugins.
+
+        Check for:
+        - All internal links must include the `/acss-plugins-docs` base path prefix
+          (e.g. `/acss-plugins-docs/getting-started/introduction/`). Flag bare paths like `/getting-started/`.
+        - Pages that mention a color role, font size, component name, or utility class must embed at least
+          one visual primitive imported from `~/components/`:
+            - `<ColorSwatch roles={['primary']} />` for color roles
+            - `<TypeScale />` for font-size tokens
+            - `<ComponentPreview code={`...`} />` for HTML component demos
+            - `<UtilityExample class="..." property="...">` for utility classes
+          Flag content pages that name these concepts but include no visual primitives.
+        - Front-matter must have both `title` and `description` fields.
+        - MDX component imports should use `~/components/` path aliases, not relative paths.
+        - Do not duplicate token-resolution logic — that lives in `src/scripts/visuals.ts`.
+        - The sidebar in `astro.config.mjs` is hardcoded — Starlight does not auto-discover pages.
+          When a page is added, renamed, or deleted, a matching sidebar entry must be added,
+          updated, or removed in `astro.config.mjs`. Flag PRs where this is out of sync.
+
+    - path: "astro.config.mjs"
+      instructions: |
+        The `sidebar` array in this file is hardcoded — Starlight does not auto-discover pages.
+        When reviewing PRs that add, rename, or delete files in `src/content/docs/`, verify:
+        - Every new MDX slug has a matching sidebar entry.
+        - Every sidebar slug references an MDX file that actually exists.
+        - Removed pages are also removed from the sidebar.
+
+    - path: "src/styles/custom.css"
+      instructions: |
+        This site uses a light-first theme. Rules:
+        - Light-mode values go on `:root`.
+        - Dark-mode overrides go in `:root[data-theme='dark']`.
+        Never invert this pattern — it must match Starlight's upstream `props.css` contract.
+
+    - path: "src/styles/acss-tokens.css"
+      instructions: |
+        This file defines all `--color-*` and `--font-size-*` tokens consumed by ColorSwatch,
+        TypeScale, ComponentPreview, and UtilityExample. Token renames or removals ripple across
+        every MDX page that references those names. Flag any change that could break existing
+        visual primitive usage in content pages.
+
+    - path: "src/components/**/*.astro"
+      instructions: |
+        These are shared visual primitive components used in MDX pages. They import
+        `src/scripts/visuals.ts` for CSS token resolution — do not duplicate that logic inline.
+        Props must remain backwards-compatible unless all call-sites in `src/content/docs/` are
+        updated in the same PR.
+
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+
+chat:
+  auto_reply: true
