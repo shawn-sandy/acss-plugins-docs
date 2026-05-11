@@ -1,0 +1,109 @@
+---
+title: /css-to-class
+description: Extract a list of CSS utility classes from an HTML element or class string into a single, semantically named CSS class.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+Collapse a multi-class HTML element or plain class string into a single, semantically named CSS class. Resolves each utility token to its actual property/value declarations by grepping all `.css` files in your project — no external processor, no framework assumption.
+
+## Syntax
+
+```text
+/css-to-class [name]
+```
+
+## Arguments
+
+| Argument | Required | Description                                                                                                                                                    |
+| -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`   | No       | The CSS class name to use for the output. Max 20 characters, kebab-case. If omitted, a name is auto-generated from the most semantic tokens in the class list. |
+
+## Input forms
+
+| Form             | Example                                                                |
+| ---------------- | ---------------------------------------------------------------------- |
+| HTML element     | `<div class="testimonial flex-grid py-8 items-center" data-flex-grid>` |
+| Plain class list | `testimonial flex-grid py-8 items-center`                              |
+| Quoted string    | `"flex py-4 items-center justify-between"`                             |
+
+## Examples
+
+Extract from a plain class list:
+
+```text
+/css-to-class testimonial-grid
+```
+
+Paste an HTML element (the command accepts it directly):
+
+```html
+<div class="testimonial flex-grid py-8 items-center" data-flex-grid></div>
+```
+
+Let the command auto-generate the name:
+
+```text
+/css-to-class
+```
+
+## Workflow
+
+<Steps>
+
+1. **Parse input.** Accept a pasted HTML snippet or a bare class string (with or without surrounding quotes). Extract the `class="…"` value when HTML is present. Tokenise and deduplicate.
+
+2. **Determine the class name.** Apply the name rules. When auto-generating and the class list is all-utility or the generated name is ambiguous, ask via `AskUserQuestion` with the suggestion pre-filled.
+
+3. **Discover CSS files.** Run a `find` command to locate all `.css` files in the project, excluding `node_modules`, `.git`, `dist`, and `build`. If no `.css` files are found, all tokens will be unresolved.
+
+4. **Resolve declarations.** For each class token, apply CSS identifier escaping rules to build its selector form, then grep the discovered files for a matching selector. Resolved tokens have their property/value declarations extracted; unresolved tokens (custom or semantic classes not yet in any CSS file) become placeholder comments.
+
+5. **Emit the CSS class block.** Output a single class with resolved declarations inlined and unresolved tokens as `/* <token>: add declarations manually */` placeholder comments. Declarations inside `@media`, `@supports`, or `@layer` rules are wrapped in their at-rule context.
+
+6. **Emit the refactored HTML.** Replace the full `class="…"` value with the new single class name. All other attributes (`data-*`, `id`, `aria-*`) are preserved unchanged.
+
+7. **Print a summary.** Reports the original class count, the chosen name (provided or auto-generated), resolved declaration count, unresolved tokens, and any name coercion warnings.
+
+</Steps>
+
+## Output
+
+Given `<div class="testimonial flex-grid py-8 items-center" data-flex-grid>`, the command produces:
+
+**Extracted CSS class:**
+
+```css
+/* extracted: testimonial flex-grid py-8 items-center */
+.testimonial-grid {
+  /* testimonial: add declarations manually */
+  /* flex-grid: add declarations manually */
+  padding-block: 2rem;
+  align-items: center;
+}
+```
+
+**Refactored HTML:**
+
+```html
+<div class="testimonial-grid" data-flex-grid></div>
+```
+
+## Name rules
+
+- Max **20 characters**, **kebab-case** only (`[a-z][a-z0-9-]*`).
+- If `name` is supplied, it is sanitised: lowercased, spaces and underscores replaced with `-`, invalid characters stripped, leading hyphens and digits stripped, trailing hyphens stripped, consecutive hyphens collapsed, truncated to 20 characters. If the result is empty, `AskUserQuestion` is used.
+- If `name` is omitted, the auto-name algorithm partitions tokens into semantic and utility, then builds a candidate name from the first semantic token (or first utility token stripped of trailing numeric suffixes). When the result is ambiguous, `AskUserQuestion` is used with the suggestion pre-filled.
+
+<Aside type="tip">
+  Run `/css-to-class` on any element where the class list has grown unwieldy.
+  The command reads your project's actual CSS files, so resolved declarations
+  reflect the exact property/value pairs your styles define — not guesses.
+</Aside>
+
+<Aside type="note">
+  This command is the inverse of
+  [`/inline-style-to-class`](/acss-plugins-docs/style-agent/commands/inline-style-to-class),
+  which lifts inline styles out into a named class. Use both together to keep
+  markup clean.
+</Aside>

@@ -3,7 +3,7 @@ title: components skill
 description: Deep dive into how the components skill generates React components — the generation contract, dependency resolution, and file output conventions.
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps } from "@astrojs/starlight/components";
 
 The `components` skill drives `/kit-add`. It defines the seven-step generation workflow, the component reference system, and all the conventions that keep generated code consistent across every component.
 
@@ -19,7 +19,7 @@ The `components` skill is triggered by `/kit-add`. It can also be invoked by the
 
 2. **Step A — Resolve component name.** The skill looks up the requested name in the component reference catalogue (`skills/components/references/catalog.md`). Names are normalized (case-insensitive, hyphenated or camelCase both accepted). If a name doesn't match, the skill lists the closest alternatives and stops.
 
-3. **Step B — Verify sass and copy `ui.tsx`.** Checks `devDependencies` in `package.json` for `sass`. If missing, halts with an install command. Then checks whether `ui.tsx` exists in the components directory — if not, copies `assets/foundation/ui.tsx` there. The foundation file is never overwritten on subsequent runs.
+3. **Step B — Verify sass and copy `ui.tsx` and `foundation.css`.** Checks `devDependencies` in `package.json` for `sass`. If missing, halts with an install command. Then applies the three-case foundation install matrix (see [Foundation CSS install](/acss-plugins-docs/acss-kit/skills/components#foundation-css-install) below).
 
 4. **Step C — Resolve dependency tree.** Reads the component's spec doc for its `dependencies:` list, then recursively resolves each dependency's dependencies. The result is a flat, deduplicated list ordered from leaf to root (bottom-up).
 
@@ -30,6 +30,24 @@ The `components` skill is triggered by `/kit-add`. It can also be invoked by the
 7. **Step F — Display summary.** After all files are written, the skill prints a summary table and the import statement(s) to add to your code.
 
 </Steps>
+
+## Foundation CSS install
+
+On Step B, the skill applies a three-case matrix to determine whether to copy `foundation.css` and the `foundation/sass/` source tree alongside `ui.tsx`:
+
+| Project state                                                 | Action                                                                                                                                |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Neither `ui.tsx` nor `foundation.css` present (fresh install) | Copy `ui.tsx`, `foundation.css`, and the full `foundation/sass/` tree; print an import hint                                           |
+| `ui.tsx` present, `foundation.css` absent (existing install)  | Prompt the developer before copying — explains the CSS reset, `@layer` ordering, and spacing/shadow tokens; the developer can opt out |
+| Both `ui.tsx` and `foundation.css` present                    | Skip silently (idempotent)                                                                                                            |
+
+`foundation.css` declares the canonical `@layer` cascade order for consumer projects:
+
+```css
+@layer foundation, components, utilities, theme;
+```
+
+The cascade outcome — **theme > utilities > components > foundation** — means theme tokens always win. Import `foundation.css` once in your project entrypoint before any component SCSS.
 
 ## The generation contract
 
@@ -66,13 +84,14 @@ Each component has a spec doc in `skills/components/references/components/<name>
 
 All component tokens follow the `--comp-role-descriptor` pattern:
 
-| Segment | Meaning | Example |
-|---|---|---|
-| `comp` | Component abbreviation | `btn`, `card`, `dlg` |
-| `role` | Semantic role | `bg`, `color`, `border`, `radius` |
-| `descriptor` | Optional modifier | `hover`, `focus`, `active`, `disabled` |
+| Segment      | Meaning                | Example                                |
+| ------------ | ---------------------- | -------------------------------------- |
+| `comp`       | Component abbreviation | `btn`, `card`, `dlg`                   |
+| `role`       | Semantic role          | `bg`, `color`, `border`, `radius`      |
+| `descriptor` | Optional modifier      | `hover`, `focus`, `active`, `disabled` |
 
 Approved abbreviations:
+
 - `bg` → background
 - `bd` / `border` → border
 - `rad` / `radius` → border-radius
@@ -91,11 +110,11 @@ Generated TypeScript interfaces are always inline in the component file — neve
 // ✓ Inline types — what the skill generates
 export interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  variant?: "primary" | "secondary" | "ghost" | "danger";
 }
 
 // ✗ Imported types — the skill never does this
-import type { ButtonProps } from '../types/button';
+import type { ButtonProps } from "../types/button";
 ```
 
 This keeps each component self-contained and makes it easy to copy a single file into any project.
@@ -135,6 +154,7 @@ The disabled visual state is styled via the CSS selector `[aria-disabled="true"]
 Generated components are meant to be edited. After running `/kit-add`, you own the files. Common extension patterns:
 
 **Add a new variant** — add a `data-variant` value and its CSS:
+
 ```scss
 &[data-variant="outline"] {
   --btn-bg: transparent;
@@ -143,6 +163,7 @@ Generated components are meant to be edited. After running `/kit-add`, you own t
 ```
 
 **Add a prop** — extend the TypeScript interface and add the conditional attribute:
+
 ```tsx
 interface ButtonProps {
   loading?: boolean;
@@ -152,10 +173,14 @@ aria-busy={loading}
 ```
 
 **Override a token** — in your app CSS, not in the generated file:
+
 ```css
-.btn { --btn-radius: 9999px; }
+.btn {
+  --btn-radius: 9999px;
+}
 ```
 
 <Aside type="note">
-The skill never overwrites existing files, so edits you make to generated components are safe — re-running `/kit-add` for the same component is a no-op.
+  The skill never overwrites existing files, so edits you make to generated
+  components are safe — re-running `/kit-add` for the same component is a no-op.
 </Aside>

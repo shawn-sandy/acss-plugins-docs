@@ -3,30 +3,36 @@ title: style-tune skill (pilot)
 description: Adjust your app's visual feel with natural language adjectives — the skill routes to the right CSS tokens and validates WCAG before writing.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 `style-tune` is a pilot skill that maps natural language visual intent to CSS token changes, with WCAG pre-validation and atomic rollback.
 
 <Aside type="note">
-This is a **pilot skill** validating a per-feel routing pattern. The intent vocabulary and routing logic are actively refined.
+  This is a **pilot skill** validating a per-feel routing pattern. The intent
+  vocabulary and routing logic are actively refined. Graduates to v1 once
+  auto-trigger reliability is observed across a full release cycle on real user
+  prompts and the v2 component scope (Field, Checkbox, Icon, Link, List,
+  Popover, Table, Tag, Badge, Img) is folded into the intent vocabulary.
+  Failure-mode fallbacks for unsupported components and modifiers are documented
+  in the plugin's `docs/troubleshooting.md`.
 </Aside>
 
 ## Trigger phrases
 
 The skill activates on adjective + component (or theme-layer) combinations:
 
-| Phrase | Routes to |
-|---|---|
-| "warmer button" | `--btn-bg` hue shift toward amber |
-| "cooler card" | `--card-bg` hue shift toward blue |
-| "softer dialog" | `--dlg-radius` increase |
-| "sharper inputs" | `--input-radius` set to 0 or near-0 |
-| "larger button text" | `--btn-font-size` increase |
-| "smaller badge" | `--badge-padding-x/y` decrease |
-| "bolder primary" | `--color-primary` chroma increase |
-| "tone down the primary" | `--color-primary` chroma decrease |
-| "more elevated cards" | `--card-shadow` increase |
-| "flatter surfaces" | Component + theme shadow tokens decrease |
+| Phrase                  | Routes to                                |
+| ----------------------- | ---------------------------------------- |
+| "warmer button"         | `--btn-bg` hue shift toward amber        |
+| "cooler card"           | `--card-bg` hue shift toward blue        |
+| "softer dialog"         | `--dlg-radius` increase                  |
+| "sharper inputs"        | `--input-radius` set to 0 or near-0      |
+| "larger button text"    | `--btn-font-size` increase               |
+| "smaller badge"         | `--badge-padding-x/y` decrease           |
+| "bolder primary"        | `--color-primary` chroma increase        |
+| "tone down the primary" | `--color-primary` chroma decrease        |
+| "more elevated cards"   | `--card-shadow` increase                 |
+| "flatter surfaces"      | Component + theme shadow tokens decrease |
 
 ## Two-layer routing
 
@@ -54,18 +60,18 @@ Component-layer changes edit the component's `.scss` file directly.
 
 ## Intent vocabulary
 
-| Modifier | Target tokens | Delta |
-|---|---|---|
-| warmer | `--*-bg`, `--color-*` | H° + 15–30° toward amber (H80°) |
-| cooler | `--*-bg`, `--color-*` | H° - 15–30° toward blue (H240°) |
-| softer | `--*-radius` | radius × 1.5 (min 4px) |
-| sharper | `--*-radius` | radius × 0.5 (min 0) |
-| larger / bigger | `--*-font-size`, `--*-padding-*` | × 1.125 |
-| smaller | `--*-font-size`, `--*-padding-*` | × 0.875 |
-| bolder | `--*-bg`, `--color-*` chroma | C × 1.2 |
-| subtler / muted | `--*-bg`, `--color-*` chroma | C × 0.8 |
-| more elevated | `--*-shadow` | next shadow step up |
-| flatter | `--*-shadow` | next shadow step down or removed |
+| Modifier        | Target tokens                    | Delta                            |
+| --------------- | -------------------------------- | -------------------------------- |
+| warmer          | `--*-bg`, `--color-*`            | H° + 15–30° toward amber (H80°)  |
+| cooler          | `--*-bg`, `--color-*`            | H° - 15–30° toward blue (H240°)  |
+| softer          | `--*-radius`                     | radius × 1.5 (min 4px)           |
+| sharper         | `--*-radius`                     | radius × 0.5 (min 0)             |
+| larger / bigger | `--*-font-size`, `--*-padding-*` | × 1.125                          |
+| smaller         | `--*-font-size`, `--*-padding-*` | × 0.875                          |
+| bolder          | `--*-bg`, `--color-*` chroma     | C × 1.2                          |
+| subtler / muted | `--*-bg`, `--color-*` chroma     | C × 0.8                          |
+| more elevated   | `--*-shadow`                     | next shadow step up              |
+| flatter         | `--*-shadow`                     | next shadow step down or removed |
 
 ## OKLCH delta application
 
@@ -127,7 +133,9 @@ style-tune: Another +20° step?  (current: H°290)
 ```
 
 <Aside type="tip">
-If `style-tune` adjusts a theme-layer token (like `--color-primary`), it also re-validates the paired hover state (`--color-primary-hover`) to ensure both stay in sync.
+  If `style-tune` adjusts a theme-layer token (like `--color-primary`), it also
+  re-validates the paired hover state (`--color-primary-hover`) to ensure both
+  stay in sync.
 </Aside>
 
 ## Rollback example

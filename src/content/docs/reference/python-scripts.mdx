@@ -4,6 +4,7 @@ description: API reference for every Python script in acss-kit and acss-utilitie
 ---
 
 import { Aside } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
 
 All scripts use **Python 3 stdlib only** — no pip dependencies. They follow one of two contract families.
 
@@ -145,9 +146,101 @@ python3 verify_integration.py [--project-root=<path>] [--strict]
 
 ---
 
+### `generate_color_scale.py`
+
+**Contract:** Generator
+**Location:** `plugins/acss-kit/scripts/generate_color_scale.py`
+
+Generates a 10-step OKLCH color scale (steps 50–900) from a seed hex color. Used by [`/color-scale`](/acss-plugins-docs/acss-kit/commands/color-scale).
+
+**Inputs (CLI arguments):**
+
+```bash
+python3 generate_color_scale.py <hex-color> [--name=<name>] [--format=css|json|both]
+```
+
+| Argument    | Required | Description                                        |
+| ----------- | -------- | -------------------------------------------------- |
+| `hex-color` | Yes      | Seed color as `#rrggbb` or `#rgb`                  |
+| `--name`    | No       | CSS variable prefix, kebab-case (default: `scale`) |
+| `--format`  | No       | `css`, `json`, or `both` (default: `both`)         |
+
+**Output (stdout):** JSON block then CSS block, separated by a blank line (when `--format=both`).
+
+JSON shape:
+
+```json
+{
+  "name": "primary",
+  "seed": "#4f46e5",
+  "seed_oklch": { "L": 0.4823, "C": 0.2108, "H": 264.05 },
+  "steps": [
+    {
+      "step": 50,
+      "hex": "#f5f3ff",
+      "oklch": "oklch(0.965 0.0213 264.1)",
+      "css_var": "--color-primary-50",
+      "clamped": false,
+      "reasons": []
+    },
+    {
+      "step": 900,
+      "hex": "#1e1b4b",
+      "oklch": "oklch(0.141 0.0812 264.1)",
+      "css_var": "--color-primary-900",
+      "clamped": true,
+      "reasons": ["P3 gamut exceeded at chroma 0.24; clamped to sRGB boundary"]
+    }
+  ]
+}
+```
+
+CSS output uses the `var(--x, <fallback>)` convention required by acss-kit.
+
+The scale is generated from a single seed color — below is an example of the `primary` role that `/color-scale` would expand into a 10-step scale:
+
+<ColorSwatch roles={["primary"]} table={false} />
+
+**Exit codes:** 0 = success, 1 = invalid hex argument, 2 = IO/usage error
+
+---
+
+### `wrap_foundation_layer.py`
+
+**Contract:** Generator
+**Location:** `plugins/acss-kit/scripts/wrap_foundation_layer.py`
+
+Second step of the `foundation.css` refresh pipeline. Wraps a compiled Sass output in `@layer foundation { }`, prepends the canonical file header (including upstream SHA pin and patch list), and appends the P3 `prefers-reduced-motion` patch.
+
+Run after compiling with Sass:
+
+```bash
+npx sass --style=expanded --no-source-map \
+  plugins/acss-kit/assets/foundation/sass/_index.scss:_foundation_raw.css
+python3 plugins/acss-kit/scripts/wrap_foundation_layer.py \
+  _foundation_raw.css plugins/acss-kit/assets/foundation/foundation.css
+```
+
+**Inputs:**
+
+```bash
+python3 wrap_foundation_layer.py <raw_css_in> <foundation_css_out>
+```
+
+**Output:** Writes `<foundation_css_out>` with:
+
+- A file header comment declaring the upstream SHA and patches P1–P4
+- `@layer foundation, components, utilities, theme;` cascade order declaration
+- All input CSS wrapped in `@layer foundation { }`
+- P3 `prefers-reduced-motion` block appended
+
+**Exit codes:** 0 = success, 2 = usage/IO error
+
+---
+
 ### `generate_palette.py`
 
-**Contract:** Generator  
+**Contract:** Generator
 **Location:** `plugins/acss-kit/scripts/generate_palette.py`
 
 Converts a hex seed color into a full semantic role palette using OKLCH math and WCAG 2.2 AA validation.

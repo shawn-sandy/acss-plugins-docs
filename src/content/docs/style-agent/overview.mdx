@@ -1,0 +1,59 @@
+---
+title: style-agent Overview
+description: Framework-agnostic CSS authoring plugin for Claude Code — write, extract, and organise CSS utilities and classes in any web project.
+---
+
+import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
+
+**style-agent** is a framework-agnostic CSS authoring plugin for Claude Code. It provides commands for extracting multi-class utility soup into single semantic CSS classes and converting inline styles to reusable stylesheet rules — with no external processor or framework assumption.
+
+Works with plain CSS, compiled SCSS output, Tailwind, or any utility-first workflow. Declaration lookup reads `.css` files in your project, so SCSS source files are supported via their compiled output.
+
+## Install
+
+```text
+/plugin marketplace add shawn-sandy/agentic-acss-plugins
+/plugin install style-agent@shawn-sandy-agentic-acss-plugins
+```
+
+## Commands
+
+<CardGrid>
+  <Card title="/css-to-class" icon="seti:css">
+    Extract a list of CSS utility classes from an HTML element or class string into a single, semantically named CSS class. Resolves declarations by grepping your project's own CSS files.
+  </Card>
+  <Card title="/inline-style-to-class" icon="pencil">
+    Convert an inline `style` attribute, JSX `style` object, or `<style>` block into a single named CSS class and append it to the project stylesheet.
+  </Card>
+</CardGrid>
+
+| Command                                                                                          | What it does                                                           |
+| ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| [`/css-to-class [name]`](/acss-plugins-docs/style-agent/commands/css-to-class)                   | Collapse a multi-class element or class string into one semantic class |
+| [`/inline-style-to-class [name]`](/acss-plugins-docs/style-agent/commands/inline-style-to-class) | Migrate inline styles to a named class in your stylesheet              |
+
+## Skills
+
+Both commands delegate all their behavior to a corresponding skill file. The skill owns argument handling, name generation, CSS discovery, and output formatting.
+
+| Skill                                                                                  | Driven by                |
+| -------------------------------------------------------------------------------------- | ------------------------ |
+| [`css-to-class`](/acss-plugins-docs/style-agent/skills/css-to-class)                   | `/css-to-class`          |
+| [`inline-style-to-class`](/acss-plugins-docs/style-agent/skills/inline-style-to-class) | `/inline-style-to-class` |
+
+## Design principles
+
+**No external processor.** Both commands work by grepping `.css` files already present in your project. There is no dependency on PostCSS, Tailwind CLI, or any build tool.
+
+**Framework-agnostic.** Whether your project uses plain CSS, compiled SCSS, Tailwind, or another utility-first system, the plugin reads what is already on disk.
+
+**Name rules are consistent.** Both commands apply the same kebab-case sanitisation pipeline (max 20 characters) to any supplied name, and offer the same auto-generation algorithm when no name is given.
+
+**The two commands are inverses.** `/css-to-class` collapses many classes into one. `/inline-style-to-class` lifts inline declarations out into a class. Together they cover the two most common style-migration tasks.
+
+## Version history
+
+| Version | Changes                              |
+| ------- | ------------------------------------ |
+| 0.2.0   | Added `/inline-style-to-class`       |
+| 0.1.0   | Initial release with `/css-to-class` |
