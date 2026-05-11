@@ -288,6 +288,79 @@ WCAG validation — src/styles/theme/light.css
 
 ---
 
+### `generate_color_scale.py`
+
+**Contract:** Generator  
+**Location:** `plugins/acss-kit/scripts/generate_color_scale.py`
+
+Generates a 10-step OKLCH color scale (steps 50–900) from a seed hex color. Used by the [`/color-scale`](/acss-plugins-docs/acss-kit/commands/color-scale) command.
+
+**Inputs:**
+
+```bash
+python3 generate_color_scale.py <hex-color> [--name=<name>] [--format=css|json|both]
+```
+
+| Argument    | Required | Description                                               |
+| ----------- | -------- | --------------------------------------------------------- |
+| `hex-color` | Yes      | Seed color as `#rrggbb` or `#rgb`                         |
+| `--name`    | No       | CSS variable prefix, kebab-case (default: `scale`)        |
+| `--format`  | No       | Output format: `css`, `json`, or `both` (default: `both`) |
+
+**Output (stdout) — JSON shape (`--format=json` or `--format=both`):**
+
+```json
+{
+  "name": "primary",
+  "seed": "#4f46e5",
+  "seed_oklch": { "L": 0.4823, "C": 0.2108, "H": 264.05 },
+  "steps": [
+    {
+      "step": 50,
+      "hex": "#f5f3ff",
+      "oklch": "oklch(0.965 0.0213 264.1)",
+      "css_var": "--color-primary-50",
+      "clamped": false,
+      "reasons": []
+    },
+    {
+      "step": 900,
+      "hex": "#1e1b4b",
+      "oklch": "oklch(0.141 0.0812 264.1)",
+      "css_var": "--color-primary-900",
+      "clamped": false,
+      "reasons": []
+    }
+  ],
+  "reasons": []
+}
+```
+
+Each `steps` entry includes a `clamped` boolean and a `reasons` array that indicate whether gamut clamping occurred at that lightness level. The top-level `reasons` array collects all per-step clamp messages.
+
+**Output (stdout) — CSS block (`--format=css` or `--format=both`):**
+
+```css
+:root {
+  --color-primary-50: var(--color-primary-50, #f5f3ff);
+  --color-primary-100: var(--color-primary-100, #ede9fe);
+  --color-primary-200: var(--color-primary-200, #ddd6fe);
+  --color-primary-300: var(--color-primary-300, #c4b5fd);
+  --color-primary-400: var(--color-primary-400, #a78bfa);
+  --color-primary-500: var(--color-primary-500, #8b5cf6);
+  --color-primary-600: var(--color-primary-600, #7c3aed);
+  --color-primary-700: var(--color-primary-700, #6d28d9);
+  --color-primary-800: var(--color-primary-800, #5b21b6);
+  --color-primary-900: var(--color-primary-900, #4c1d95);
+}
+```
+
+When `--format=both`, JSON is emitted first, followed by a blank line, then the CSS block.
+
+**Exit codes:** 0 = success, 2 = invalid input (bad hex, bad name, or unknown `--format`)
+
+---
+
 ### `oklch_shift.py`
 
 **Contract:** Generator  
