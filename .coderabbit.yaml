@@ -76,7 +76,3 @@ reviews:
 
 chat:
   auto_reply: true
-
-commit_message:
-  pattern: "^(feat|fix|docs|ci|chore|refactor|test|style|perf|revert)(\\(.+\\))?: .{1,72}"
-  error: "Commit messages must follow Conventional Commits: <type>: <description> (types: feat|fix|docs|ci|chore|refactor|test|style|perf|revert)"
