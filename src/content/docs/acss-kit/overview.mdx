@@ -31,6 +31,7 @@ import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
 | [`/kit-list`](/acss-plugins-docs/acss-kit/commands/kit-list)           | Browse the component catalogue or inspect a specific component                         |
 | [`/kit-sync`](/acss-plugins-docs/acss-kit/commands/kit-sync)           | Bulk-install every component, foundation, and starter theme in one shot                |
 | [`/kit-update`](/acss-plugins-docs/acss-kit/commands/kit-update)       | Re-copy unmodified components after a plugin upgrade, preserving your edits            |
+| [`/color-scale`](/acss-plugins-docs/acss-kit/commands/color-scale)     | Generate a 10-step OKLCH color scale from a hex value, CSS named color, or theme role  |
 | [`/theme-create`](/acss-plugins-docs/acss-kit/commands/theme-create)   | Generate a full light/dark theme from a seed hex color                                 |
 | [`/theme-brand`](/acss-plugins-docs/acss-kit/commands/theme-brand)     | Scaffold a brand-specific theme override file                                          |
 | [`/theme-extract`](/acss-plugins-docs/acss-kit/commands/theme-extract) | Extract brand colors from an image or Figma URL                                        |
@@ -40,14 +41,17 @@ import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
 
 ## Skills
 
-| Skill               | Triggered by                                                       | Purpose                                                          |
-| ------------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| `setup`             | `/setup`                                                           | One-shot project bootstrap (ui.tsx, target, optional seed theme) |
-| `components`        | `/kit-add`                                                         | Full component generation workflow (Steps A–F)                   |
-| `component-creator` | `/kit-create` or natural language ("create a primary pill button") | Generate a single component instance from a description          |
-| `styles`            | All `/theme-*` commands                                            | OKLCH palette math, WCAG validation, role catalogue              |
-| `component-form`    | Natural language ("build a signup form")                           | Auto-generates accessible form components                        |
-| `style-tune`        | `/style-tune` or natural language ("warmer button")                | Adjusts visual feel via token edits + WCAG validation            |
+| Skill               | Triggered by                                                       | Purpose                                                              |
+| ------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| `setup`             | `/setup`                                                           | One-shot project bootstrap (ui.tsx, target, optional seed theme)     |
+| `components`        | `/kit-add`, `/kit-list`                                            | Full component generation workflow (Steps A–F) and catalogue listing |
+| `components-html`   | `/kit-add-html`                                                    | Static HTML + SCSS + vanilla JS generation for non-React projects    |
+| `component-creator` | `/kit-create` or natural language ("create a primary pill button") | Generate a single component instance from a description              |
+| `kit-sync`          | `/kit-sync`, `/kit-update`                                         | Bulk install and drift-safe re-copy with manifest tracking           |
+| `styles`            | All `/theme-*` and `/color-scale` commands                         | OKLCH palette math, WCAG validation, role catalogue, color scales    |
+| `prompt-book`       | `/prompt-book`                                                     | Display the bundled copy-paste prompt catalogue                      |
+| `component-form`    | Natural language ("build a signup form")                           | Auto-generates accessible form components (pilot)                    |
+| `style-tune`        | `/style-tune` or natural language ("warmer button")                | Adjusts visual feel via token edits + WCAG validation (pilot)        |
 
 ## Key design decisions
 
