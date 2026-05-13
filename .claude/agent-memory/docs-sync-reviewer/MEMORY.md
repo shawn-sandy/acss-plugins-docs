@@ -5,8 +5,8 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 # Upstream layout cache
 
-- **verified-at-sha:** `ead1d1b`
-- **verified-at:** `2026-05-10T11:50:35Z`
+- **verified-at-sha:** `128506f`
+- **verified-at:** `2026-05-13T00:00:00Z`
 
 ## Plugin roots
 
@@ -24,4 +24,4 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 ## Notes
 
-- `style-agent` is present upstream but has no corresponding docs section in this repo. The agent's "new plugin" rule (in the Doc-to-source mapping table) flags this for human decision — caching its path here only avoids re-running `find`, it does not auto-create docs.
+- `style-agent` is present upstream and has a corresponding docs section in this repo at `src/content/docs/style-agent/`.
