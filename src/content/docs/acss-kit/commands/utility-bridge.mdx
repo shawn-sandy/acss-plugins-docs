@@ -1,0 +1,120 @@
+---
+title: /utility-bridge
+description: Regenerate token-bridge.css against the active acss-kit theme, with mandatory dark-mode parity.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+Regenerate `token-bridge.css` so the fpkit-style aliases (`--color-error`, `--color-error-bg`, `--color-primary-light`, …) resolve to your active acss-kit theme. Always emits both `:root` and `[data-theme="dark"]` blocks.
+
+<Aside type="note">
+  This command moved to **acss-kit v1.0.0** from the now-deprecated
+  `acss-utilities` plugin. If you have `acss-utilities` installed, see the
+  [Migration Guide](/acss-plugins-docs/acss-kit/migration-v1) for upgrade steps.
+</Aside>
+
+## Syntax
+
+```text
+/utility-bridge [--theme=<file>]
+```
+
+## Options
+
+| Option           | Default       | Description                         |
+| ---------------- | ------------- | ----------------------------------- |
+| `--theme=<file>` | Auto-detected | Override the source theme file path |
+
+## Examples
+
+Regenerate against the auto-detected theme:
+
+```text
+/utility-bridge
+```
+
+Regenerate against a specific theme file:
+
+```text
+/utility-bridge --theme=src/styles/theme/light.css
+```
+
+Regenerate against a brand override:
+
+```text
+/utility-bridge --theme=src/styles/theme/brand-forest.css
+```
+
+## Theme detection
+
+Without `--theme`, the command looks for your theme in this order:
+
+1. `src/styles/theme/light.css` and `dark.css`
+2. Any `.css` file in `src/styles/theme/` containing `--color-primary`
+3. Built-in defaults from `assets/utilities/token-bridge.css` (warns the user)
+
+## What the bridge generates
+
+The bridge maps **fpkit-style utility names** to **acss-kit role names** and synthesizes derived variants using `color-mix()`:
+
+```css
+:root {
+  --color-error: var(--color-danger, #dc2626);
+  --color-error-bg: color-mix(
+    in oklch,
+    var(--color-danger, #dc2626) 12%,
+    var(--color-background, #ffffff)
+  );
+  --color-primary-light: color-mix(
+    in oklch,
+    var(--color-primary, #4f46e5) 80%,
+    white
+  );
+}
+
+[data-theme="dark"] {
+  --color-error: var(--color-danger, #f87171);
+  --color-error-bg: color-mix(
+    in oklch,
+    var(--color-danger, #f87171) 18%,
+    var(--color-background, #0f172a)
+  );
+  --color-primary-light: color-mix(
+    in oklch,
+    var(--color-primary, #7dd3fc) 70%,
+    black
+  );
+}
+```
+
+## Dark-mode parity validation
+
+After generating the bridge, `validate_utilities.py` checks that every alias defined in `:root` also exists in `[data-theme="dark"]`. If parity fails, the command reports the missing aliases and does not write the file.
+
+## Automatic regeneration
+
+From acss-kit v1.0.0, every `/theme-create` and `/theme-update` run automatically regenerates `token-bridge.css` via `generate_bridge.py`. You only need to call `/utility-bridge` directly when you update the theme after the initial install and don't want to re-copy the full utilities bundle.
+
+## When to run `/utility-bridge`
+
+- After `/theme-update` (a role value changed)
+- After `/theme-brand` (brand overlay applied)
+- After manually editing a theme CSS file
+- After migrating from acss-utilities to acss-kit v1.0.0 (one-time refresh)
+
+<Aside type="tip">
+  If you have a custom `token-bridge.css` with manually added aliases, move
+  those additions to `assets/utilities/vocab.json` before running
+  `/utility-bridge` so they survive regeneration.
+</Aside>
+
+## Output location
+
+The regenerated bridge is written to the same location as the existing `token-bridge.css`, auto-detected from `.acss-target.json` or the detected styles directory.
+
+## Related
+
+- [`/utility-add`](/acss-plugins-docs/acss-kit/commands/utility-add) — copy the full utilities bundle
+- [`/utility-list`](/acss-plugins-docs/acss-kit/commands/utility-list) — browse families and classes
+- [`/utility-tune`](/acss-plugins-docs/acss-kit/commands/utility-tune) — adjust token settings
+- [`utilities skill`](/acss-plugins-docs/acss-kit/skills/utilities) — full skill reference

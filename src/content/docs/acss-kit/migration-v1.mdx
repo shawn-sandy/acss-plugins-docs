@@ -1,0 +1,83 @@
+---
+title: Migration Guide — acss-kit v1.0.0
+description: Upgrade from acss-utilities + acss-kit v0.x to acss-kit v1.0.0, which absorbs all utility commands.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+acss-kit v1.0.0 absorbs the `acss-utilities` plugin. All four `/utility-*`
+commands now live inside `acss-kit`. The `acss-utilities` plugin is tombstoned
+at v1.0.0 — existing installs keep working but no new features will be added.
+
+## Step 1 — Reinstall plugins
+
+```text
+/plugin uninstall acss-utilities@shawn-sandy-agentic-acss-plugins
+/plugin update acss-kit@shawn-sandy-agentic-acss-plugins
+```
+
+## Step 2 — Command changes
+
+| Old command                        | New command                     | Notes                                             |
+| ---------------------------------- | ------------------------------- | ------------------------------------------------- |
+| `/kit-add-html <name>`             | `/kit-add --target=html <name>` | Old form still works; prints a deprecation notice |
+| (acss-utilities) `/utility-add`    | `/utility-add`                  | Now in acss-kit; arguments unchanged              |
+| (acss-utilities) `/utility-bridge` | `/utility-bridge`               | Now in acss-kit; arguments unchanged              |
+| (acss-utilities) `/utility-list`   | `/utility-list`                 | Now in acss-kit; arguments unchanged              |
+| (acss-utilities) `/utility-tune`   | `/utility-tune`                 | Now in acss-kit; arguments unchanged              |
+
+No CSS class names changed. Your existing `utilities.css` and `token-bridge.css`
+files in your project work without modification.
+
+## Step 3 — Token bridge is now regenerated automatically
+
+From v1.0.0, every `/theme-create` and `/theme-update` run automatically
+regenerates `token-bridge.css` from your active theme via `generate_bridge.py`.
+The generated bridge uses `var()` chains with fresh hex fallbacks extracted from
+your current `light.css`/`dark.css`.
+
+<Aside type="caution">
+  If you manually edited `token-bridge.css` to add extra aliases, move those
+  additions to `assets/utilities/vocab.json` before upgrading so they survive
+  regeneration.
+</Aside>
+
+## Step 4 — One-time bridge refresh
+
+If you already have a `token-bridge.css` from a previous `acss-utilities`
+install, regenerate it once after upgrading to pick up fresh hex fallbacks:
+
+```text
+/utility-bridge
+```
+
+## Step 5 — Asset path changes (plugin developers only)
+
+If you reference plugin assets in custom tooling:
+
+| Old path                                               | New path                                                  |
+| ------------------------------------------------------ | --------------------------------------------------------- |
+| `plugins/acss-utilities/assets/utilities.css`          | `plugins/acss-kit/assets/utilities/utilities.css`         |
+| `plugins/acss-utilities/assets/token-bridge.css`       | `plugins/acss-kit/assets/utilities/token-bridge.css`      |
+| `plugins/acss-utilities/assets/utilities.tokens.json`  | `plugins/acss-kit/assets/utilities/utilities.tokens.json` |
+| `plugins/acss-utilities/assets/utilities/<family>.css` | `plugins/acss-kit/assets/utilities/<family>.css`          |
+| `plugins/acss-utilities/scripts/generate_utilities.py` | `plugins/acss-kit/scripts/generate_utilities.py`          |
+| `plugins/acss-utilities/scripts/validate_utilities.py` | `plugins/acss-kit/scripts/validate_utilities.py`          |
+| `plugins/acss-utilities/scripts/migrate_classnames.py` | `plugins/acss-kit/scripts/migrate_classnames.py`          |
+
+## Rollback
+
+To stay on v0.x:
+
+```text
+/plugin install acss-kit@0.13.0@shawn-sandy-agentic-acss-plugins
+/plugin install acss-utilities@0.5.0@shawn-sandy-agentic-acss-plugins
+```
+
+## Related
+
+- [`/utility-add`](/acss-plugins-docs/acss-kit/commands/utility-add)
+- [`/utility-bridge`](/acss-plugins-docs/acss-kit/commands/utility-bridge)
+- [`/utility-list`](/acss-plugins-docs/acss-kit/commands/utility-list)
+- [`/utility-tune`](/acss-plugins-docs/acss-kit/commands/utility-tune)
+- [`utilities skill`](/acss-plugins-docs/acss-kit/skills/utilities)

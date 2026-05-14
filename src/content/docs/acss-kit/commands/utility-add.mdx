@@ -1,0 +1,104 @@
+---
+title: /utility-add
+description: Copy the prebuilt utilities.css bundle and token-bridge.css into a target React project.
+---
+
+import { Steps, Aside } from "@astrojs/starlight/components";
+
+Copy the bundled `utilities.css` and `token-bridge.css` into your React project. Auto-detects your styles directory and reports the recommended import order.
+
+<Aside type="note">
+  This command moved to **acss-kit v1.0.0** from the now-deprecated
+  `acss-utilities` plugin. If you have `acss-utilities` installed, see the
+  [Migration Guide](/acss-plugins-docs/acss-kit/migration-v1) for upgrade steps.
+</Aside>
+
+## Syntax
+
+```text
+/utility-add [--target=<dir>] [--families=<list>] [--no-bridge]
+```
+
+## Options
+
+| Option              | Default         | Description                                                                                 |
+| ------------------- | --------------- | ------------------------------------------------------------------------------------------- |
+| `--target=<dir>`    | Auto-detected   | Override the destination directory                                                          |
+| `--families=<list>` | All families    | Comma-separated list of family partials to include (e.g. `color-bg,spacing,flex`)           |
+| `--no-bridge`       | Bridge included | Skip copying `token-bridge.css` — use when the project ships its own theme without acss-kit |
+
+## Examples
+
+Full install (auto-detect directory):
+
+```text
+/utility-add
+```
+
+Install to a custom directory:
+
+```text
+/utility-add --target=app/styles/
+```
+
+Install only specific families:
+
+```text
+/utility-add --families=color-bg,color-text,spacing,flex,display
+```
+
+Install without the token bridge (standalone use without acss-kit):
+
+```text
+/utility-add --no-bridge
+```
+
+## Workflow
+
+<Steps>
+
+1. **Detect styles directory** — runs `detect_utility_target.py`. Uses the `utilitiesDir` from `.acss-target.json` if present; falls back to `src/styles/`, `src/css/`, `app/styles/`, or `styles/` in that order. Pass `--target=<dir>` to override.
+
+2. **Detect build stack** — runs `detect_stack.py` to classify framework and entrypoint. Result is merged into `.acss-target.json` under a `stack` key. If acss-kit is not installed, this step is skipped with a warning.
+
+3. **Copy files** — copies the prebuilt `utilities.css` verbatim (or a filtered bundle when `--families=` is set) and `token-bridge.css` (unless `--no-bridge`) to the detected directory.
+
+4. **Print import order** — reports the required import sequence:
+
+   ```ts
+   import "./styles/token-bridge.css"; // first — defines the aliases
+   import "./styles/utilities.css"; // then — utility classes consume them
+   ```
+
+5. **Print summary** — files written, total bundle size, families included.
+
+6. **Verify integration** — runs `verify_integration.py` against the recorded entry point (skipped when acss-kit is absent). Missing imports are surfaced as a numbered fix-up list; the command never auto-edits your entry file.
+
+</Steps>
+
+<Aside type="caution">
+  Import order is critical. `token-bridge.css` must load before `utilities.css`.
+  Loading them in reverse order means color utilities fall back to hex values
+  instead of your theme tokens.
+</Aside>
+
+## Partial family install
+
+To install only the families you need (reduces bundle size):
+
+```text
+/utility-add --families=color-bg,color-text,spacing,flex,display
+```
+
+This generates a filtered `utilities.css` containing only the specified families, concatenated in canonical order. You can add more families later by re-running the command — the file is always regenerated from scratch.
+
+## Re-running safely
+
+`/utility-add` always overwrites `utilities.css` and `token-bridge.css`. It is safe to re-run to pick up updated bundles after a plugin version update or after changing which families are included.
+
+## Related
+
+- [`/utility-bridge`](/acss-plugins-docs/acss-kit/commands/utility-bridge) — regenerate the token bridge after a theme update
+- [`/utility-list`](/acss-plugins-docs/acss-kit/commands/utility-list) — browse families and classes
+- [`/utility-tune`](/acss-plugins-docs/acss-kit/commands/utility-tune) — adjust spacing, breakpoints, or family settings
+- [`utilities skill`](/acss-plugins-docs/acss-kit/skills/utilities) — full skill reference

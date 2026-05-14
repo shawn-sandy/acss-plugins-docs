@@ -1,113 +1,26 @@
 ---
-title: /utility-list
-description: Browse all utility families and classes — read-only, no side effects.
+title: /utility-list (acss-utilities — deprecated)
+description: Deprecated — this command has moved to acss-kit v1.0.0.
 ---
 
-Browse the full utility catalogue or drill into a specific family. This command is entirely read-only — it never writes files.
+import { Aside } from "@astrojs/starlight/components";
 
-## Syntax
-
-```text
-/utility-list [family]
-```
-
-## Arguments
-
-| Argument | Required | Description |
-|---|---|---|
-| `family` | No | Family name to inspect. If omitted, shows all families with summary info. |
-
-## Examples
-
-Show all families:
+<Aside type="caution">
+  **`acss-utilities` is deprecated.** This command is now part of **acss-kit
+  v1.0.0**. Run `/plugin update acss-kit@shawn-sandy-agentic-acss-plugins` to
+  get it, then uninstall `acss-utilities`:
 
 ```text
-/utility-list
+/plugin uninstall acss-utilities@shawn-sandy-agentic-acss-plugins
+/plugin update acss-kit@shawn-sandy-agentic-acss-plugins
 ```
 
-Show all classes in a specific family:
+See the [Migration Guide](/acss-plugins-docs/acss-kit/migration-v1) for the
+full upgrade steps.
 
-```text
-/utility-list spacing
-/utility-list flex
-/utility-list color-bg
-/utility-list display
-```
+</Aside>
 
-## Output: all families
+This page is preserved for reference. The canonical documentation for
+`/utility-list` is now at [`acss-kit /utility-list`](/acss-plugins-docs/acss-kit/commands/utility-list).
 
-Without a family argument, `/utility-list` shows a summary table of every family:
-
-```
-acss-utilities bundle  (v0.3.0)
-
-Family         Classes  Responsive  Status
-─────────────────────────────────────────────
-color-bg         14        no       enabled
-color-text       14        no       enabled
-color-border      8        no       enabled
-spacing          96       yes       enabled
-display          10       yes       enabled
-flex             18       yes       enabled
-grid             16       yes       enabled
-type             16        no       enabled
-radius            8        no       enabled
-shadow            6        no       enabled
-position          6        no       enabled
-z-index           8        no       enabled
-
-Total: 220 base classes · 1,024 including responsive variants
-Breakpoints: sm(30rem) · md(48rem) · lg(62rem) · xl(80rem)
-Spacing scale: 4px baseline · 0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24
-```
-
-## Output: family detail
-
-With a family argument, shows every class in that family with its CSS property mapping:
-
-```
-spacing  —  Margin, padding, and gap utilities
-
-Class       Property           Value
-─────────────────────────────────────────────────
-.m-0        margin             0
-.m-1        margin             var(--space-1, 0.25rem)
-.m-2        margin             var(--space-2, 0.5rem)
-.m-3        margin             var(--space-3, 0.75rem)
-.m-4        margin             var(--space-4, 1rem)
-.m-5        margin             var(--space-5, 1.25rem)
-.m-6        margin             var(--space-6, 1.5rem)
-.m-8        margin             var(--space-8, 2rem)
-.mt-*       margin-top         (same scale)
-.mr-*       margin-right       (same scale)
-.mb-*       margin-bottom      (same scale)
-.ml-*       margin-left        (same scale)
-.mx-*       margin-inline      (same scale)
-.my-*       margin-block       (same scale)
-.p-*        padding            (same scale)
-.pt-*       padding-top        (same scale)
-...
-.gap-*      gap                (same scale)
-.gap-x-*   column-gap         (same scale)
-.gap-y-*   row-gap            (same scale)
-
-Responsive prefix: sm- · md- · lg- · xl-
-Example: .md-mt-4 applies margin-top: 1rem at 48rem and above
-```
-
-## Available family names
-
-| Family | Description |
-|---|---|
-| `color-bg` | Background color utilities |
-| `color-text` | Text color utilities |
-| `color-border` | Border color utilities |
-| `spacing` | Margin, padding, and gap |
-| `display` | Display and visibility |
-| `flex` | Flexbox layout |
-| `grid` | CSS Grid layout |
-| `type` | Typography (size, weight, style) |
-| `radius` | Border radius |
-| `shadow` | Box shadow |
-| `position` | CSS position |
-| `z-index` | Stack order |
+No arguments changed — the command works identically in acss-kit v1.0.0.

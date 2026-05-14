@@ -1,112 +1,26 @@
 ---
-title: /utility-add
-description: Copy utilities.css and token-bridge.css into your project's styles directory.
+title: /utility-add (acss-utilities — deprecated)
+description: Deprecated — this command has moved to acss-kit v1.0.0.
 ---
 
-import { Steps, Aside } from '@astrojs/starlight/components';
-
-Copy the pre-built utility CSS bundle and token bridge into your project. Auto-detects your styles directory and reports the exact import order to use.
-
-## Syntax
-
-```text
-/utility-add [--target=<dir>] [--families=<list>] [--no-bridge]
-```
-
-## Options
-
-| Option | Default | Description |
-|---|---|---|
-| `--target=<dir>` | Auto-detected | Override the destination directory |
-| `--families=<list>` | All families | Comma-separated list of families to include (e.g., `color-bg,spacing,flex`) |
-| `--no-bridge` | Bridge included | Skip generating `token-bridge.css` |
-
-## Examples
-
-Full install (auto-detect directory):
-
-```text
-/utility-add
-```
-
-Install to a custom directory:
-
-```text
-/utility-add --target=app/styles/
-```
-
-Install only specific families:
-
-```text
-/utility-add --families=color-bg,color-text,spacing,flex,display
-```
-
-Install without the token bridge (standalone use without acss-kit):
-
-```text
-/utility-add --no-bridge
-```
-
-## Directory auto-detection
-
-The command runs `detect_utility_target.py` to find your styles directory. The detection order is:
-
-1. `.acss-target.json` at project root → `utilitiesDir` field
-2. `src/styles/` — exists and is a directory
-3. `src/css/`, `app/styles/`, `styles/` — checked in order
-4. If none found: defaults to `src/styles/` (created if missing)
-
-## Output
-
-<Steps>
-
-1. **`token-bridge.css`** is written first (unless `--no-bridge`). Contains CSS custom property aliases that map utility color names to acss-kit theme roles.
-
-2. **`utilities.css`** is written second. Contains all 12 utility families concatenated in a fixed order for stable specificity.
-
-3. Claude reports the **import order** for your entry file.
-
-</Steps>
-
-```
-Detected styles dir: src/styles/
-
-Writing src/styles/token-bridge.css  ✓
-Writing src/styles/utilities.css     ✓
-
-Bundle stats:
-  Classes:    312
-  Families:   12 (all enabled)
-  File size:  8.4 KB (minified: 6.1 KB)
-
-Add to your entry file IN THIS ORDER:
-  import './styles/token-bridge.css';   // ← first (defines color vars)
-  import './styles/utilities.css';      // ← second (uses those vars)
-```
+import { Aside } from "@astrojs/starlight/components";
 
 <Aside type="caution">
-Import order is critical. `token-bridge.css` must load before `utilities.css`. Loading them in reverse order means color utilities fall back to hex values instead of your theme tokens.
-</Aside>
-
-## Partial family install
-
-To install only the families you need (reduces bundle size):
+  **`acss-utilities` is deprecated.** This command is now part of **acss-kit
+  v1.0.0**. Run `/plugin update acss-kit@shawn-sandy-agentic-acss-plugins` to
+  get it, then uninstall `acss-utilities`:
 
 ```text
-/utility-add --families=color-bg,color-text,spacing,flex,display
+/plugin uninstall acss-utilities@shawn-sandy-agentic-acss-plugins
+/plugin update acss-kit@shawn-sandy-agentic-acss-plugins
 ```
 
-This generates a filtered `utilities.css` containing only the specified families. You can add more families later by re-running the command — the file is always regenerated from scratch.
+See the [Migration Guide](/acss-plugins-docs/acss-kit/migration-v1) for the
+full upgrade steps.
 
-## Integration check
+</Aside>
 
-After writing the files, the command runs an integration check that verifies:
-- The import statements are present in your entry file (or alerts you if they're missing)
-- `token-bridge.css` imports before `utilities.css`
-- Dark-mode parity: every color alias in `:root` also exists in `[data-theme="dark"]`
+This page is preserved for reference. The canonical documentation for
+`/utility-add` is now at [`acss-kit /utility-add`](/acss-plugins-docs/acss-kit/commands/utility-add).
 
-If the integration check finds missing imports, it prints a numbered fix-up list — it does **not** automatically edit your entry file.
-
-## Re-running safely
-
-`/utility-add` always overwrites `utilities.css` and `token-bridge.css`. It's safe to re-run to pick up updated bundles after a plugin version update, or after changing which families are included.
+No arguments changed — the command works identically in acss-kit v1.0.0.

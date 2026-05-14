@@ -1,0 +1,104 @@
+---
+title: /utility-list
+description: Read-only catalogue printer for the acss-utilities bundle — list all families or drill into a specific family's classes.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+<Aside type="note">
+  This command moved to **acss-kit v1.0.0** from the now-deprecated
+  `acss-utilities` plugin. If you have `acss-utilities` installed, see the
+  [Migration Guide](/acss-plugins-docs/acss-kit/migration-v1) for upgrade steps.
+</Aside>
+
+Browse the utility-class bundle. Without arguments, lists every family with its
+enabled and responsive status. With a `<family>` argument, prints every class in
+that family along with the CSS property and custom property each one references.
+
+This command writes nothing — it is always safe to run.
+
+## Syntax
+
+```text
+/utility-list [family]
+```
+
+## Arguments
+
+| Argument | Required | Description                                                                           |
+| -------- | -------- | ------------------------------------------------------------------------------------- |
+| `family` | No       | One of the 12 family names below. Omit to list all families with summary information. |
+
+## Family names
+
+`color-bg`, `color-text`, `color-border`, `spacing`, `display`, `flex`, `grid`,
+`type`, `radius`, `shadow`, `position`, `z-index`
+
+## Examples
+
+List all families:
+
+```text
+/utility-list
+```
+
+Show every class in the spacing family:
+
+```text
+/utility-list spacing
+```
+
+Show color-bg classes and how they resolve through the token bridge:
+
+```text
+/utility-list color-bg
+```
+
+## Output — no arguments
+
+Reads `assets/utilities/utilities.tokens.json` and prints each family entry:
+
+```
+Families (12 total):
+  color-bg       enabled  non-responsive
+  color-text     enabled  non-responsive
+  color-border   enabled  non-responsive
+  spacing        enabled  responsive (sm, md, lg, xl)
+  display        enabled  responsive (sm, md, lg, xl)
+  flex           enabled  responsive (sm, md, lg, xl)
+  grid           enabled  responsive (sm, md, lg, xl)
+  type           enabled  non-responsive
+  radius         enabled  non-responsive
+  shadow         enabled  non-responsive
+  position       enabled  non-responsive
+  z-index        enabled  non-responsive
+
+Spacing scale: 0 0.25rem 0.5rem 0.75rem 1rem 1.25rem 1.5rem 2rem 2.5rem 3rem 4rem 5rem 6rem
+Breakpoints:   sm=30rem  md=48rem  lg=62rem  xl=80rem
+
+Tip: /utility-list <family> for class-level detail
+```
+
+## Output — with family argument
+
+Reads `assets/utilities/<family>.css` and prints each selector:
+
+```
+color-bg — 18 classes (2.1 KB)
+
+  .bg-primary      background-color: var(--color-primary, transparent)
+  .bg-accent       background-color: var(--color-accent, transparent)
+  .bg-danger       background-color: var(--color-danger, transparent)
+  ...
+
+Token bridge resolution (via token-bridge.css):
+  .bg-error        var(--color-error) → var(--color-danger, #dc2626)
+  .bg-error-bg     var(--color-error-bg) → color-mix(oklch, ...)
+```
+
+## Related
+
+- [`/utility-add`](/acss-plugins-docs/acss-kit/commands/utility-add) — copy the utilities bundle into your project
+- [`/utility-tune`](/acss-plugins-docs/acss-kit/commands/utility-tune) — adjust token settings
+- [`/utility-bridge`](/acss-plugins-docs/acss-kit/commands/utility-bridge) — regenerate the token bridge
+- [`utilities skill`](/acss-plugins-docs/acss-kit/skills/utilities) — full skill reference
