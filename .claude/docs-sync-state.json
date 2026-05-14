@@ -1,14 +1,14 @@
 {
-  "lastUpstreamSha": "ead1d1b5a7c032919fe7e38cdf2ae307909819fd",
-  "lastSyncedAt": "2026-05-11T10:15:28Z",
+  "lastUpstreamSha": "68faf6d5f5c1fd67bf755b08cdb385104e966561",
+  "lastSyncedAt": "2026-05-14T10:13:59Z",
   "plugins": {
     "acss-kit": {
-      "lastUpstreamSha": "ead1d1b5a7c032919fe7e38cdf2ae307909819fd",
-      "lastSyncedAt": "2026-05-11T10:15:28Z"
+      "lastUpstreamSha": "68faf6d5f5c1fd67bf755b08cdb385104e966561",
+      "lastSyncedAt": "2026-05-14T10:13:59Z"
     },
     "acss-utilities": {
-      "lastUpstreamSha": "ead1d1b5a7c032919fe7e38cdf2ae307909819fd",
-      "lastSyncedAt": "2026-05-11T10:15:28Z"
+      "lastUpstreamSha": "68faf6d5f5c1fd67bf755b08cdb385104e966561",
+      "lastSyncedAt": "2026-05-14T10:13:59Z"
     }
   }
 }

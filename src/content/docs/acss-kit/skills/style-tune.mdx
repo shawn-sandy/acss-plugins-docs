@@ -8,14 +8,14 @@ import { Aside } from "@astrojs/starlight/components";
 `style-tune` is a pilot skill that maps natural language visual intent to CSS token changes, with WCAG pre-validation and atomic rollback.
 
 <Aside type="note">
-  This is a **pilot skill** validating a per-feel routing pattern. The intent
-  vocabulary and routing logic are actively refined. Graduates to v1 once
-  auto-trigger reliability is observed across a full release cycle on real user
-  prompts and the v2 component scope (Field, Checkbox, Icon, Link, List,
-  Popover, Table, Tag, Badge, Img) is folded into the intent vocabulary.
-  Failure-mode fallbacks for unsupported components and modifiers are documented
-  in the plugin's `docs/troubleshooting.md`.
+  This is a **pilot skill** validating a per-feel routing pattern. Vocabulary,
+  trigger phrases, and component coverage may shift in 0.4.x point releases as
+  real-world usage surfaces gaps.
 </Aside>
+
+## When not to use
+
+Bare adjectives without a named component or role (e.g. "warmer" alone) trigger disambiguation via `AskUserQuestion` (Step A3) rather than routing directly. For best results, name a target: "warmer button", "softer card", "deeper accent".
 
 ## Trigger phrases
 
