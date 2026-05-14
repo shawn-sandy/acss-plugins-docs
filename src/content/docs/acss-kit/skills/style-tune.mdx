@@ -1,21 +1,11 @@
 ---
-title: style-tune skill (pilot)
+title: style-tune skill
 description: Adjust your app's visual feel with natural language adjectives — the skill routes to the right CSS tokens and validates WCAG before writing.
 ---
 
 import { Aside } from "@astrojs/starlight/components";
 
-`style-tune` is a pilot skill that maps natural language visual intent to CSS token changes, with WCAG pre-validation and atomic rollback.
-
-<Aside type="note">
-  This is a **pilot skill** validating a per-feel routing pattern. The intent
-  vocabulary and routing logic are actively refined. Graduates to v1 once
-  auto-trigger reliability is observed across a full release cycle on real user
-  prompts and the v2 component scope (Field, Checkbox, Icon, Link, List,
-  Popover, Table, Tag, Badge, Img) is folded into the intent vocabulary.
-  Failure-mode fallbacks for unsupported components and modifiers are documented
-  in the plugin's `docs/troubleshooting.md`.
-</Aside>
+`style-tune` maps natural language visual intent to CSS token changes, with WCAG pre-validation and atomic rollback. It routes a free-form prompt ("warmer button", "softer card", "deeper accent") to either a theme-layer OKLCH edit or a component SCSS token edit.
 
 ## When not to use
 

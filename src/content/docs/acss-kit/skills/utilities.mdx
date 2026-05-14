@@ -1,0 +1,178 @@
+---
+title: utilities skill
+description: Atomic-CSS utility-class generation and management — routes /utility-add, /utility-list, /utility-tune, and /utility-bridge workflows.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+The `utilities` skill drives all four `/utility-*` commands. It manages
+`assets/utilities/utilities.tokens.json` (the canonical source of truth for the
+bundle), routes to the correct generator or validator, and enforces the atomic
+write contract.
+
+<Aside type="note">
+  This skill moved to **acss-kit v1.0.0** from the now-deprecated
+  `acss-utilities` plugin. See the [Migration
+  Guide](/acss-plugins-docs/acss-kit/migration-v1) if you are upgrading.
+</Aside>
+
+## Trigger
+
+Triggered by [`/utility-add`](/acss-plugins-docs/acss-kit/commands/utility-add),
+[`/utility-list`](/acss-plugins-docs/acss-kit/commands/utility-list),
+[`/utility-tune`](/acss-plugins-docs/acss-kit/commands/utility-tune), and
+[`/utility-bridge`](/acss-plugins-docs/acss-kit/commands/utility-bridge).
+
+## Source of truth: `utilities.tokens.json`
+
+`assets/utilities/utilities.tokens.json` is the **only** editable source. CSS
+files are always derived artifacts — never edit them directly.
+
+```json
+{
+  "spacing": {
+    "baseline": "0.25rem",
+    "scale": [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24]
+  },
+  "breakpoints": {
+    "sm": "30rem",
+    "md": "48rem",
+    "lg": "62rem",
+    "xl": "80rem"
+  },
+  "families": {
+    "color-bg": { "enabled": true, "responsive": false },
+    "color-text": { "enabled": true, "responsive": false },
+    "color-border": { "enabled": true, "responsive": false },
+    "spacing": { "enabled": true, "responsive": true },
+    "display": { "enabled": true, "responsive": true },
+    "flex": { "enabled": true, "responsive": true },
+    "grid": { "enabled": true, "responsive": true },
+    "type": { "enabled": true, "responsive": false },
+    "radius": { "enabled": true, "responsive": false },
+    "shadow": { "enabled": true, "responsive": false },
+    "position": { "enabled": true, "responsive": false },
+    "z-index": { "enabled": true, "responsive": false }
+  },
+  "budgetKB": 15
+}
+```
+
+## Generation pipeline
+
+When `/utility-tune` or `/utility-add` triggers a regeneration:
+
+```
+utilities.tokens.json
+        ↓
+generate_utilities.py
+        ↓
+assets/utilities/<family>.css   (per-family partials)
+        ↓
+assets/utilities/utilities.css  (concatenated bundle)
+        ↓
+validate_utilities.py
+        ↓
+[pass] write to project          OR   [fail] revert tokens.json
+```
+
+## Plan-mode behaviour
+
+`/utility-list` is read-only and may stay in plan mode. All other flows
+(`/utility-add`, `/utility-tune`, `/utility-bridge`) exit plan mode first because
+they run `generate_utilities.py`, `validate_utilities.py`, and write CSS via
+Bash — all blocked under plan mode. The skill only stays in plan mode when the
+user explicitly asked for a preview ("show me which families would land", "don't
+write yet").
+
+## Token bridge integration
+
+From acss-kit v1.0.0, every `/theme-create` and `/theme-update` run
+automatically regenerates `token-bridge.css` via `generate_bridge.py`. The
+bridge maps fpkit-style utility names to acss-kit role names and synthesizes
+`-bg` and `-light` variants using `color-mix(in oklch, …)`.
+
+The vocabulary delta between acss-kit roles and fpkit utility names is declared
+in `assets/utilities/vocab.json`:
+
+| acss-kit role            | fpkit utility token         | Utility class example    |
+| ------------------------ | --------------------------- | ------------------------ |
+| `--color-danger`         | `--color-error`             | `bg-error`, `text-error` |
+| `--color-surface-raised` | `--color-surface-secondary` | `bg-surface-secondary`   |
+
+<Aside type="tip">
+  If you maintain custom bridge aliases, add them to
+  `assets/utilities/vocab.json` so they survive every `/utility-bridge`
+  regeneration.
+</Aside>
+
+## Family concatenation order
+
+The skill enforces a fixed family order for stable CSS specificity:
+
+```
+1. color-bg       7. grid
+2. color-text     8. type
+3. color-border   9. radius
+4. spacing       10. shadow
+5. display       11. position
+6. flex          12. z-index
+```
+
+Color utilities come first (lowest specificity). Layout utilities occupy the
+middle. Position and z-index come last.
+
+## CSS class conventions
+
+**Selector format** — kebab-case, unprefixed:
+
+```css
+.bg-primary {
+} /* correct */
+.u-bg-primary {
+} /* incorrect — no prefix */
+```
+
+**Responsive format** — hyphen prefix, not colon:
+
+```css
+@media (min-width: 48rem) {
+  .md-flex {
+    display: flex;
+  } /* correct */
+  .md\:flex {
+    display: flex;
+  } /* incorrect — Tailwind style */
+}
+```
+
+**`!important` policy** — only `display` and `visibility` families use
+`!important`. All other utilities rely on source order and normal cascade.
+
+## Bundle size budget
+
+The tokens file includes a `budgetKB` field (default: 15 KB). If
+`generate_utilities.py` produces a bundle exceeding this limit, the skill warns
+and asks whether to proceed or trim disabled families.
+
+## Quality gates
+
+Every flow ends with a contract check:
+
+- **Bundle integrity** — `validate_utilities.py` exits 0.
+- **Idempotency** — regenerating from `utilities.tokens.json` produces the same
+  bytes as the committed `utilities.css`.
+- **Bridge parity** — every alias in `:root` is also defined in
+  `[data-theme="dark"]`.
+
+If any of these fail, the user-visible flow halts and the assistant reports the
+`reasons` array verbatim.
+
+## References
+
+- [`/utility-add`](/acss-plugins-docs/acss-kit/commands/utility-add)
+- [`/utility-list`](/acss-plugins-docs/acss-kit/commands/utility-list)
+- [`/utility-tune`](/acss-plugins-docs/acss-kit/commands/utility-tune)
+- [`/utility-bridge`](/acss-plugins-docs/acss-kit/commands/utility-bridge)
+- [Utility Families](/acss-plugins-docs/acss-utilities/utility-families)
+- [Token Bridge](/acss-plugins-docs/acss-utilities/token-bridge)

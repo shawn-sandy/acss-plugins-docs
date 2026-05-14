@@ -1,0 +1,76 @@
+---
+title: /utility-tune
+description: Adjust utility-class tokens — spacing baseline, breakpoints, family enables — via natural language, then regenerate and validate the bundle.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+<Aside type="note">
+  This command moved to **acss-kit v1.0.0** from the now-deprecated
+  `acss-utilities` plugin. If you have `acss-utilities` installed, see the
+  [Migration Guide](/acss-plugins-docs/acss-kit/migration-v1) for upgrade steps.
+</Aside>
+
+Adjust `utilities.tokens.json` via a natural-language request, regenerate the
+bundle, and validate the result. All edits are atomic — if validation fails, the
+tokens file is reverted and no CSS is written.
+
+## Syntax
+
+```text
+/utility-tune <natural-language description>
+```
+
+## Examples
+
+```text
+/utility-tune use a 4px spacing baseline
+/utility-tune use an 8px spacing baseline
+/utility-tune add an xs breakpoint at 20rem
+/utility-tune disable shadow utilities
+/utility-tune drop responsive variants from spacing
+/utility-tune add a 'soft' radius value at 1rem
+```
+
+## What you can tune
+
+| Request                                 | Effect on `utilities.tokens.json`     |
+| --------------------------------------- | ------------------------------------- |
+| "use a 4px spacing baseline"            | `spacing.baseline = "0.25rem"`        |
+| "use an 8px spacing baseline"           | `spacing.baseline = "0.5rem"`         |
+| "add an xs breakpoint at 20rem"         | `breakpoints.xs = "20rem"`            |
+| "disable shadow utilities"              | `families.shadow.enabled = false`     |
+| "drop responsive variants from spacing" | `families.spacing.responsive = false` |
+| "add a 'soft' radius value at 1rem"     | `radius.soft = "1rem"`                |
+
+## Workflow
+
+<Steps>
+
+1. **Parse the request** — interprets the natural-language request into one or more concrete edits to `utilities.tokens.json`. If the intent is ambiguous, asks one clarifying question before making changes.
+
+2. **Edit tokens** — reads `assets/utilities/utilities.tokens.json`, applies the edits in memory, and writes the updated tokens back to disk.
+
+3. **Regenerate the bundle** — runs `generate_utilities.py` to rebuild per-family CSS partials and the concatenated `utilities.css`.
+
+4. **Validate** — runs `validate_utilities.py` on the regenerated bundle.
+   - On failure: prints the reasons array and **reverts** the tokens edit. No CSS is written.
+   - On success: continues.
+
+5. **Print summary** — reports which token fields changed, the new bundle size, and how many classes were added or removed.
+
+</Steps>
+
+<Aside type="caution">
+  The committed `utilities.css` bundle must always match what
+  `generate_utilities.py` produces from the tokens file — the idempotency check
+  in `validate_utilities.py` enforces this. Never edit `utilities.css` directly;
+  always go through `/utility-tune` or the tokens file.
+</Aside>
+
+## Related
+
+- [`/utility-add`](/acss-plugins-docs/acss-kit/commands/utility-add) — copy the bundle into your project
+- [`/utility-list`](/acss-plugins-docs/acss-kit/commands/utility-list) — browse current families and classes
+- [`/utility-bridge`](/acss-plugins-docs/acss-kit/commands/utility-bridge) — regenerate the token bridge
+- [`utilities skill`](/acss-plugins-docs/acss-kit/skills/utilities) — full skill reference

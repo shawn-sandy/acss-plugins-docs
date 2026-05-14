@@ -3,7 +3,7 @@ title: /kit-create
 description: Generate a single fpkit component from a natural-language description, with prop vocabulary resolution and accessibility validation.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 `/kit-create` turns a short natural-language description into a ready-to-paste TSX snippet (or a standalone component file). It is the "creator-mode" companion to `/kit-add` — instead of generating the catalogue source, it composes a specific instance of a component with the props you described.
 
@@ -24,24 +24,25 @@ import { Aside } from '@astrojs/starlight/components';
 
 ## Supported components
 
-Any component with a dedicated reference doc under `plugins/acss-kit/skills/component-creator/references/components/`:
+Any component with a dedicated reference doc under `plugins/acss-kit/skills/components/references/components/`:
 
-| Group | Components |
-|---|---|
+| Group       | Components                   |
+| ----------- | ---------------------------- |
 | Interactive | Button, IconButton, Checkbox |
-| Feedback | Alert |
-| Surfaces | Card, Dialog, Popover |
-| Content | Link, Img, Icon |
-| Form | Input, Field |
-| Collections | List, Table, Nav |
+| Feedback    | Alert                        |
+| Surfaces    | Card, Dialog, Popover        |
+| Content     | Link, Img, Icon              |
+| Form        | Input, Field                 |
+| Collections | List, Table, Nav             |
 
 <Aside type="caution">
-Badge, Tag, Heading, Text/Paragraph, Details, and Progress are catalogue-only and not yet supported by `/kit-create`. Use `/kit-add` for those.
+  Badge, Tag, Heading, Text/Paragraph, Details, and Progress are catalogue-only
+  and not yet supported by `/kit-create`. Use `/kit-add` for those.
 </Aside>
 
 ## How it works
 
-The skill follows a nine-step pipeline (Steps A–I):
+The Creator Mode workflow lives in the `## Creator Mode` section of `skills/components/SKILL.md` (steps CM-0 through CM-G):
 
 1. **Parse the description** against the component's reference doc and prop vocabulary.
 2. **Resolve the components directory** via `detect_target.py` and bootstrap missing dependencies through `/kit-add` if needed.
@@ -52,6 +53,8 @@ The skill follows a nine-step pipeline (Steps A–I):
 7. **Refine on follow-ups** — "make it larger", "swap to secondary", etc., adjust the in-memory spec.
 8. **Halt or confirm** for unresolved required props, out-of-union values, or same-axis conflicts.
 9. **Worked examples** double as parser test fixtures.
+
+**Form-shaped requests** ("signup form", "create a login form") are handled by the Form Mode section of the same skill — not Creator Mode. Say "create a signup form with email and password" to enter that flow.
 
 ## Vocabulary the skill recognises
 
@@ -65,12 +68,12 @@ The skill follows a nine-step pipeline (Steps A–I):
 
 **Variant synonyms:**
 
-| You say | Resolves to |
-|---|---|
-| pill, rounded, capsule | `pill` |
+| You say                            | Resolves to            |
+| ---------------------------------- | ---------------------- |
+| pill, rounded, capsule             | `pill`                 |
 | outline, outlined, bordered, ghost | `outline` / `outlined` |
-| filled, solid | `filled` |
-| soft, subtle, tonal | `soft` |
+| filled, solid                      | `filled`               |
+| soft, subtle, tonal                | `soft`                 |
 
 ## Anti-patterns
 
@@ -85,5 +88,5 @@ The skill explicitly refuses to:
 ## Related
 
 - [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — generates the catalogue source files
-- [`component-creator` skill](/acss-plugins-docs/acss-kit/skills/component-creator)
+- [`components` skill](/acss-plugins-docs/acss-kit/skills/components) — Creator Mode and Form Mode live in this skill
 - [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

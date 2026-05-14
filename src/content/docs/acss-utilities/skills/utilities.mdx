@@ -1,145 +1,27 @@
 ---
-title: utilities skill
-description: How the utilities skill manages the token source, routes between commands, and controls generation and validation.
+title: utilities skill (acss-utilities — deprecated)
+description: Deprecated — this skill and all utility-class functionality has moved to acss-kit v1.0.0.
 ---
 
-The `utilities` skill is the omnibus controller for all four `/utility-*` commands. It manages `utilities.tokens.json` (the source of truth), routes to the correct generator or validator, and enforces the atomic write contract.
+import { Aside } from "@astrojs/starlight/components";
 
-## Trigger
+<Aside type="caution">
+  **`acss-utilities` is deprecated.** All `/utility-*` commands and the
+  `utilities` skill are now part of **acss-kit v1.0.0**.
 
-Triggered by `/utility-add`, `/utility-list`, `/utility-tune`, and `/utility-bridge`. All four commands are thin shells that pass arguments to this skill.
-
-## Source of truth: `utilities.tokens.json`
-
-The skill treats `assets/utilities.tokens.json` as the **only** source of truth for the bundle. The CSS files are always derived artifacts — never edited directly.
-
-```json
-{
-  "spacing": {
-    "baseline": "0.25rem",
-    "scale": [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24]
-  },
-  "breakpoints": {
-    "sm": "30rem",
-    "md": "48rem",
-    "lg": "62rem",
-    "xl": "80rem"
-  },
-  "colorRoles": [
-    "primary", "accent", "danger", "warning", "info", "success",
-    "background", "surface", "text", "text-inverse", "text-muted",
-    "border", "error", "error-bg", "warning-bg", "info-bg", "success-bg",
-    "primary-light"
-  ],
-  "families": {
-    "color-bg":    { "enabled": true,  "responsive": false },
-    "color-text":  { "enabled": true,  "responsive": false },
-    "color-border":{ "enabled": true,  "responsive": false },
-    "spacing":     { "enabled": true,  "responsive": true  },
-    "display":     { "enabled": true,  "responsive": true  },
-    "flex":        { "enabled": true,  "responsive": true  },
-    "grid":        { "enabled": true,  "responsive": true  },
-    "type":        { "enabled": true,  "responsive": false },
-    "radius":      { "enabled": true,  "responsive": false },
-    "shadow":      { "enabled": true,  "responsive": false },
-    "position":    { "enabled": true,  "responsive": false },
-    "z-index":     { "enabled": true,  "responsive": false }
-  },
-  "radiusPresets": {
-    "sm": "0.125rem", "md": "0.375rem", "lg": "0.5rem",
-    "xl": "0.75rem", "2xl": "1rem", "full": "9999px"
-  },
-  "shadowPresets": {
-    "sm": "0 1px 2px oklch(0% 0 0 / 0.08)",
-    "md": "0 4px 6px -1px oklch(0% 0 0 / 0.10)",
-    "lg": "0 10px 15px -3px oklch(0% 0 0 / 0.12)"
-  },
-  "budgetKB": 15
-}
+```text
+/plugin uninstall acss-utilities@shawn-sandy-agentic-acss-plugins
+/plugin update acss-kit@shawn-sandy-agentic-acss-plugins
 ```
 
-## The generation pipeline
+See the [Migration Guide](/acss-plugins-docs/acss-kit/migration-v1) for the
+full upgrade steps.
 
-When `/utility-tune` or `/utility-add` triggers a regeneration:
+</Aside>
 
-```
-utilities.tokens.json
-        ↓
-generate_utilities.py
-        ↓
-assets/utilities/<family>.css  (per-family partials)
-        ↓
-assets/utilities.css           (concatenated bundle)
-        ↓
-validate_utilities.py
-        ↓
-[pass] write to src/styles/    OR   [fail] revert tokens.json
-```
+This page is preserved for reference. The canonical documentation for the
+`utilities` skill is now at [`acss-kit utilities skill`](/acss-plugins-docs/acss-kit/skills/utilities).
 
-## Plan-mode behaviour
-
-When any of `/utility-add`, `/utility-tune`, or `/utility-bridge` triggers a regeneration, exiting plan mode is the first action. `generate_utilities.py` and `validate_utilities.py` both run via Bash, and the final write to `src/styles/utilities.css` is blocked under plan mode. `/utility-list` is read-only and may stay in plan mode. The skill otherwise only stays in plan mode when the user asked for a description without running anything.
-
-## Family concatenation order
-
-The skill enforces a **fixed family order** for stable specificity — the order is always the same regardless of which families are enabled:
-
-```
-1. color-bg
-2. color-text
-3. color-border
-4. spacing
-5. display
-6. flex
-7. grid
-8. type
-9. radius
-10. shadow
-11. position
-12. z-index
-```
-
-Color utilities come first (lowest specificity for color). Layout utilities (display, flex, grid) come in the middle. Position and z-index come last.
-
-## CSS class conventions enforced by the skill
-
-**Selector format:** kebab-case, unprefixed:
-```css
-.bg-primary { }          /* ✓ */
-.BgPrimary { }           /* ✗ */
-.u-bg-primary { }        /* ✗ */
-```
-
-**Responsive format:** hyphen prefix (not colon):
-```css
-@media (min-width: 48rem) {
-  .md-flex { display: flex; }   /* ✓ */
-  .md\:flex { display: flex; }  /* ✗ — Tailwind style, requires escaping in JSX */
-}
-```
-
-**`!important` policy:**
-```css
-.hide { display: none !important; }     /* ✓ — display utilities only */
-.sr-only { /* ... */ }                  /* ✓ — visibility utilities only */
-.bg-primary { background: ...; }        /* ✗ — no !important on color utilities */
-.flex { display: flex; }                /* ✓ — wait, display utilities get !important */
-```
-
-Only `display` and `visibility` families use `!important`. All other utilities rely on source order and normal cascade.
-
-## Token bridge contract
-
-The skill enforces the token bridge parity contract during `/utility-bridge`:
-
-- Every alias defined in `:root` must also be defined in `[data-theme="dark"]`
-- Derived variants (`-bg`, `-light`) must be present in both modes
-- Missing dark aliases are a validation failure (bridge is not written)
-
-## Bundle size budget
-
-The tokens file includes a `budgetKB` field (default: 15 KB). If `generate_utilities.py` produces a bundle exceeding this limit, the skill warns and asks whether to proceed or trim disabled families further.
-
-## Idempotency check
-
-`validate_utilities.py` runs an idempotency check: it re-runs `generate_utilities.py` and compares the output byte-for-byte to the committed bundle. If they differ, it means someone edited `utilities.css` directly (bypassing the tokens file). The validation fails with a warning to regenerate from `utilities.tokens.json`.
+No behavior changed — the skill works identically in acss-kit v1.0.0, with the
+addition that `token-bridge.css` is now regenerated automatically on every
+`/theme-create` and `/theme-update` run.
