@@ -8,11 +8,15 @@ on:
 jobs:
   docs-sync:
     runs-on: ubuntu-latest
+    concurrency:
+      group: docs-sync
+      cancel-in-progress: false
     permissions:
       contents: write # push sync branches
       pull-requests: write # open / update drift PRs
       issues: write # comment on notification PRs
       id-token: write # OIDC for claude-code-action
+      actions: read # allow agent to read CI results
 
     steps:
       - name: Checkout repository
