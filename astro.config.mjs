@@ -197,6 +197,10 @@ export default defineConfig({
                   label: "/inline-style-to-class",
                   slug: "style-agent/commands/inline-style-to-class",
                 },
+                {
+                  label: "/create-utilities",
+                  slug: "style-agent/commands/create-utilities",
+                },
               ],
             },
             {
@@ -209,6 +213,10 @@ export default defineConfig({
                 {
                   label: "inline-style-to-class skill",
                   slug: "style-agent/skills/inline-style-to-class",
+                },
+                {
+                  label: "create-utilities skill",
+                  slug: "style-agent/skills/create-utilities",
                 },
               ],
             },
