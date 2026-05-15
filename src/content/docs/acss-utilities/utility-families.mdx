@@ -57,13 +57,13 @@ Directional margin and padding utilities now emit CSS logical properties so spac
 
 Examples:
 
-| Class     | Sets                                 |
-| --------- | ------------------------------------ |
-| `.m-0`    | `margin: 0`                          |
-| `.m-4`    | `margin: 1rem`                       |
-| `.mt-2`   | `margin-block-start: 0.5rem`         |
-| `.px-6`   | `padding-inline: 1.5rem`             |
-| `.gap-3`  | `gap: 0.75rem`                       |
-| `.sm-p-4` | wrapped in `@media (width >= 30rem)` |
+| Class     | Sets                                   |
+| --------- | -------------------------------------- |
+| `.m-0`    | `margin: 0`                            |
+| `.m-4`    | `margin: 1rem`                         |
+| `.mt-2`   | `margin-block-start: 0.5rem`           |
+| `.px-6`   | `padding-inline: 1.5rem`               |
+| `.gap-3`  | `gap: 0.75rem`                         |
+| `.sm-p-4` | wrapped in `@media (min-width: 30rem)` |
 
 For RTL consumers that relied on the physical `margin-left` / `margin-right` assignment: use an inline `style` attribute with a literal `margin-left` declaration (which is writing-mode-agnostic) when you specifically need the physical left side regardless of direction.

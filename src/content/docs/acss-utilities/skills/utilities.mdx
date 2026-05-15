@@ -167,7 +167,7 @@ Color utilities come first (lowest specificity for color). Layout utilities (dis
 } /* ✗ — no !important on color utilities */
 .flex {
   display: flex;
-} /* ✓ — wait, display utilities get !important */
+} /* ✗ — flex family, not display family: no !important */
 ```
 
 Only `display` and `visibility` families use `!important`. All other utilities rely on source order and normal cascade.
