@@ -132,7 +132,7 @@ export default defineConfig({
                   slug: "acss-kit/skills/components-html",
                 },
                 {
-                  label: "component-creator skill",
+                  label: "component-creator (archived)",
                   slug: "acss-kit/skills/component-creator",
                 },
                 { label: "styles skill", slug: "acss-kit/skills/styles" },
@@ -142,7 +142,7 @@ export default defineConfig({
                   slug: "acss-kit/skills/prompt-book",
                 },
                 {
-                  label: "component-form (pilot)",
+                  label: "component-form (archived)",
                   slug: "acss-kit/skills/component-form",
                 },
                 {

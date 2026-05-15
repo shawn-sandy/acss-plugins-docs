@@ -9,7 +9,11 @@ The `components` skill drives `/kit-add`. It defines the seven-step generation w
 
 ## Trigger
 
-The `components` skill is triggered by `/kit-add`. It can also be invoked by the `component-form` pilot skill when it needs to generate field-level dependencies.
+The `components` skill is triggered by `/kit-add`, `/kit-create`, and natural-language phrases. It handles three modes:
+
+- **Standard Mode** — `/kit-add` generates one or more components with full dependency resolution (Steps 0, A–F below).
+- **Creator Mode** — `/kit-create` or natural language ("create a primary pill button") generates a single component instance from a description.
+- **Form Mode** — natural language ("build a signup form") auto-generates an accessible form component from field-type grammar.
 
 ## The seven steps (0, A–F)
 
