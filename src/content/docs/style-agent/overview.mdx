@@ -25,35 +25,41 @@ Works with plain CSS, compiled SCSS output, Tailwind, or any utility-first workf
   <Card title="/inline-style-to-class" icon="pencil">
     Convert an inline `style` attribute, JSX `style` object, or `<style>` block into a single named CSS class and append it to the project stylesheet.
   </Card>
+  <Card title="/create-utilities" icon="add-document">
+    Generate a utility class string from a plain-language visual description. Detects acss-kit, Tailwind, Bootstrap, or falls back to Tailwind-compatible naming.
+  </Card>
 </CardGrid>
 
-| Command                                                                                          | What it does                                                           |
-| ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| [`/css-to-class [name]`](/acss-plugins-docs/style-agent/commands/css-to-class)                   | Collapse a multi-class element or class string into one semantic class |
-| [`/inline-style-to-class [name]`](/acss-plugins-docs/style-agent/commands/inline-style-to-class) | Migrate inline styles to a named class in your stylesheet              |
+| Command                                                                                          | What it does                                                             |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| [`/css-to-class [name]`](/acss-plugins-docs/style-agent/commands/css-to-class)                   | Collapse a multi-class element or class string into one semantic class   |
+| [`/inline-style-to-class [name]`](/acss-plugins-docs/style-agent/commands/inline-style-to-class) | Migrate inline styles to a named class in your stylesheet                |
+| [`/create-utilities [description]`](/acss-plugins-docs/style-agent/commands/create-utilities)    | Generate a utility class string from a plain-language visual description |
 
 ## Skills
 
-Both commands delegate all their behavior to a corresponding skill file. The skill owns argument handling, name generation, CSS discovery, and output formatting.
+Each command delegates all its behavior to a corresponding skill file. The skill owns argument handling, name generation, CSS discovery, and output formatting.
 
 | Skill                                                                                  | Driven by                |
 | -------------------------------------------------------------------------------------- | ------------------------ |
 | [`css-to-class`](/acss-plugins-docs/style-agent/skills/css-to-class)                   | `/css-to-class`          |
 | [`inline-style-to-class`](/acss-plugins-docs/style-agent/skills/inline-style-to-class) | `/inline-style-to-class` |
+| [`create-utilities`](/acss-plugins-docs/style-agent/skills/create-utilities)           | `/create-utilities`      |
 
 ## Design principles
 
-**No external processor.** Both commands work by grepping `.css` files already present in your project. There is no dependency on PostCSS, Tailwind CLI, or any build tool.
+**No external processor.** All commands work by grepping `.css` files already present in your project. There is no dependency on PostCSS, Tailwind CLI, or any build tool.
 
 **Framework-agnostic.** Whether your project uses plain CSS, compiled SCSS, Tailwind, or another utility-first system, the plugin reads what is already on disk.
 
-**Name rules are consistent.** Both commands apply the same kebab-case sanitisation pipeline (max 20 characters) to any supplied name, and offer the same auto-generation algorithm when no name is given.
+**Name rules are consistent.** `/css-to-class` and `/inline-style-to-class` apply the same kebab-case sanitisation pipeline (max 20 characters) to any supplied name, and offer the same auto-generation algorithm when no name is given.
 
-**The two commands are inverses.** `/css-to-class` collapses many classes into one. `/inline-style-to-class` lifts inline declarations out into a class. Together they cover the two most common style-migration tasks.
+**The commands complement each other.** `/css-to-class` collapses many classes into one. `/inline-style-to-class` lifts inline declarations out into a class. `/create-utilities` generates a class string from intent. Together they cover the most common style-authoring and migration tasks.
 
 ## Version history
 
 | Version | Changes                              |
 | ------- | ------------------------------------ |
+| 0.3.0   | Added `/create-utilities`            |
 | 0.2.0   | Added `/inline-style-to-class`       |
 | 0.1.0   | Initial release with `/css-to-class` |
