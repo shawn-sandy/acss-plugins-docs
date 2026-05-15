@@ -6,6 +6,7 @@ description:
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 The `components` skill drives `/kit-add`. It defines the seven-step generation
 workflow, the component reference system, and all the conventions that keep
@@ -162,6 +163,10 @@ export function Button({ children, ...props }: ButtonProps) {
 `UI` accepts an `as` prop and forwards all HTML attributes to the correct
 element. It also handles the `data-*` attribute pattern used for variants and
 states.
+
+<ComponentPreview
+  code={`<button>Button</button>\n<button aria-disabled="true" style="opacity:0.5;cursor:not-allowed">Disabled</button>`}
+/>
 
 ## `aria-disabled` pattern
 

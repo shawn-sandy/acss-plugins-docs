@@ -4,6 +4,8 @@ description: Every utility family, its classes, and the CSS properties they map 
 ---
 
 import { Aside } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
+import UtilityExample from "~/components/UtilityExample.astro";
 
 Run `/utility-list` in a Claude Code session to see the full family catalogue with current values based on your tokens configuration.
 
@@ -30,6 +32,12 @@ Run `/utility-list` in a Claude Code session to see the full family catalogue wi
 | shadow       | no         | no           | `.shadow-sm`, `.shadow-lg`                                              |
 | position     | no         | no           | `.relative`, `.absolute`                                                |
 | z-index      | no         | no           | `.z-10`, `.z-50`                                                        |
+
+<ColorSwatch roles={["primary", "danger", "success", "info"]} table={false} />
+
+<UtilityExample class="flex gap-3 items-center">
+  <span>`.flex .gap-3 .items-center`</span>
+</UtilityExample>
 
 ## Logical-property spacing (v0.5.0+)
 

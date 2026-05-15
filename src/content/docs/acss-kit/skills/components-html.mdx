@@ -30,10 +30,6 @@ If the session is in plan mode, the skill calls `ExitPlanMode` before Step A. Th
 
 The skill stays in plan mode only when the user explicitly asked for a preview without running any scripts at all. In that case it narrates the file list (from the dependency tree) without invoking Write/Edit/Bash and waits for approval.
 
-## Step 0 — Exit plan mode
-
-If the session is in plan mode, exit it before Step A. The first-run initialization shells out to `detect_html_target.py`, writes `.acss-html-target.json`, and copies `_stateful.js` — all blocked by plan mode. Subsequent generation steps write `.html`, `.scss`, and `.js` artifacts. The skill only stays in plan mode when the user asked for a description without running anything.
-
 ## Step A — First-run initialization
 
 ### A1. Determine the target directory

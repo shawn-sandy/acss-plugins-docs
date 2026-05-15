@@ -43,7 +43,7 @@ The skill is structured as a ten-step pipeline. Each step has explicit halt/conf
 
 ### Step 0 — Exit plan mode
 
-If the session is in plan mode, exit it before Step A. Step B runs `detect_target.py` and may invoke `/kit-add` to bootstrap a missing component or dependency, and Step C's file-mode output writes a standalone TSX file — all blocked by plan mode. The skill only stays in plan mode when the user asked for a description without running anything.
+If the session is in plan mode, exit it before Step A. Step B runs `detect_target.py` and may invoke `/kit-add` to bootstrap a missing component or dependency, and Step E writes a standalone TSX file when file mode is chosen (Step C only decides the mode) — all blocked by plan mode. The skill only stays in plan mode when the user asked for a description without running anything.
 
 ### Step A — Parse the description
 
