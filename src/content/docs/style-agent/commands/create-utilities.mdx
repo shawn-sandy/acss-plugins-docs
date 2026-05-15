@@ -1,0 +1,132 @@
+---
+title: /create-utilities
+description: Generate a utility class string from a plain-language visual description — detects acss-kit, Tailwind, Bootstrap, or falls back to Tailwind-compatible naming.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+Generate a ready-to-use utility class string from a plain-language description of visual intent. Detects which utility library your project uses and maps the description to specific class names via LLM reasoning. Chains naturally into `/css-to-class` when you want to consolidate the result into a named class.
+
+## Syntax
+
+```text
+/create-utilities [description]
+```
+
+## Arguments
+
+| Argument      | Required | Description                                          |
+| ------------- | -------- | ---------------------------------------------------- |
+| `description` | Yes      | Plain-language visual intent (see Input forms below) |
+
+## Input forms
+
+| Form                     | Example                                                                            |
+| ------------------------ | ---------------------------------------------------------------------------------- |
+| Plain description        | `"a card with white background, 1rem padding, subtle shadow, and rounded corners"` |
+| Component phrase         | `"primary button with hover state"`                                                |
+| HTML element with intent | `<div> <!-- make this a centered hero section -->`                                 |
+
+## Examples
+
+Generate classes for a card layout:
+
+```text
+/create-utilities a card with white background, 1rem padding, subtle shadow, and rounded corners
+```
+
+Generate classes for a primary button:
+
+```text
+/create-utilities primary button with hover state
+```
+
+Generate classes for a flex row:
+
+```text
+/create-utilities centered flex row with gap and horizontal padding
+```
+
+## Framework detection
+
+The command greps your project files to identify which utility library is active:
+
+| Framework     | Detection signal                                                                         |
+| ------------- | ---------------------------------------------------------------------------------------- |
+| **acss-kit**  | `utilities.css` present with selectors like `.bg-primary`, `.flex`, `.m-4`               |
+| **Tailwind**  | `tailwind.config.*` file exists, or `@tailwind base` appears in any `.css`/`.scss`       |
+| **Bootstrap** | `bootstrap*.css` present, or Bootstrap-specific patterns (`d-flex`, `btn`) in source     |
+| **Fallback**  | No framework detected — uses Tailwind-compatible naming (`flex`, `p-4`, `rounded`, etc.) |
+
+When multiple frameworks are detected, the command asks which vocabulary to use.
+
+## Workflow
+
+<Steps>
+
+1. **Parse the description.** Extracts visual properties: layout, spacing, color, typography, borders, shadows, states. If the description is too vague (e.g., "make it look nice"), asks specific follow-up questions before proceeding.
+
+2. **Detect the framework.** Greps project files for framework signatures. Confirms acss-kit by checking for distinctive selectors in any found `utilities.css`. Asks for clarification if multiple frameworks are found.
+
+3. **Map to classes.** Selects the best class name from the detected framework's vocabulary for each extracted visual property. Class order is always: layout → spacing → color → typography → border/radius → shadow → state.
+
+4. **Apply accessibility defaults.** For interactive elements (button, link, input, etc.):
+   - **Tailwind / fallback:** appends `focus-visible:ring`.
+   - **acss-kit:** no focus utility exists in the bundle — emits a summary warning to add `:focus-visible { outline: 2px solid var(--color-primary, currentColor); outline-offset: 2px; }` to your project CSS, or use an acss-kit component class like `.btn` that provides focus styling.
+   - **Bootstrap:** appends `focus-ring` (Bootstrap 5.3+).
+
+5. **Emit output.** Prints two fenced code blocks: a class string and a one-line HTML example showing the class applied to the appropriate element.
+
+6. **Print summary.** Lists framework detected, number of classes generated, accessibility notes, any ambiguities resolved, any unmapped properties, and a WCAG contrast warning if the described color pair is likely to fail 4.5:1. Closes with a tip to run `/css-to-class [name]` to consolidate into a named class.
+
+</Steps>
+
+## Output example
+
+Given `"centered flex row with gap and horizontal padding"` in a project with acss-kit:
+
+**Class string:**
+
+```text
+flex items-center gap-4 px-4
+```
+
+**HTML example:**
+
+```html
+<div class="flex items-center gap-4 px-4">...</div>
+```
+
+**Summary:**
+
+```
+Framework: acss-kit
+Classes generated: 4 (flex, items-center, gap-4, px-4)
+No interactive element — no focus class added.
+Run /css-to-class row-header to consolidate into a named class.
+```
+
+<Aside type="caution">
+  When the description is too vague, the command uses `AskUserQuestion` rather
+  than guessing. If you receive a clarifying question, answer with specifics:
+  "flex, medium padding, primary background" rather than "a styled container".
+</Aside>
+
+<Aside type="tip">
+  The class string output is designed to chain into
+  [`/css-to-class`](/acss-plugins-docs/style-agent/commands/css-to-class) — run
+  `/css-to-class [name]` after this command to extract the classes into a single
+  semantic class in your stylesheet.
+</Aside>
+
+## When to use
+
+- You know the visual intent but not which classes to use.
+- You're working in a project you haven't memorised the utility vocabulary for.
+- You want a starting point that you'll refine into a named class via `/css-to-class`.
+
+## Related
+
+- [`/css-to-class`](/acss-plugins-docs/style-agent/commands/css-to-class) — collapse a multi-class element into one semantic class
+- [`create-utilities skill`](/acss-plugins-docs/style-agent/skills/create-utilities) — full skill reference
+- [style-agent Overview](/acss-plugins-docs/style-agent/overview)
