@@ -141,7 +141,14 @@ Theme files participate in the canonical `@layer` cascade. `foundation.css` decl
 @layer foundation, components, utilities, theme;
 ```
 
-Generated `light.css`, `dark.css`, and `brand-*.css` must be imported **after** `foundation.css`. The cascade outcome — **theme > utilities > components > foundation** — means `--color-*` values from theme files always win over any primitive tokens declared in `@layer foundation`. This is by design: the foundation layer intentionally omits `--color-*` semantic roles so theme files hold the only source of truth for every `--color-*` variable.
+Generated `light.css`, `dark.css`, and `brand-*.css` contain plain `:root { ... }` rules and must be imported into the `theme` layer using the CSS `layer()` import syntax:
+
+```css
+@import "./light.css" layer(theme);
+@import "./dark.css" layer(theme);
+```
+
+This import form assigns the file's rules to `@layer theme` without requiring the file itself to contain a `@layer` wrapper. The cascade outcome — **theme > utilities > components > foundation** — means `--color-*` values from theme files always win over any primitive tokens declared in `@layer foundation`. This is by design: the foundation layer intentionally omits `--color-*` semantic roles so theme files hold the only source of truth for every `--color-*` variable.
 
 ## WCAG 2.2 AA contrast validation
 
@@ -209,7 +216,7 @@ The `styles` skill also backs the [`/color-scale`](/acss-plugins-docs/acss-kit/c
 Resolve `<color>` to a 6-digit hex string before calling the script:
 
 1. **Hex value** (`#rrggbb` or `#rgb`) — used directly, no lookup needed.
-2. **Theme role name** (`background`, `primary`, `surface`, `text`, `border`, etc.) — find the project's `light.css` (or `dark.css` if specified), grep for `--color-<role>:`, and extract the hex fallback from the `var(--color-<role>, <hex>)` value. If both files exist, default to `light.css`. If neither exists, halt with: `"No theme file found. Run /theme-create first or pass a hex value directly."`
+2. **Theme role name** (`background`, `primary`, `surface`, `text`, `border`, etc.) — find the project's `light.css` (or `dark.css` if specified), read `--color-<role>:`, and resolve its value: if already hex, use it directly; if `oklch(...)`, convert to hex before invoking `generate_color_scale.py`. If both files exist, default to `light.css`. If neither exists, halt with: `"No theme file found. Run /theme-create first or pass a hex value directly."`
 3. **CSS named color** (`red`, `cornflowerblue`, `tomato`, etc.) — resolve to hex using the W3C CSS Color 4 named-color table. Example: `red` → `#ff0000`, `cornflowerblue` → `#6495ed`.
 4. **Anything else** — halt with the usage hint.
 
