@@ -4,6 +4,7 @@ description: Tailwind-style atomic CSS utility classes for fpkit/acss projects, 
 ---
 
 import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
+import UtilityExample from "~/components/UtilityExample.astro";
 
 **acss-utilities** provides a pre-built bundle of Tailwind-style atomic CSS utility classes that connect to your acss-kit theme via a token bridge.
 
@@ -47,6 +48,11 @@ import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
 | `position`     | No         | `.relative`, `.absolute`, `.fixed`, `.sticky`            |
 | `z-index`      | No         | `.z-10`, `.z-20`, `.z-50`, `.z-auto`                     |
 
+<UtilityExample class="bg-primary" property="--color-primary">
+  Sample element styled with <code>.bg-primary</code> — color comes from the
+  token bridge.
+</UtilityExample>
+
 ## Responsive variants
 
 Four families support responsive prefixes (`spacing`, `display`, `flex`, `grid`). The prefix activates the utility at that breakpoint and above:
@@ -58,6 +64,10 @@ Four families support responsive prefixes (`spacing`, `display`, `flex`, `grid`)
 ```
 
 Breakpoints: `sm` (30rem) · `md` (48rem) · `lg` (62rem) · `xl` (80rem)
+
+<UtilityExample class="md-flex-row" property="flex-direction">
+  Responsive flex: column on mobile, row from <code>md</code> breakpoint up.
+</UtilityExample>
 
 <LinkCard
   title="Responsive Variants"
