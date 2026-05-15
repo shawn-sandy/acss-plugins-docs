@@ -4,6 +4,7 @@ description: Generate static HTML snippets, SCSS, and (for stateful components) 
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 The `components-html` skill drives [`/kit-add-html`](/acss-plugins-docs/acss-kit/commands/kit-add-html). It is a sibling to the [`components` skill](/acss-plugins-docs/acss-kit/skills/components) — both read the same reference docs at `references/components/<name>.md`. The TSX generator copies the `## TSX Template` block; this generator copies `## HTML Template` and (for stateful components) `## Vanilla JS`. The `## SCSS Template` block is identical for both — the SCSS is framework-agnostic.
 
@@ -23,6 +24,10 @@ The `components-html` skill drives [`/kit-add-html`](/acss-plugins-docs/acss-kit
 | **Template source**       | `## TSX Template` block  | `## HTML Template` + `## Vanilla JS` blocks                     |
 | **SCSS**                  | Per-component            | Byte-identical to the TSX output                                |
 | **Disabled-state helper** | Inline React hook        | `_stateful.js` foundation + `wireDisabled` import               |
+
+<ComponentPreview
+  code={`<button class="btn" aria-disabled="true" style="opacity:0.5;cursor:not-allowed">Disabled button</button>\n<div class="card" style="padding:1rem;border:1px solid #ccc;border-radius:4px;min-width:10rem"><strong>Card</strong><p style="margin:.25rem 0 0">HTML output</p></div>`}
+/>
 
 ## Step 0 — Exit plan mode
 
