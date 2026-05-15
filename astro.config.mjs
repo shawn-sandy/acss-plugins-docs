@@ -97,6 +97,22 @@ export default defineConfig({
                   label: "/prompt-book",
                   slug: "acss-kit/commands/prompt-book",
                 },
+                {
+                  label: "/utility-add",
+                  slug: "acss-kit/commands/utility-add",
+                },
+                {
+                  label: "/utility-bridge",
+                  slug: "acss-kit/commands/utility-bridge",
+                },
+                {
+                  label: "/utility-list",
+                  slug: "acss-kit/commands/utility-list",
+                },
+                {
+                  label: "/utility-tune",
+                  slug: "acss-kit/commands/utility-tune",
+                },
               ],
             },
             {
@@ -106,6 +122,10 @@ export default defineConfig({
                 {
                   label: "components skill",
                   slug: "acss-kit/skills/components",
+                },
+                {
+                  label: "utilities skill",
+                  slug: "acss-kit/skills/utilities",
                 },
                 {
                   label: "components-html skill",
