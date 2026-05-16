@@ -97,6 +97,22 @@ export default defineConfig({
                   label: "/prompt-book",
                   slug: "acss-kit/commands/prompt-book",
                 },
+                {
+                  label: "/utility-add",
+                  slug: "acss-kit/commands/utility-add",
+                },
+                {
+                  label: "/utility-list",
+                  slug: "acss-kit/commands/utility-list",
+                },
+                {
+                  label: "/utility-tune",
+                  slug: "acss-kit/commands/utility-tune",
+                },
+                {
+                  label: "/utility-bridge",
+                  slug: "acss-kit/commands/utility-bridge",
+                },
               ],
             },
             {
@@ -107,27 +123,31 @@ export default defineConfig({
                   label: "components skill",
                   slug: "acss-kit/skills/components",
                 },
-                {
-                  label: "components-html skill",
-                  slug: "acss-kit/skills/components-html",
-                },
-                {
-                  label: "component-creator skill",
-                  slug: "acss-kit/skills/component-creator",
-                },
                 { label: "styles skill", slug: "acss-kit/skills/styles" },
+                {
+                  label: "utilities skill",
+                  slug: "acss-kit/skills/utilities",
+                },
                 { label: "kit-sync skill", slug: "acss-kit/skills/kit-sync" },
                 {
                   label: "prompt-book skill",
                   slug: "acss-kit/skills/prompt-book",
                 },
                 {
-                  label: "component-form (pilot)",
+                  label: "style-tune skill",
+                  slug: "acss-kit/skills/style-tune",
+                },
+                {
+                  label: "component-creator (absorbed)",
+                  slug: "acss-kit/skills/component-creator",
+                },
+                {
+                  label: "component-form (absorbed)",
                   slug: "acss-kit/skills/component-form",
                 },
                 {
-                  label: "style-tune (pilot)",
-                  slug: "acss-kit/skills/style-tune",
+                  label: "components-html (absorbed)",
+                  slug: "acss-kit/skills/components-html",
                 },
               ],
             },
@@ -140,6 +160,7 @@ export default defineConfig({
               slug: "acss-kit/css-variables",
             },
             { label: "OKLCH Theming", slug: "acss-kit/oklch-theming" },
+            { label: "Migration Guide (v1.0)", slug: "acss-kit/migration-v1" },
           ],
         },
         {

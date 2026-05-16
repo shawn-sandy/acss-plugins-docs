@@ -1,15 +1,31 @@
 ---
 title: components skill
-description: Deep dive into how the components skill generates React components — the generation contract, dependency resolution, and file output conventions.
+description: Full component generation workflow — React (Steps A–F), Creator Mode (/kit-create), Form Mode, and HTML Target (/kit-add --target=html).
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
 
-The `components` skill drives `/kit-add`. It defines the seven-step generation workflow, the component reference system, and all the conventions that keep generated code consistent across every component.
+The `components` skill (v0.4.0) drives all component generation for acss-kit. It contains four integrated workflows: the standard React generation pipeline (Steps A–F), **Creator Mode** for natural-language descriptions, **Form Mode** for accessible form scaffolding, and **HTML Target** for static HTML + SCSS + vanilla-JS output.
 
-## Trigger
+<Aside type="note">
+  As of acss-kit v1.0.0, the former `component-creator`, `component-form`, and
+  `components-html` pilot skills have been absorbed into this single skill. The
+  separate skill directories no longer exist upstream. See the corresponding
+  [component-creator](/acss-plugins-docs/acss-kit/skills/component-creator),
+  [component-form](/acss-plugins-docs/acss-kit/skills/component-form), and
+  [components-html](/acss-plugins-docs/acss-kit/skills/components-html) pages
+  for historical reference; they are preserved here but are no longer active
+  separate skills upstream.
+</Aside>
 
-The `components` skill is triggered by `/kit-add`. It can also be invoked by the `component-form` pilot skill when it needs to generate field-level dependencies.
+## Triggers
+
+| Trigger                                                                     | Workflow                                       |
+| --------------------------------------------------------------------------- | ---------------------------------------------- |
+| `/kit-add <component>`                                                      | Standard React generation (Steps A–F)          |
+| `/kit-add --target=html <component>` or `/kit-add-html`                     | HTML Target workflow (steps HT-A through HT-F) |
+| `/kit-create <description>` or natural language ("create a…", "make me a…") | Creator Mode                                   |
+| Natural language ("create a signup form", "build a contact form with…")     | Form Mode                                      |
 
 ## The seven steps (0, A–F)
 
