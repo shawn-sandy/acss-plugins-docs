@@ -1,10 +1,18 @@
 ---
-title: component-creator skill
-description: Generates a single component instance from a natural-language description, resolving prop vocabulary against per-component reference docs.
+title: component-creator skill (absorbed)
+description: Generates a single component instance from a natural-language description — now built into the components skill as Creator Mode (acss-kit v1.0.0).
 ---
 
 import { Aside } from "@astrojs/starlight/components";
 import ComponentPreview from "~/components/ComponentPreview.astro";
+
+<Aside type="caution">
+  **This skill was absorbed into the `components` skill as of acss-kit v1.0.0.**
+  The `component-creator` skill directory no longer exists upstream. Creator
+  Mode is now the `## Creator Mode` section of the [`components`
+  skill](/acss-plugins-docs/acss-kit/skills/components). This page is preserved
+  for historical reference.
+</Aside>
 
 The `component-creator` skill powers [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create). It also auto-triggers on natural-language phrases, so the slash command is optional.
 
