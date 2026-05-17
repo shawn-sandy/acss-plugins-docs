@@ -8,16 +8,23 @@ import ComponentPreview from "~/components/ComponentPreview.astro";
 
 The `component-creator` skill powers [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create). It also auto-triggers on natural-language phrases, so the slash command is optional.
 
-|                  |                                                                                                                                                                                                                                                    |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Triggered by** | `/kit-create` plus phrases like _"create a …"_, _"make me a …"_, _"build a …"_, _"design a …"_, _"generate a …"_                                                                                                                                   |
-| **Output**       | A TSX snippet (default) or a standalone component file                                                                                                                                                                                             |
-| **Dependencies** | Per-component reference docs under `plugins/acss-kit/skills/component-creator/references/components/<name>.md`                                                                                                                                     |
-| **Status**       | Pilot — graduates to v1 once auto-trigger reliability is observed across a full release cycle on real user prompts and the six inline-only catalog entries (Badge, Tag, Heading, Text, Details, Progress) are promoted to dedicated reference docs |
+<Aside type="note">
+  The `component-creator` pilot skill was absorbed into the [`components`
+  skill](/acss-plugins-docs/acss-kit/skills/components) in acss-kit v1.0.0.
+  **Creator Mode** now lives in the `## Creator Mode` section of
+  `skills/components/SKILL.md`. This page is preserved for reference.
+</Aside>
+
+|                  |                                                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-create` plus phrases like _"create a …"_, _"make me a …"_, _"build a …"_, _"design a …"_, _"generate a …"_ |
+| **Output**       | A TSX snippet (default) or a standalone component file                                                           |
+| **Dependencies** | Per-component reference docs under `plugins/acss-kit/skills/components/references/components/<name>.md`          |
+| **Status**       | Absorbed into `components` skill v1.0.0 — Creator Mode and Form Mode now live in that skill                      |
 
 ## Supported components
 
-Reference docs live under `plugins/acss-kit/skills/component-creator/references/components/`:
+Reference docs live under `plugins/acss-kit/skills/components/references/components/`:
 
 | Component              | Reference doc                         |
 | ---------------------- | ------------------------------------- |

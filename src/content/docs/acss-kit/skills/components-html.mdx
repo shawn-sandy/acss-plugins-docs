@@ -3,26 +3,34 @@ title: components-html skill
 description: Generate static HTML snippets, SCSS, and (for stateful components) vanilla-JS helpers for fpkit-style components in non-React projects.
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps } from "@astrojs/starlight/components";
 
-The `components-html` skill drives [`/kit-add-html`](/acss-plugins-docs/acss-kit/commands/kit-add-html). It is a sibling to the [`components` skill](/acss-plugins-docs/acss-kit/skills/components) — both read the same reference docs at `references/components/<name>.md`. The TSX generator copies the `## TSX Template` block; this generator copies `## HTML Template` and (for stateful components) `## Vanilla JS`. The `## SCSS Template` block is identical for both — the SCSS is framework-agnostic.
+<Aside type="caution">
+  The `components-html` skill was **removed** upstream in acss-kit v1.0.0. The
+  HTML Target workflow is now part of the [`components`
+  skill](/acss-plugins-docs/acss-kit/skills/components) (`## HTML Target`
+  section, steps HT-A through HT-F), accessed via `/kit-add --target=html`. This
+  page is preserved for reference; use `/kit-add --target=html` going forward.
+</Aside>
 
-| | |
-|---|---|
-| **Triggered by** | `/kit-add-html` |
-| **Output** | `<name>.html` + `<name>.scss` + (stateful only) `<name>.js`, plus a one-time `_stateful.js` foundation helper |
-| **Target config** | `<projectRoot>/.acss-html-target.json` |
-| **Stateless components emit no `.js`** | Img, Link, Icon, List, Table, Field, Nav, plain Card variant |
+The `components-html` skill drove [`/kit-add-html`](/acss-plugins-docs/acss-kit/commands/kit-add-html). It is a sibling to the [`components` skill](/acss-plugins-docs/acss-kit/skills/components) — both read the same reference docs at `references/components/<name>.md`. The TSX generator copies the `## TSX Template` block; this generator copies `## HTML Template` and (for stateful components) `## Vanilla JS`. The `## SCSS Template` block is identical for both — the SCSS is framework-agnostic.
+
+|                                        |                                                                                                               |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Triggered by**                       | `/kit-add-html`                                                                                               |
+| **Output**                             | `<name>.html` + `<name>.scss` + (stateful only) `<name>.js`, plus a one-time `_stateful.js` foundation helper |
+| **Target config**                      | `<projectRoot>/.acss-html-target.json`                                                                        |
+| **Stateless components emit no `.js`** | Img, Link, Icon, List, Table, Field, Nav, plain Card variant                                                  |
 
 ## Sibling vs the React generator
 
-| Aspect | `components` skill (TSX) | `components-html` skill |
-|---|---|---|
-| **Output files** | `<Name>.tsx` | `<name>.html` + `<name>.scss` + `<name>.js` (stateful only) |
-| **Target projects** | React-based | Server-rendered apps, static sites, email templates, prototypes |
-| **Template source** | `## TSX Template` block | `## HTML Template` + `## Vanilla JS` blocks |
-| **SCSS** | Per-component | Byte-identical to the TSX output |
-| **Disabled-state helper** | Inline React hook | `_stateful.js` foundation + `wireDisabled` import |
+| Aspect                    | `components` skill (TSX) | `components-html` skill                                         |
+| ------------------------- | ------------------------ | --------------------------------------------------------------- |
+| **Output files**          | `<Name>.tsx`             | `<name>.html` + `<name>.scss` + `<name>.js` (stateful only)     |
+| **Target projects**       | React-based              | Server-rendered apps, static sites, email templates, prototypes |
+| **Template source**       | `## TSX Template` block  | `## HTML Template` + `## Vanilla JS` blocks                     |
+| **SCSS**                  | Per-component            | Byte-identical to the TSX output                                |
+| **Disabled-state helper** | Inline React hook        | `_stateful.js` foundation + `wireDisabled` import               |
 
 ## Step 0 — Exit plan mode
 
@@ -151,5 +159,9 @@ Runs `verify_html_integration.py`:
 7. **No auto-edits to user pages** — Step F reports missing references but never patches them.
 
 <Aside type="tip">
-For React-only projects, use the [`components` skill](/acss-plugins-docs/acss-kit/skills/components) (driven by [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)) instead. The two are designed to coexist — the framework-agnostic SCSS contract is the foundation that makes both possible.
+  For React-only projects, use the [`components`
+  skill](/acss-plugins-docs/acss-kit/skills/components) (driven by
+  [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)) instead. The two
+  are designed to coexist — the framework-agnostic SCSS contract is the
+  foundation that makes both possible.
 </Aside>

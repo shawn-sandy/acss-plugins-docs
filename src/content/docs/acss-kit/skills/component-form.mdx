@@ -8,10 +8,17 @@ import ComponentPreview from "~/components/ComponentPreview.astro";
 
 `component-form` is a pilot skill that auto-triggers on natural language form requests. Instead of running `/kit-add form`, you describe the form you want and the skill resolves the right field types, generates the dependencies, and produces a complete, accessible form component.
 
+<Aside type="caution">
+  The `component-form` pilot skill was **absorbed** into the [`components`
+  skill](/acss-plugins-docs/acss-kit/skills/components) in acss-kit v1.0.0.
+  **Form Mode** now lives in the `## Form Mode` section of
+  `skills/components/SKILL.md`. This page is preserved for reference.
+</Aside>
+
 <Aside type="note">
-  This is a **pilot skill** — it validates a per-component skill discovery
-  pattern and may evolve. The generated output is stable; the natural language
-  trigger vocabulary is what's being refined. Graduates to v1 once auto-trigger
+  This was a **pilot skill** — it validated a per-component skill discovery
+  pattern. The generated output is stable; the natural language trigger
+  vocabulary is what's being refined. Graduates to v1 once auto-trigger
   reliability is observed across a full release cycle on real user prompts with
   the v1 field-type grammar (text, email, password, tel, url, number, date,
   textarea, select, checkbox, radio). Failure-mode fallbacks for unsupported
