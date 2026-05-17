@@ -6,7 +6,7 @@ description: Auto-generates accessible form components from natural language —
 import { Aside } from "@astrojs/starlight/components";
 import ComponentPreview from "~/components/ComponentPreview.astro";
 
-`component-form` is a pilot skill that auto-triggers on natural language form requests. Instead of running `/kit-add form`, you describe the form you want and the skill resolves the right field types, generates the dependencies, and produces a complete, accessible form component.
+`component-form` was a pilot skill that auto-triggered on natural language form requests. Instead of running `/kit-add form`, you described the form you wanted and the skill resolved the right field types, generated the dependencies, and produced a complete, accessible form component.
 
 <Aside type="caution">
   The `component-form` pilot skill was **absorbed** into the [`components`
@@ -17,12 +17,12 @@ import ComponentPreview from "~/components/ComponentPreview.astro";
 
 <Aside type="note">
   This was a **pilot skill** — it validated a per-component skill discovery
-  pattern. The generated output is stable; the natural language trigger
-  vocabulary is what's being refined. Graduates to v1 once auto-trigger
-  reliability is observed across a full release cycle on real user prompts with
-  the v1 field-type grammar (text, email, password, tel, url, number, date,
-  textarea, select, checkbox, radio). Failure-mode fallbacks for unsupported
-  field types (file, color, range) are documented in the plugin's
+  pattern. The generated output was stable; the natural language trigger
+  vocabulary was what was being refined. It was planned to graduate to v1 once
+  auto-trigger reliability was observed across a full release cycle on real user
+  prompts with the v1 field-type grammar (text, email, password, tel, url,
+  number, date, textarea, select, checkbox, radio). Failure-mode fallbacks for
+  unsupported field types (file, color, range) are documented in the plugin's
   `docs/troubleshooting.md`.
 </Aside>
 
