@@ -97,6 +97,22 @@ export default defineConfig({
                   label: "/prompt-book",
                   slug: "acss-kit/commands/prompt-book",
                 },
+                {
+                  label: "/utility-add",
+                  slug: "acss-kit/commands/utility-add",
+                },
+                {
+                  label: "/utility-bridge",
+                  slug: "acss-kit/commands/utility-bridge",
+                },
+                {
+                  label: "/utility-list",
+                  slug: "acss-kit/commands/utility-list",
+                },
+                {
+                  label: "/utility-tune",
+                  slug: "acss-kit/commands/utility-tune",
+                },
               ],
             },
             {
@@ -129,6 +145,10 @@ export default defineConfig({
                   label: "style-tune (pilot)",
                   slug: "acss-kit/skills/style-tune",
                 },
+                {
+                  label: "utilities skill",
+                  slug: "acss-kit/skills/utilities",
+                },
               ],
             },
             {
@@ -140,6 +160,10 @@ export default defineConfig({
               slug: "acss-kit/css-variables",
             },
             { label: "OKLCH Theming", slug: "acss-kit/oklch-theming" },
+            {
+              label: "Migration Guide (v1.0.0)",
+              slug: "acss-kit/migration-v1",
+            },
           ],
         },
         {

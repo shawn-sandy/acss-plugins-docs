@@ -5,8 +5,8 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 # Upstream layout cache
 
-- **verified-at-sha:** `128506f`
-- **verified-at:** `2026-05-13T00:00:00Z`
+- **verified-at-sha:** `d4c8498`
+- **verified-at:** `2026-05-17T00:00:00Z`
 
 ## Plugin roots
 
