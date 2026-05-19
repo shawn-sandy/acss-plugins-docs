@@ -4,6 +4,8 @@ description: Tailwind-style atomic CSS utility classes for fpkit/acss projects, 
 ---
 
 import { Aside, CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
+import UtilityExample from "~/components/UtilityExample.astro";
 
 <Aside type="caution" title="Plugin tombstoned — acss-utilities v1.0.0">
   All utility-class commands (`/utility-add`, `/utility-bridge`, `/utility-list`,
@@ -72,6 +74,8 @@ Six families support responsive prefixes. The prefix activates the utility at th
 
 Breakpoints: `sm` (30rem) · `md` (48rem) · `lg` (62rem) · `xl` (80rem)
 
+<UtilityExample class="md-flex-row" property="flex-direction" />
+
 <LinkCard
   title="Responsive Variants"
   href="/acss-plugins-docs/acss-utilities/responsive-variants"
@@ -81,6 +85,8 @@ Breakpoints: `sm` (30rem) · `md` (48rem) · `lg` (62rem) · `xl` (80rem)
 ## Token bridge
 
 The token bridge (`token-bridge.css`) maps utility color class names to your acss-kit theme tokens and synthesizes derived variants via `color-mix()`:
+
+<ColorSwatch roles={["primary", "error", "surface"]} />
 
 ```css
 :root {

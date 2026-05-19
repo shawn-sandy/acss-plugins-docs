@@ -4,6 +4,8 @@ description: What acss-kit does, what it generates, and how the commands and ski
 ---
 
 import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
+import UtilityExample from "~/components/UtilityExample.astro";
 
 **acss-kit** is a Claude Code plugin that generates accessible React components and CSS themes for [fpkit/acss](https://github.com/shawn-sandy/acss) projects.
 
@@ -19,6 +21,8 @@ import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
     color roles, WCAG AA validated, light + dark.
   </Card>
 </CardGrid>
+
+<ColorSwatch roles={["primary", "surface", "error", "warning"]} />
 
 ## Commands
 
@@ -56,6 +60,8 @@ Absorbed from `acss-utilities` in v1.0.0 — no separate plugin install required
 | [`/utility-list`](/acss-plugins-docs/acss-kit/commands/utility-list)     | Browse utility families and their classes                            |
 | [`/utility-tune`](/acss-plugins-docs/acss-kit/commands/utility-tune)     | Adjust spacing, breakpoints, or family settings via natural language |
 | [`/utility-bridge`](/acss-plugins-docs/acss-kit/commands/utility-bridge) | Regenerate the token bridge against your active theme                |
+
+<UtilityExample class="bg-primary" property="--color-primary" />
 
 ## Skills
 
