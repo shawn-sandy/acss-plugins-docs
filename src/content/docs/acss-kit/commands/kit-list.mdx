@@ -4,6 +4,7 @@ description: Browse the full component catalogue or inspect a specific component
 ---
 
 import { Aside } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 Browse the component catalogue or inspect a specific component's props, CSS tokens, dependencies, and generation contract. This command is entirely read-only — it never writes files.
 
@@ -67,6 +68,12 @@ Run /kit-add <component> to generate React components, or /kit-add --target=html
 Components without `[HTML]` exist as React only — `/kit-add --target=html` will warn if you try to generate them.
 
 ## Output: component inspect
+
+<ComponentPreview
+  code={`<button class="btn btn--primary">Save</button>
+<button class="btn btn--secondary">Cancel</button>
+<button class="btn btn--primary" disabled>Unavailable</button>`}
+/>
 
 With a component name, `/kit-list` shows the full specification including a dedicated **HTML output** line:
 

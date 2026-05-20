@@ -4,6 +4,7 @@ description: Tailwind-style atomic CSS utility classes for fpkit/acss projects, 
 ---
 
 import { CardGrid, Card, LinkCard, Aside } from "@astrojs/starlight/components";
+import UtilityExample from "~/components/UtilityExample.astro";
 
 <Aside type="caution">
   **`acss-utilities` is deprecated.** All utility-class commands and the
@@ -62,6 +63,13 @@ full upgrade steps. No CSS class names changed — your `utilities.css` and
 | `shadow`       | No         | `.shadow-sm`, `.shadow-md`, `.shadow-lg`                 |
 | `position`     | No         | `.relative`, `.absolute`, `.fixed`, `.sticky`            |
 | `z-index`      | No         | `.z-10`, `.z-20`, `.z-50`, `.z-auto`                     |
+
+<UtilityExample class="bg-primary" property="--color-primary">
+  bg-primary
+</UtilityExample>
+<UtilityExample class="text-muted" property="--color-text-muted">
+  text-muted
+</UtilityExample>
 
 ## Responsive variants
 

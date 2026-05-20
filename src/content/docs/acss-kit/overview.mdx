@@ -4,6 +4,7 @@ description: What acss-kit does, what it generates, and how the commands and ski
 ---
 
 import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
 
 **acss-kit** is a Claude Code plugin that generates accessible React components and CSS themes for [fpkit/acss](https://github.com/shawn-sandy/acss) projects.
 
@@ -54,6 +55,8 @@ import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
 | `utilities`   | `/utility-add`, `/utility-bridge`, `/utility-list`, `/utility-tune`                    | Atomic CSS utility generation, token bridge, and bundle management            |
 | `style-tune`  | `/style-tune` or natural language ("warmer button", "softer card")                     | Adjusts visual feel via token edits + WCAG validation                         |
 | `prompt-book` | `/prompt-book`                                                                         | Read-only display of the bundled copy-paste prompt catalogue                  |
+
+<ColorSwatch roles={["primary", "danger", "surface", "success"]} />
 
 ## Key design decisions
 
