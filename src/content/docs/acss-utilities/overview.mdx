@@ -3,46 +3,68 @@ title: acss-utilities Overview
 description: Tailwind-style atomic CSS utility classes for fpkit/acss projects, connected to your acss-kit theme via a token bridge.
 ---
 
-import { CardGrid, Card, LinkCard } from '@astrojs/starlight/components';
+import { Aside, CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
 
-**acss-utilities** provides a pre-built bundle of Tailwind-style atomic CSS utility classes that connect to your acss-kit theme via a token bridge.
+<Aside type="caution">
+  **`acss-utilities` is deprecated as of v1.0.0.** All utility commands
+  (`/utility-add`, `/utility-bridge`, `/utility-list`, `/utility-tune`) and the
+  `utilities` skill have moved to **acss-kit**. Existing installs continue to
+  work but no new features will be added here.
+
+```text
+/plugin uninstall acss-utilities@shawn-sandy-agentic-acss-plugins
+/plugin update acss-kit@shawn-sandy-agentic-acss-plugins
+```
+
+See the [Migration Guide](/acss-plugins-docs/acss-kit/migration-v1) for full
+upgrade steps and the canonical utility command docs under
+[acss-kit Commands](/acss-plugins-docs/acss-kit/overview).
+
+</Aside>
+
+**acss-utilities** provided a pre-built bundle of Tailwind-style atomic CSS
+utility classes that connect to your acss-kit theme via a token bridge. This
+plugin is preserved for reference; all functionality is now in acss-kit v1.0.0.
 
 ## What it includes
 
 <CardGrid>
   <Card title="12 utility families" icon="seti:css">
-    Spacing, flex, grid, display, color, typography, radius, shadow, position, and z-index — covering the utility classes you reach for most.
+    Spacing, flex, grid, display, color, typography, radius, shadow, position,
+    and z-index — covering the utility classes you reach for most.
   </Card>
   <Card title="Token bridge" icon="random">
-    A `token-bridge.css` that maps utility class color names to your acss-kit `--color-*` roles, including dark mode parity and derived `-bg` / `-light` variants.
+    A `token-bridge.css` that maps utility class color names to your acss-kit
+    `--color-*` roles, including dark mode parity and derived `-bg` / `-light`
+    variants.
   </Card>
 </CardGrid>
 
 ## Commands
 
-| Command | What it does |
-|---|---|
-| [`/utility-add`](/acss-plugins-docs/acss-utilities/commands/utility-add) | Copy `utilities.css` + `token-bridge.css` into your project |
-| [`/utility-list`](/acss-plugins-docs/acss-utilities/commands/utility-list) | Browse families and classes — read-only |
-| [`/utility-tune`](/acss-plugins-docs/acss-utilities/commands/utility-tune) | Adjust spacing, breakpoints, or family settings via natural language |
-| [`/utility-bridge`](/acss-plugins-docs/acss-utilities/commands/utility-bridge) | Regenerate the token bridge against your active acss-kit theme |
+| Command                                                                        | What it does                                                         |
+| ------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| [`/utility-add`](/acss-plugins-docs/acss-utilities/commands/utility-add)       | Copy `utilities.css` + `token-bridge.css` into your project          |
+| [`/utility-list`](/acss-plugins-docs/acss-utilities/commands/utility-list)     | Browse families and classes — read-only                              |
+| [`/utility-tune`](/acss-plugins-docs/acss-utilities/commands/utility-tune)     | Adjust spacing, breakpoints, or family settings via natural language |
+| [`/utility-bridge`](/acss-plugins-docs/acss-utilities/commands/utility-bridge) | Regenerate the token bridge against your active acss-kit theme       |
 
 ## The 12 utility families
 
-| Family | Responsive | Example classes |
-|---|---|---|
-| `color-bg` | No | `.bg-primary`, `.bg-surface`, `.bg-error` |
-| `color-text` | No | `.text-primary`, `.text-muted`, `.text-inverse` |
-| `color-border` | No | `.border-primary`, `.border-error` |
-| `spacing` | Yes | `.m-4`, `.mt-2`, `.px-6`, `.gap-3` |
-| `display` | Yes | `.hide`, `.show`, `.sr-only`, `.print-hide` |
-| `flex` | Yes | `.flex`, `.flex-col`, `.justify-center`, `.items-center` |
-| `grid` | Yes | `.grid`, `.grid-cols-2`, `.grid-cols-12` |
-| `type` | No | `.text-xs`, `.text-lg`, `.font-bold`, `.italic` |
-| `radius` | No | `.rounded-sm`, `.rounded-md`, `.rounded-full` |
-| `shadow` | No | `.shadow-sm`, `.shadow-md`, `.shadow-lg` |
-| `position` | No | `.relative`, `.absolute`, `.fixed`, `.sticky` |
-| `z-index` | No | `.z-10`, `.z-20`, `.z-50`, `.z-auto` |
+| Family         | Responsive | Example classes                                          |
+| -------------- | ---------- | -------------------------------------------------------- |
+| `color-bg`     | No         | `.bg-primary`, `.bg-surface`, `.bg-error`                |
+| `color-text`   | No         | `.text-primary`, `.text-muted`, `.text-inverse`          |
+| `color-border` | No         | `.border-primary`, `.border-error`                       |
+| `spacing`      | Yes        | `.m-4`, `.mt-2`, `.px-6`, `.gap-3`                       |
+| `display`      | Yes        | `.hide`, `.show`, `.sr-only`, `.print-hide`              |
+| `flex`         | Yes        | `.flex`, `.flex-col`, `.justify-center`, `.items-center` |
+| `grid`         | Yes        | `.grid`, `.grid-cols-2`, `.grid-cols-12`                 |
+| `type`         | No         | `.text-xs`, `.text-lg`, `.font-bold`, `.italic`          |
+| `radius`       | No         | `.rounded-sm`, `.rounded-md`, `.rounded-full`            |
+| `shadow`       | No         | `.shadow-sm`, `.shadow-md`, `.shadow-lg`                 |
+| `position`     | No         | `.relative`, `.absolute`, `.fixed`, `.sticky`            |
+| `z-index`      | No         | `.z-10`, `.z-20`, `.z-50`, `.z-auto`                     |
 
 ## Responsive variants
 
@@ -56,7 +78,11 @@ Six families support responsive prefixes. The prefix activates the utility at th
 
 Breakpoints: `sm` (30rem) · `md` (48rem) · `lg` (62rem) · `xl` (80rem)
 
-<LinkCard title="Responsive Variants" href="/acss-plugins-docs/acss-utilities/responsive-variants" description="Full guide to the hyphen-prefix responsive system." />
+<LinkCard
+  title="Responsive Variants"
+  href="/acss-plugins-docs/acss-utilities/responsive-variants"
+  description="Full guide to the hyphen-prefix responsive system."
+/>
 
 ## Token bridge
 
@@ -64,17 +90,33 @@ The token bridge (`token-bridge.css`) maps utility color class names to your acs
 
 ```css
 :root {
-  --color-error:      var(--color-danger, #dc2626);
-  --color-error-bg:   color-mix(in oklch, var(--color-danger, #dc2626) 12%, var(--color-background, #fff));
-  --color-primary-light: color-mix(in oklch, var(--color-primary, #4f46e5) 80%, white);
+  --color-error: var(--color-danger, #dc2626);
+  --color-error-bg: color-mix(
+    in oklch,
+    var(--color-danger, #dc2626) 12%,
+    var(--color-background, #fff)
+  );
+  --color-primary-light: color-mix(
+    in oklch,
+    var(--color-primary, #4f46e5) 80%,
+    white
+  );
 }
 [data-theme="dark"] {
-  --color-error:      var(--color-danger, #f87171);
-  --color-error-bg:   color-mix(in oklch, var(--color-danger, #f87171) 18%, var(--color-background, #0f172a));
+  --color-error: var(--color-danger, #f87171);
+  --color-error-bg: color-mix(
+    in oklch,
+    var(--color-danger, #f87171) 18%,
+    var(--color-background, #0f172a)
+  );
 }
 ```
 
-<LinkCard title="Token Bridge" href="/acss-plugins-docs/acss-utilities/token-bridge" description="How the bridge works, what it maps, and when to regenerate it." />
+<LinkCard
+  title="Token Bridge"
+  href="/acss-plugins-docs/acss-utilities/token-bridge"
+  description="How the bridge works, what it maps, and when to regenerate it."
+/>
 
 ## Key design decisions
 
