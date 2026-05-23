@@ -1,0 +1,71 @@
+---
+title: component-card skill
+description: Generates an fpkit-style accessible Card component — content container with header, body, and footer slots plus an interactive variant for link or button wrappers.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-card` skill generates a self-contained `Card.tsx` + `Card.scss` pair directly into your project. Invoked by `/kit-add card` or by `/kit-create` when the description names a card.
+
+## Trigger
+
+| Invocation                        | Notes                                                                      |
+| --------------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add card`                   | Standard generation workflow                                               |
+| `/kit-create card with heading …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `Card` has no external component dependencies.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write `Card.tsx` and `Card.scss`.
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File        | Output path (default)            |
+| ----------- | -------------------------------- |
+| `Card.tsx`  | `src/components/fpkit/Card.tsx`  |
+| `Card.scss` | `src/components/fpkit/Card.scss` |
+
+## Props
+
+| Prop          | Type                | Required | Default | Description                                                        |
+| ------------- | ------------------- | -------- | ------- | ------------------------------------------------------------------ |
+| `children`    | `ReactNode`         | Yes      | —       | Card content (use `Card.Header`, `Card.Body`, `Card.Footer` slots) |
+| `interactive` | `boolean`           | No       | `false` | Wraps the card in a focusable link or button                       |
+| `href`        | `string`            | No       | —       | When set, the card renders as an anchor                            |
+| `onClick`     | `MouseEventHandler` | No       | —       | When set (no `href`), the card renders as a button                 |
+| `className`   | `string`            | No       | —       | Additional CSS classes                                             |
+
+## CSS tokens
+
+| Token              | Role               | Fallback                   |
+| ------------------ | ------------------ | -------------------------- |
+| `--card-bg`        | Background         | `var(--color-surface)`     |
+| `--card-border`    | Border color       | `var(--color-border)`      |
+| `--card-radius`    | Border radius      | `var(--radius-md, 0.5rem)` |
+| `--card-padding-x` | Horizontal padding | `1.25rem`                  |
+| `--card-padding-y` | Vertical padding   | `1.25rem`                  |
+| `--card-shadow`    | Box shadow         | `var(--shadow-sm)`         |
+
+## Accessibility
+
+- Interactive cards use a single focusable element (anchor or button) wrapping the entire card — avoids nested interactive elements.
+- Non-interactive cards use `role="article"` when standalone, or no landmark when used in a list context.
+
+<Aside type="tip">
+  Run `/kit-list card` to preview the generation contract and slot structure
+  before generating.
+</Aside>

@@ -1,0 +1,79 @@
+---
+title: component-popover skill
+description: Generates an fpkit-style accessible Popover component — Popover API with focus trap, aria-expanded, light-dismiss, and anchor positioning.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-popover` skill generates `Popover.tsx` + `Popover.scss` directly into your project. Invoked by `/kit-add popover` or by `/kit-create` when the description names a popover or tooltip.
+
+## Trigger
+
+| Invocation                                 | Notes                                                                      |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| `/kit-add popover`                         | Standard generation workflow                                               |
+| `/kit-create popover with light-dismiss …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `Popover` depends on `Button` (for the trigger element). The skill generates `Button` files before `Popover` files.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write files bottom-up (Button first, then Popover).
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File           | Output path (default)               |
+| -------------- | ----------------------------------- |
+| `Button.tsx`   | `src/components/fpkit/Button.tsx`   |
+| `Button.scss`  | `src/components/fpkit/Button.scss`  |
+| `Popover.tsx`  | `src/components/fpkit/Popover.tsx`  |
+| `Popover.scss` | `src/components/fpkit/Popover.scss` |
+
+## Props
+
+| Prop           | Type                             | Required | Default  | Description                            |
+| -------------- | -------------------------------- | -------- | -------- | -------------------------------------- |
+| `trigger`      | `ReactNode`                      | Yes      | —        | Element that opens the popover         |
+| `children`     | `ReactNode`                      | Yes      | —        | Popover content                        |
+| `open`         | `boolean`                        | No       | —        | Controlled open state                  |
+| `onOpenChange` | `(open: boolean) => void`        | No       | —        | Called when open state changes         |
+| `placement`    | `top \| bottom \| left \| right` | No       | `bottom` | Preferred anchor position              |
+| `lightDismiss` | `boolean`                        | No       | `true`   | Close on click outside or `Escape`     |
+| `trapFocus`    | `boolean`                        | No       | `false`  | Trap keyboard focus inside the popover |
+| `className`    | `string`                         | No       | —        | Additional CSS classes                 |
+
+## CSS tokens
+
+| Token                 | Role               | Fallback                   |
+| --------------------- | ------------------ | -------------------------- |
+| `--popover-bg`        | Background color   | `var(--color-surface)`     |
+| `--popover-border`    | Border color       | `var(--color-border)`      |
+| `--popover-radius`    | Border radius      | `var(--radius-md, 0.5rem)` |
+| `--popover-padding-x` | Horizontal padding | `1rem`                     |
+| `--popover-padding-y` | Vertical padding   | `0.75rem`                  |
+| `--popover-shadow`    | Box shadow         | `var(--shadow-lg)`         |
+| `--popover-max-width` | Maximum width      | `20rem`                    |
+
+## Accessibility
+
+- Uses the native [Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) where supported, falling back to manual `aria-expanded` / `aria-controls` management.
+- The trigger element receives `aria-expanded` and `aria-controls` pointing to the popover element.
+- Light-dismiss closes the popover on `Escape` and on click outside the popover boundary.
+- When `trapFocus` is `true`, keyboard focus is constrained inside the popover (suitable for interactive popovers; not needed for simple tooltips).
+
+<Aside type="tip">
+  Use `trapFocus={true}` only for interactive popovers (menus, sub-forms). For
+  simple informational tooltips, leave `trapFocus` at its default `false`.
+</Aside>

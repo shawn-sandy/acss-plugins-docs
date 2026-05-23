@@ -1,0 +1,86 @@
+---
+title: component-table skill
+description: Generates an fpkit-style accessible Table component — data table with caption, scope headers, responsive scroll wrapper, and sortable column support.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-table` skill generates `Table.tsx` + `Table.scss` directly into your project. Invoked by `/kit-add table` or by `/kit-create` when the description names a data table.
+
+## Trigger
+
+| Invocation                               | Notes                                                                      |
+| ---------------------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add table`                         | Standard generation workflow                                               |
+| `/kit-create sortable data table with …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `Table` has no external component dependencies.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write `Table.tsx` and `Table.scss`.
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File         | Output path (default)             |
+| ------------ | --------------------------------- |
+| `Table.tsx`  | `src/components/fpkit/Table.tsx`  |
+| `Table.scss` | `src/components/fpkit/Table.scss` |
+
+## Props
+
+| Prop        | Type                                                     | Required | Default | Description                                            |
+| ----------- | -------------------------------------------------------- | -------- | ------- | ------------------------------------------------------ |
+| `caption`   | `string`                                                 | Yes      | —       | Visible table caption (also serves as accessible name) |
+| `columns`   | `Column[]`                                               | Yes      | —       | Column definitions — see Column type below             |
+| `rows`      | `Record<string, ReactNode>[]`                            | Yes      | —       | Row data keyed by column `id`                          |
+| `sortable`  | `boolean`                                                | No       | `false` | Enables sortable column headers                        |
+| `onSort`    | `(columnId: string, direction: 'asc' \| 'desc') => void` | No       | —       | Called when a sortable header is clicked               |
+| `className` | `string`                                                 | No       | —       | Additional CSS classes                                 |
+
+### Column type
+
+```ts
+interface Column {
+  id: string;
+  header: string;
+  scope?: "col" | "row"; // default: "col"
+  sortable?: boolean;
+}
+```
+
+## CSS tokens
+
+| Token                    | Role                    | Fallback                     |
+| ------------------------ | ----------------------- | ---------------------------- |
+| `--table-border`         | Cell border color       | `var(--color-border)`        |
+| `--table-header-bg`      | Header row background   | `var(--color-surface-muted)` |
+| `--table-header-color`   | Header text color       | `var(--color-text-strong)`   |
+| `--table-row-bg-hover`   | Row hover background    | `var(--color-surface-hover)` |
+| `--table-caption-color`  | Caption text color      | `var(--color-text-muted)`    |
+| `--table-cell-padding-x` | Cell horizontal padding | `1rem`                       |
+| `--table-cell-padding-y` | Cell vertical padding   | `0.75rem`                    |
+
+## Accessibility
+
+- A visible `<caption>` element is always generated — it is the primary accessible name for the table.
+- Column headers use `scope="col"` and row headers use `scope="row"` to establish header associations.
+- Sortable headers render as `<button>` elements inside `<th>` with `aria-sort="ascending"` or `aria-sort="descending"` to announce sort state to screen readers.
+- The table is wrapped in a `<div>` with `overflow-x: auto` and `role="region"` plus `aria-label` for keyboard-accessible horizontal scrolling on small viewports.
+
+<Aside type="tip">
+  Always provide a meaningful `caption` — it is the only accessible name screen
+  reader users hear before deciding whether to navigate into the table.
+</Aside>

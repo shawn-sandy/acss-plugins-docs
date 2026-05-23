@@ -1,0 +1,77 @@
+---
+title: component-dialog skill
+description: Generates an fpkit-style accessible Dialog component — modal with focus trap, aria-modal, return-focus on close, and Button dependency.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-dialog` skill generates `Dialog.tsx` + `Dialog.scss` directly into your project. Invoked by `/kit-add dialog` or by `/kit-create` when the description names a dialog.
+
+## Trigger
+
+| Invocation                        | Notes                                                                      |
+| --------------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add dialog`                 | Standard generation workflow                                               |
+| `/kit-create modal dialog with …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `Dialog` depends on `Button`. The skill generates `Button` files before `Dialog` files.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write files bottom-up (Button first, then Dialog).
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File          | Output path (default)              |
+| ------------- | ---------------------------------- |
+| `Button.tsx`  | `src/components/fpkit/Button.tsx`  |
+| `Button.scss` | `src/components/fpkit/Button.scss` |
+| `Dialog.tsx`  | `src/components/fpkit/Dialog.tsx`  |
+| `Dialog.scss` | `src/components/fpkit/Dialog.scss` |
+
+## Props
+
+| Prop        | Type         | Required | Default | Description                                       |
+| ----------- | ------------ | -------- | ------- | ------------------------------------------------- |
+| `open`      | `boolean`    | Yes      | —       | Controls dialog visibility                        |
+| `onClose`   | `() => void` | Yes      | —       | Called when dialog should close                   |
+| `title`     | `string`     | Yes      | —       | Dialog heading (used as `aria-labelledby` target) |
+| `children`  | `ReactNode`  | Yes      | —       | Dialog body content                               |
+| `footer`    | `ReactNode`  | No       | —       | Footer slot (typically action buttons)            |
+| `className` | `string`     | No       | —       | Additional CSS classes                            |
+
+## CSS tokens
+
+| Token             | Role               | Fallback                    |
+| ----------------- | ------------------ | --------------------------- |
+| `--dlg-bg`        | Dialog background  | `var(--color-surface)`      |
+| `--dlg-border`    | Border color       | `var(--color-border)`       |
+| `--dlg-radius`    | Border radius      | `var(--radius-lg, 0.75rem)` |
+| `--dlg-padding-x` | Horizontal padding | `1.5rem`                    |
+| `--dlg-padding-y` | Vertical padding   | `1.5rem`                    |
+| `--dlg-max-width` | Maximum width      | `32rem`                     |
+| `--dlg-backdrop`  | Backdrop color     | `rgb(0 0 0 / 0.5)`          |
+
+## Accessibility
+
+- Uses `role="dialog"` and `aria-modal="true"`.
+- `aria-labelledby` points to the rendered title element.
+- Focus is trapped inside the dialog while open; returns to the trigger element on close.
+- `Escape` key calls `onClose`.
+
+<Aside type="tip">
+  Run `/kit-list dialog` to preview the full dependency tree and generation
+  contract before generating.
+</Aside>

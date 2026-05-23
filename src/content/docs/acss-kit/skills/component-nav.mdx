@@ -1,0 +1,73 @@
+---
+title: component-nav skill
+description: Generates an fpkit-style accessible Nav component — navigation landmark with aria-label, current-page link marking, and horizontal/vertical layout.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-nav` skill generates `Nav.tsx` + `Nav.scss` directly into your project. Invoked by `/kit-add nav` or by `/kit-create` when the description names a navigation component.
+
+## Trigger
+
+| Invocation                          | Notes                                                                      |
+| ----------------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add nav`                      | Standard generation workflow                                               |
+| `/kit-create horizontal nav with …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `Nav` depends on `Link`. The skill generates `Link` files before `Nav` files.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write files bottom-up (Link first, then Nav).
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File        | Output path (default)            |
+| ----------- | -------------------------------- |
+| `Link.tsx`  | `src/components/fpkit/Link.tsx`  |
+| `Link.scss` | `src/components/fpkit/Link.scss` |
+| `Nav.tsx`   | `src/components/fpkit/Nav.tsx`   |
+| `Nav.scss`  | `src/components/fpkit/Nav.scss`  |
+
+## Props
+
+| Prop          | Type                     | Required | Default      | Description                                            |
+| ------------- | ------------------------ | -------- | ------------ | ------------------------------------------------------ |
+| `label`       | `string`                 | Yes      | —            | `aria-label` for the `<nav>` landmark                  |
+| `children`    | `ReactNode`              | Yes      | —            | Navigation items (use `Nav.List` and `Nav.Item` slots) |
+| `orientation` | `horizontal \| vertical` | No       | `horizontal` | Layout direction                                       |
+| `className`   | `string`                 | No       | —            | Additional CSS classes                                 |
+
+## CSS tokens
+
+| Token                     | Role                      | Fallback                     |
+| ------------------------- | ------------------------- | ---------------------------- |
+| `--nav-gap`               | Gap between nav items     | `0.5rem`                     |
+| `--nav-padding-x`         | Horizontal padding        | `0`                          |
+| `--nav-padding-y`         | Vertical padding          | `0`                          |
+| `--nav-item-color`        | Item link color           | `var(--color-text)`          |
+| `--nav-item-color-active` | Active/current item color | `var(--color-primary)`       |
+| `--nav-item-bg-hover`     | Item background on hover  | `var(--color-surface-hover)` |
+
+## Accessibility
+
+- The root `<nav>` element always receives an `aria-label` to distinguish it from other navigation landmarks on the page.
+- The current-page link is marked with `aria-current="page"` — pass `current` to `Nav.Item` or the inner `Link`.
+- Multiple `<nav>` landmarks on a page must each have a unique `aria-label`.
+
+<Aside type="tip">
+  Run `/kit-list nav` to preview the compound slot structure (`Nav.List`,
+  `Nav.Item`) before generating.
+</Aside>

@@ -1,0 +1,76 @@
+---
+title: component-checkbox skill
+description: Generates an fpkit-style accessible Checkbox component — indeterminate state, aria-checked, custom indicator, and Input dependency.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-checkbox` skill generates `Checkbox.tsx` + `Checkbox.scss` directly into your project. Invoked by `/kit-add checkbox` or by `/kit-create` when the description names a checkbox.
+
+## Trigger
+
+| Invocation                        | Notes                                                                      |
+| --------------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add checkbox`               | Standard generation workflow                                               |
+| `/kit-create checkbox labelled …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `Checkbox` depends on `Input`. The skill generates `Input.tsx` / `Input.scss` before `Checkbox.tsx` / `Checkbox.scss`.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write files bottom-up (Input first, then Checkbox).
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File            | Output path (default)                |
+| --------------- | ------------------------------------ |
+| `Input.tsx`     | `src/components/fpkit/Input.tsx`     |
+| `Input.scss`    | `src/components/fpkit/Input.scss`    |
+| `Checkbox.tsx`  | `src/components/fpkit/Checkbox.tsx`  |
+| `Checkbox.scss` | `src/components/fpkit/Checkbox.scss` |
+
+## Props
+
+| Prop             | Type                 | Required | Default | Description                             |
+| ---------------- | -------------------- | -------- | ------- | --------------------------------------- |
+| `label`          | `string`             | Yes      | —       | Visible label text                      |
+| `checked`        | `boolean`            | No       | —       | Controlled checked state                |
+| `defaultChecked` | `boolean`            | No       | `false` | Uncontrolled initial state              |
+| `indeterminate`  | `boolean`            | No       | `false` | Indeterminate visual state              |
+| `disabled`       | `boolean`            | No       | `false` | Accessible disabled via `aria-disabled` |
+| `required`       | `boolean`            | No       | `false` | Marks the field as required             |
+| `onChange`       | `ChangeEventHandler` | No       | —       | Change handler                          |
+| `className`      | `string`             | No       | —       | Additional CSS classes                  |
+
+## CSS tokens
+
+| Token                  | Role                 | Fallback                     |
+| ---------------------- | -------------------- | ---------------------------- |
+| `--cb-size`            | Indicator size       | `1rem`                       |
+| `--cb-bg`              | Unchecked background | `var(--color-surface)`       |
+| `--cb-bg-checked`      | Checked background   | `var(--color-primary)`       |
+| `--cb-border`          | Border color         | `var(--color-border-strong)` |
+| `--cb-radius`          | Border radius        | `var(--radius-sm, 0.25rem)`  |
+| `--cb-indicator-color` | Checkmark color      | `var(--color-text-inverse)`  |
+
+## Accessibility
+
+- Uses `aria-checked="mixed"` for the indeterminate state.
+- Label is associated via `htmlFor` — always visible, never placeholder-only.
+- `aria-disabled="true"` preserves keyboard focusability when disabled.
+
+<Aside type="tip">
+  Run `/kit-list checkbox` to preview the generation contract before generating.
+</Aside>

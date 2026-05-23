@@ -1,0 +1,69 @@
+---
+title: component-list skill
+description: Generates an fpkit-style accessible List component — ordered/unordered list with role="list" reset, item slots, and inline/stacked layout variants.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-list` skill generates `List.tsx` + `List.scss` directly into your project. Invoked by `/kit-add list` or by `/kit-create` when the description names a list.
+
+## Trigger
+
+| Invocation                        | Notes                                                                      |
+| --------------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add list`                   | Standard generation workflow                                               |
+| `/kit-create ordered list with …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `List` has no external component dependencies.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write `List.tsx` and `List.scss`.
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File        | Output path (default)            |
+| ----------- | -------------------------------- |
+| `List.tsx`  | `src/components/fpkit/List.tsx`  |
+| `List.scss` | `src/components/fpkit/List.scss` |
+
+## Props
+
+| Prop          | Type                | Required | Default   | Description                                                    |
+| ------------- | ------------------- | -------- | --------- | -------------------------------------------------------------- |
+| `children`    | `ReactNode`         | Yes      | —         | List items (use `List.Item` slot)                              |
+| `ordered`     | `boolean`           | No       | `false`   | Renders as `<ol>` instead of `<ul>`                            |
+| `layout`      | `stacked \| inline` | No       | `stacked` | Vertical stack or horizontal inline arrangement                |
+| `markerReset` | `boolean`           | No       | `true`    | Removes default browser list markers and applies `role="list"` |
+| `className`   | `string`            | No       | —         | Additional CSS classes                                         |
+
+## CSS tokens
+
+| Token                 | Role                   | Fallback               |
+| --------------------- | ---------------------- | ---------------------- |
+| `--list-gap`          | Gap between list items | `0.5rem`               |
+| `--list-padding`      | List padding           | `0`                    |
+| `--list-item-color`   | Item text color        | `var(--color-text)`    |
+| `--list-marker-color` | Marker/bullet color    | `var(--color-primary)` |
+
+## Accessibility
+
+- When `markerReset` is `true` the list element receives `role="list"` to restore list semantics that Safari removes when `list-style: none` is applied via CSS.
+- Ordered lists convey sequence — use only when order matters (steps, rankings).
+
+<Aside type="tip">
+  Run `/kit-list list` to preview the generation contract and item slot
+  structure before generating.
+</Aside>

@@ -1,0 +1,78 @@
+---
+title: component-icon-button skill
+description: Generates an fpkit-style accessible IconButton component — icon-only button with required aria-label, tooltip fallback, and Button + Icon dependencies.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-icon-button` skill generates `IconButton.tsx` + `IconButton.scss` directly into your project. Invoked by `/kit-add icon-button` or by `/kit-create` when the description names an icon button.
+
+## Trigger
+
+| Invocation                             | Notes                                                                      |
+| -------------------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add icon-button`                 | Standard generation workflow                                               |
+| `/kit-create icon-only close button …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `IconButton` depends on both `Button` and `Icon`. The skill generates both dependencies before `IconButton`.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write files bottom-up (Button and Icon first, then IconButton).
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File              | Output path (default)                  |
+| ----------------- | -------------------------------------- |
+| `Button.tsx`      | `src/components/fpkit/Button.tsx`      |
+| `Button.scss`     | `src/components/fpkit/Button.scss`     |
+| `Icon.tsx`        | `src/components/fpkit/Icon.tsx`        |
+| `Icon.scss`       | `src/components/fpkit/Icon.scss`       |
+| `IconButton.tsx`  | `src/components/fpkit/IconButton.tsx`  |
+| `IconButton.scss` | `src/components/fpkit/IconButton.scss` |
+
+## Props
+
+| Prop        | Type                                           | Required | Default         | Description                                              |
+| ----------- | ---------------------------------------------- | -------- | --------------- | -------------------------------------------------------- |
+| `label`     | `string`                                       | **Yes**  | —               | Accessible label — always required for icon-only buttons |
+| `icon`      | `string`                                       | Yes      | —               | SVG source passed to the inner `Icon`                    |
+| `variant`   | `primary \| secondary \| ghost \| destructive` | No       | `ghost`         | Visual treatment                                         |
+| `size`      | `sm \| md \| lg`                               | No       | `md`            | Size scale                                               |
+| `disabled`  | `boolean`                                      | No       | `false`         | Accessible disabled state                                |
+| `onClick`   | `MouseEventHandler`                            | No       | —               | Click handler                                            |
+| `tooltip`   | `string`                                       | No       | Same as `label` | Visible tooltip text on hover/focus                      |
+| `className` | `string`                                       | No       | —               | Additional CSS classes                                   |
+
+## CSS tokens
+
+Inherits all `--btn-*` tokens from `Button`. Additional tokens:
+
+| Token               | Role                                      | Fallback                     |
+| ------------------- | ----------------------------------------- | ---------------------------- |
+| `--icon-btn-size`   | Button dimension (equal width and height) | `2.25rem`                    |
+| `--icon-btn-radius` | Border radius                             | `var(--radius-full, 9999px)` |
+
+## Accessibility
+
+- `label` is **always required** — icon-only buttons have no visible text.
+- Rendered as `aria-label` on the button element.
+- A visible tooltip is shown on hover and `:focus-visible` as a fallback for users who cannot read the icon.
+- Uses `aria-disabled="true"` pattern from `Button`.
+
+<Aside type="caution">
+  Never omit the `label` prop on an `IconButton`. The skill will halt and ask
+  for one if it detects a missing required accessible name.
+</Aside>

@@ -1,0 +1,73 @@
+---
+title: component-link skill
+description: Generates an fpkit-style accessible Link component — anchor with external/new-tab detection, aria-label injection, and current-page indication.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-link` skill generates `Link.tsx` + `Link.scss` directly into your project. Invoked by `/kit-add link` or by `/kit-create` when the description names a link.
+
+## Trigger
+
+| Invocation                                    | Notes                                                                      |
+| --------------------------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add link`                               | Standard generation workflow                                               |
+| `/kit-create external link with aria-label …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `Link` has no external component dependencies.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write `Link.tsx` and `Link.scss`.
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File        | Output path (default)            |
+| ----------- | -------------------------------- |
+| `Link.tsx`  | `src/components/fpkit/Link.tsx`  |
+| `Link.scss` | `src/components/fpkit/Link.scss` |
+
+## Props
+
+| Prop        | Type        | Required | Default                   | Description                                                               |
+| ----------- | ----------- | -------- | ------------------------- | ------------------------------------------------------------------------- |
+| `href`      | `string`    | Yes      | —                         | Link destination                                                          |
+| `children`  | `ReactNode` | Yes      | —                         | Link text or content                                                      |
+| `external`  | `boolean`   | No       | Auto-detected from `href` | Adds `target="_blank"` and `rel="noopener noreferrer"`                    |
+| `label`     | `string`    | No       | —                         | Explicit `aria-label` override (useful when link text alone is ambiguous) |
+| `current`   | `boolean`   | No       | `false`                   | Marks the link as the current page (`aria-current="page"`)                |
+| `className` | `string`    | No       | —                         | Additional CSS classes                                                    |
+
+## CSS tokens
+
+| Token                     | Role                  | Fallback                            |
+| ------------------------- | --------------------- | ----------------------------------- |
+| `--link-color`            | Link text color       | `var(--color-primary)`              |
+| `--link-color-hover`      | Hover text color      | `var(--color-primary-dark)`         |
+| `--link-color-visited`    | Visited text color    | `var(--color-primary-muted)`        |
+| `--link-underline-offset` | Text underline offset | `2px`                               |
+| `--link-focus-outline`    | Focus outline style   | `2px solid var(--color-focus-ring)` |
+
+## Accessibility
+
+- External links automatically receive `rel="noopener noreferrer"` and a visually hidden "(opens in new tab)" suffix when `external` is `true`.
+- `aria-current="page"` is applied when `current` is `true`.
+- When link text is icon-only or ambiguous, the `label` prop supplies `aria-label`.
+
+<Aside type="tip">
+  For icon-only links, use
+  [`IconButton`](/acss-plugins-docs/acss-kit/skills/component-icon-button)
+  instead — it requires an accessible label by design.
+</Aside>

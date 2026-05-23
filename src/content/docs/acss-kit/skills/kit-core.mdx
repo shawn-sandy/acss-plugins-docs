@@ -1,0 +1,123 @@
+---
+title: kit-core skill
+description: Internal orchestrator for /kit-create, /kit-list, /kit-sync, /kit-update, and Form Mode. Per-component generation lives in dedicated component-<name> skills — kit-core does not auto-trigger for component requests.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+`kit-core` is the internal orchestrator that backs `/kit-create`, `/kit-list`, `/kit-sync`, `/kit-update`, and Form Mode. It was extracted from the earlier `components` skill (v1.2.0) to prevent the LLM router from auto-triggering it whenever a user asks for a component — per-component generation now lives in dedicated `component-<name>` skills.
+
+## Purpose
+
+| Triggered by           | Notes                                                       |
+| ---------------------- | ----------------------------------------------------------- |
+| `/kit-create`          | Creator Mode — describe a component in natural language     |
+| `/kit-list`            | Read-only catalogue inspection                              |
+| `/kit-sync`            | Bulk install all components + foundation + theme            |
+| `/kit-update`          | Safe re-copy of unmodified files after an upgrade           |
+| `/kit-add <component>` | Delegates immediately to `skills/component-<name>/SKILL.md` |
+
+`kit-core` is **not** the generation engine for individual components. When `/kit-add button` runs, the skill it invokes is `component-button`, not `kit-core`.
+
+## Component inventory
+
+Starting with acss-kit v1.2.0 the component inventory is assembled at runtime by globbing `skills/component-*/SKILL.md` and reading the `name:` and `description:` from each file's frontmatter. There is no static catalog file.
+
+Components with a dedicated per-component skill (v1.2.x):
+
+| Component     | Skill                   |
+| ------------- | ----------------------- |
+| `alert`       | `component-alert`       |
+| `button`      | `component-button`      |
+| `card`        | `component-card`        |
+| `checkbox`    | `component-checkbox`    |
+| `dialog`      | `component-dialog`      |
+| `field`       | `component-field`       |
+| `icon`        | `component-icon`        |
+| `icon-button` | `component-icon-button` |
+| `img`         | `component-img`         |
+| `input`       | `component-input`       |
+| `link`        | `component-link`        |
+| `list`        | `component-list`        |
+| `nav`         | `component-nav`         |
+| `popover`     | `component-popover`     |
+| `table`       | `component-table`       |
+
+Inline-only entries (Badge, Tag, Heading, Text/Paragraph, Details, Progress) live in `kit-core/references/inline-components.md` and are included in `/kit-sync` and `/kit-list` but are not yet promotable via `/kit-create` (v0.1 limitation).
+
+## Creator Mode
+
+Creator Mode (`/kit-create`) turns a natural-language description into a JSX snippet or standalone component file.
+
+<Steps>
+
+1. **Dispatch** — match the component noun in the user's description against available per-component skills at `skills/component-<name>/`. Halt with a list of known components if no match is found.
+
+2. **Parse** — load the matched component's `reference.md`, read its Props Interface, and resolve user phrases against the prop set. Global synonym tables (colour family, size family, variant synonyms) are applied before per-component rules.
+
+3. **Resolve target** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py` to locate the `componentsDir`.
+
+4. **Vendor dependencies** — run `/kit-add <component> [...dependencies]` for any component not yet present in the project.
+
+5. **Validate** — apply generic rules (empty slots, content over 80 chars, two-axis conflicts, missing required props) plus any per-component Generation Notes the reference doc declares.
+
+6. **Choose output mode** — snippet (default) or standalone file at `src/components/<Name>.tsx`.
+
+7. **Generate** — emit JSX using only the resolved props; never silently default a colour-family prop.
+
+8. **Summarise** — print the resolved spec, any deferred sub-components, and a "Refine" prompt for follow-up tweaks.
+
+</Steps>
+
+**Refinement:** follow-up phrases like "make it larger", "swap to secondary", "drop the full width", or "change the title to '…'" merge into the in-memory spec and re-emit. Say "start over" to clear the spec.
+
+## `/kit-list` workflow
+
+Read-only catalogue inspection — never writes files.
+
+<Steps>
+
+1. **No arguments** — glob `skills/component-*/SKILL.md`, read `name:` + `description:` from each frontmatter, and print a categorized listing. Components with a Verified HTML entry are marked `[HTML]`.
+
+2. **With component name** — locate `skills/component-<name>/SKILL.md`, load `reference.md`, and output: Generation Contract, Dependencies, HTML output status, Props, CSS Variables, and a Usage Example.
+
+3. **Unknown name** — list the closest matches (fuzzy name match) and stop.
+
+</Steps>
+
+## References layout
+
+`kit-core` carries shared reference documents used by multiple per-component skills and by the Form Mode workflow:
+
+| Path                                       | Content                                                               |
+| ------------------------------------------ | --------------------------------------------------------------------- |
+| `kit-core/references/accessibility.md`     | ARIA role contracts and keyboard interaction patterns                 |
+| `kit-core/references/architecture.md`      | Layer architecture, `ui.tsx` design                                   |
+| `kit-core/references/composition.md`       | Compound-component patterns                                           |
+| `kit-core/references/foundation.md`        | `foundation.css` and `@layer` cascade ordering                        |
+| `kit-core/references/form.md`              | Form Mode workflow and field-set patterns                             |
+| `kit-core/references/inline-components.md` | Generation contracts for Badge, Tag, Heading, Text, Details, Progress |
+
+## CSS variable conventions
+
+All component tokens follow the `--comp-role-descriptor` pattern:
+
+| Segment      | Meaning                | Example                                |
+| ------------ | ---------------------- | -------------------------------------- |
+| `comp`       | Component abbreviation | `btn`, `card`, `dlg`                   |
+| `role`       | Semantic role          | `bg`, `color`, `border`, `radius`      |
+| `descriptor` | Optional modifier      | `hover`, `focus`, `active`, `disabled` |
+
+Approved abbreviations: `bg` → background, `bd` / `border` → border, `rad` / `radius` → border-radius, `clr` / `color` → text color, `sz` / `size` → font-size, `fw` → font-weight, `px` / `py` → horizontal / vertical padding, `mx` / `my` → horizontal / vertical margin, `el` → elevation / shadow.
+
+## `aria-disabled` pattern
+
+Generated components use `aria-disabled="true"` instead of the `disabled` attribute. This preserves keyboard focusability and screen-reader announcement while appearing disabled visually. The disabled visual state is styled via `[aria-disabled="true"]` in the component's SCSS.
+
+<Aside type="note">
+  `kit-core` replaced the earlier `components` skill in acss-kit v1.2.0. The
+  skill was renamed and narrowed to prevent auto-triggering on component
+  requests — those now route directly to `component-<name>` skills. The
+  `component-creator` and `component-form` pilot skills were absorbed into
+  this skill's Creator Mode and Form Mode sections in v1.0.0.
+</Aside>

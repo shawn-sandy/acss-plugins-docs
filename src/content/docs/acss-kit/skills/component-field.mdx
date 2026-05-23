@@ -1,0 +1,72 @@
+---
+title: component-field skill
+description: Generates an fpkit-style accessible Field component — form field wrapper with label, hint, and error message association via aria-describedby.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-field` skill generates `Field.tsx` + `Field.scss` directly into your project. Invoked by `/kit-add field` or by `/kit-create` when the description names a field wrapper.
+
+## Trigger
+
+| Invocation                       | Notes                                                                      |
+| -------------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add field`                 | Standard generation workflow                                               |
+| `/kit-create field with label …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `Field` has no external component dependencies. It is a wrapper that accepts any input control as `children`.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write `Field.tsx` and `Field.scss`.
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File         | Output path (default)             |
+| ------------ | --------------------------------- |
+| `Field.tsx`  | `src/components/fpkit/Field.tsx`  |
+| `Field.scss` | `src/components/fpkit/Field.scss` |
+
+## Props
+
+| Prop        | Type        | Required | Default | Description                                                               |
+| ----------- | ----------- | -------- | ------- | ------------------------------------------------------------------------- |
+| `label`     | `string`    | Yes      | —       | Visible label text                                                        |
+| `children`  | `ReactNode` | Yes      | —       | The input control (Input, Checkbox, Select, etc.)                         |
+| `hint`      | `string`    | No       | —       | Helper text shown below the label                                         |
+| `error`     | `string`    | No       | —       | Validation error message; triggers error styling                          |
+| `required`  | `boolean`   | No       | `false` | Appends a required indicator to the label                                 |
+| `htmlFor`   | `string`    | No       | —       | Explicit `for` attribute override (inferred from child `id` when omitted) |
+| `className` | `string`    | No       | —       | Additional CSS classes                                                    |
+
+## CSS tokens
+
+| Token                  | Role                                           | Fallback                        |
+| ---------------------- | ---------------------------------------------- | ------------------------------- |
+| `--field-gap`          | Vertical gap between label, hint, input, error | `0.25rem`                       |
+| `--field-label-size`   | Label font size                                | `var(--font-size-sm, 0.875rem)` |
+| `--field-label-weight` | Label font weight                              | `500`                           |
+| `--field-hint-color`   | Hint text color                                | `var(--color-text-muted)`       |
+| `--field-error-color`  | Error text color                               | `var(--color-danger)`           |
+
+## Accessibility
+
+- Label is always visible — never replaced by placeholder.
+- `hint` and `error` are associated to the child input via `aria-describedby`.
+- When `error` is set, the child input receives `aria-invalid="true"` via a context prop.
+
+<Aside type="tip">
+  Run `/kit-list field` to preview the generation contract before generating.
+</Aside>

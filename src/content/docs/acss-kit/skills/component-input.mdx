@@ -1,0 +1,80 @@
+---
+title: component-input skill
+description: Generates an fpkit-style accessible Input component — text, number, email, and password types with aria-invalid, error state, and controlled/uncontrolled patterns.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-input` skill generates `Input.tsx` + `Input.scss` directly into your project. Invoked by `/kit-add input` or by `/kit-create` when the description names a text input.
+
+## Trigger
+
+| Invocation                                  | Notes                                                                      |
+| ------------------------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add input`                            | Standard generation workflow                                               |
+| `/kit-create email input with validation …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `Input` has no external component dependencies.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write `Input.tsx` and `Input.scss`.
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File         | Output path (default)             |
+| ------------ | --------------------------------- |
+| `Input.tsx`  | `src/components/fpkit/Input.tsx`  |
+| `Input.scss` | `src/components/fpkit/Input.scss` |
+
+## Props
+
+| Prop           | Type                                                          | Required | Default | Description                                               |
+| -------------- | ------------------------------------------------------------- | -------- | ------- | --------------------------------------------------------- |
+| `id`           | `string`                                                      | Yes      | —       | Associates with a `Field` label via `htmlFor`             |
+| `type`         | `text \| email \| number \| password \| search \| tel \| url` | No       | `text`  | Input type                                                |
+| `value`        | `string`                                                      | No       | —       | Controlled value                                          |
+| `defaultValue` | `string`                                                      | No       | —       | Uncontrolled initial value                                |
+| `placeholder`  | `string`                                                      | No       | —       | Placeholder text (supplement to label, not a replacement) |
+| `disabled`     | `boolean`                                                     | No       | `false` | Disables the input                                        |
+| `required`     | `boolean`                                                     | No       | `false` | Marks the field as required                               |
+| `error`        | `boolean`                                                     | No       | `false` | Applies error styling and `aria-invalid="true"`           |
+| `onChange`     | `ChangeEventHandler`                                          | No       | —       | Change handler                                            |
+| `className`    | `string`                                                      | No       | —       | Additional CSS classes                                    |
+
+## CSS tokens
+
+| Token                  | Role                             | Fallback                     |
+| ---------------------- | -------------------------------- | ---------------------------- |
+| `--input-bg`           | Background color                 | `var(--color-surface)`       |
+| `--input-color`        | Text color                       | `var(--color-text)`          |
+| `--input-border`       | Border color                     | `var(--color-border-strong)` |
+| `--input-border-error` | Border color when in error state | `var(--color-danger)`        |
+| `--input-radius`       | Border radius                    | `var(--radius-sm, 0.25rem)`  |
+| `--input-padding-x`    | Horizontal padding               | `0.75rem`                    |
+| `--input-padding-y`    | Vertical padding                 | `0.5rem`                     |
+| `--input-font-size`    | Font size                        | `1rem`                       |
+
+## Accessibility
+
+- Always used alongside a visible `Field` label — never as a standalone element with only a placeholder.
+- `aria-invalid="true"` is applied automatically when `error` is `true`.
+- `aria-describedby` is wired by the parent `Field` component to associate hint and error messages.
+
+<Aside type="tip">
+  Wrap `Input` in a
+  [`Field`](/acss-plugins-docs/acss-kit/skills/component-field) to get the
+  label, hint, and error message association automatically.
+</Aside>

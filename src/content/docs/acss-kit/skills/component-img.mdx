@@ -1,0 +1,73 @@
+---
+title: component-img skill
+description: Generates an fpkit-style accessible Img component — required alt, lazy-loading, aspect-ratio containment, and decorative mode.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-img` skill generates `Img.tsx` + `Img.scss` directly into your project. Invoked by `/kit-add img` or by `/kit-create` when the description names an image component.
+
+## Trigger
+
+| Invocation                                | Notes                                                                      |
+| ----------------------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add img`                            | Standard generation workflow                                               |
+| `/kit-create responsive image with alt …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `Img` has no external component dependencies.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write `Img.tsx` and `Img.scss`.
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File       | Output path (default)           |
+| ---------- | ------------------------------- |
+| `Img.tsx`  | `src/components/fpkit/Img.tsx`  |
+| `Img.scss` | `src/components/fpkit/Img.scss` |
+
+## Props
+
+| Prop          | Type            | Required | Default | Description                                       |
+| ------------- | --------------- | -------- | ------- | ------------------------------------------------- |
+| `src`         | `string`        | Yes      | —       | Image URL                                         |
+| `alt`         | `string`        | Yes      | —       | Alternative text; pass `""` for decorative images |
+| `aspectRatio` | `string`        | No       | —       | CSS aspect-ratio value (e.g. `16/9`, `1`)         |
+| `loading`     | `lazy \| eager` | No       | `lazy`  | Browser loading hint                              |
+| `srcSet`      | `string`        | No       | —       | Responsive image set                              |
+| `sizes`       | `string`        | No       | —       | Responsive sizes descriptor                       |
+| `className`   | `string`        | No       | —       | Additional CSS classes                            |
+
+## CSS tokens
+
+| Token                | Role                              | Fallback |
+| -------------------- | --------------------------------- | -------- |
+| `--img-radius`       | Border radius                     | `0`      |
+| `--img-object-fit`   | `object-fit` value                | `cover`  |
+| `--img-aspect-ratio` | Aspect ratio (overridden by prop) | `auto`   |
+| `--img-width`        | Width constraint                  | `100%`   |
+
+## Accessibility
+
+- `alt` is always required by the component type signature — the skill halts if the prop is absent.
+- Decorative images pass `alt=""` which causes screen readers to skip the element.
+- `loading="lazy"` is the default to avoid render-blocking requests for below-the-fold images.
+
+<Aside type="tip">
+  Pass `alt=""` (empty string) for purely decorative images. Never omit the prop
+  — that would leave the `src` URL as the fallback accessible name in some
+  screen readers.
+</Aside>

@@ -1,0 +1,71 @@
+---
+title: component-icon skill
+description: Generates an fpkit-style accessible Icon component — SVG wrapper with aria-hidden/aria-label toggle, size variants, and decorative/semantic modes.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-icon` skill generates `Icon.tsx` + `Icon.scss` directly into your project. Invoked by `/kit-add icon` or by `/kit-create` when the description names an icon.
+
+## Trigger
+
+| Invocation                      | Notes                                                                      |
+| ------------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add icon`                 | Standard generation workflow                                               |
+| `/kit-create decorative icon …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `detect_target.py`. If `ui.tsx` is missing, initialize the foundation first.
+
+3. **Dependency tree** — `Icon` has no external component dependencies.
+
+4. **Show the plan** — display files to be created or skipped.
+
+5. **Generate** — write `Icon.tsx` and `Icon.scss`.
+
+6. **Summary** — print the file list and import statement.
+
+</Steps>
+
+## Generation contract
+
+| File        | Output path (default)            |
+| ----------- | -------------------------------- |
+| `Icon.tsx`  | `src/components/fpkit/Icon.tsx`  |
+| `Icon.scss` | `src/components/fpkit/Icon.scss` |
+
+## Props
+
+| Prop        | Type                   | Required | Default | Description                                                                                        |
+| ----------- | ---------------------- | -------- | ------- | -------------------------------------------------------------------------------------------------- |
+| `src`       | `string`               | Yes      | —       | SVG source — inline SVG string or import path                                                      |
+| `size`      | `sm \| md \| lg \| xl` | No       | `md`    | Size variant                                                                                       |
+| `label`     | `string`               | No       | —       | When provided, the icon is semantic (`aria-label`); when absent, decorative (`aria-hidden="true"`) |
+| `className` | `string`               | No       | —       | Additional CSS classes                                                                             |
+
+## CSS tokens
+
+| Token            | Role              | Fallback       |
+| ---------------- | ----------------- | -------------- |
+| `--icon-size-sm` | Small size        | `1rem`         |
+| `--icon-size-md` | Medium size       | `1.25rem`      |
+| `--icon-size-lg` | Large size        | `1.5rem`       |
+| `--icon-size-xl` | Extra-large size  | `2rem`         |
+| `--icon-color`   | Fill/stroke color | `currentColor` |
+
+## Accessibility
+
+- **Decorative mode** (no `label`): renders with `aria-hidden="true"` so screen readers ignore it.
+- **Semantic mode** (`label` provided): renders with `role="img"` and `aria-label` set to the `label` value.
+- Color inherits from the surrounding text via `currentColor` — no hardcoded color values.
+
+<Aside type="tip">
+  `Icon` is a dependency of `Alert`, `IconButton`, and several other components.
+  Running `/kit-add alert` will generate `Icon` automatically if it is not
+  already present.
+</Aside>

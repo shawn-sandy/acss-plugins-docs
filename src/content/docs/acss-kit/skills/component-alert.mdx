@@ -1,0 +1,77 @@
+---
+title: component-alert skill
+description: Generates an fpkit-style accessible Alert component — info, success, warning, and error severity with ARIA live regions and optional icon support.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-alert` skill generates a self-contained `Alert.tsx` + `Alert.scss` pair directly into your project. It is invoked by `/kit-add alert` and by `/kit-create` when the description names an alert.
+
+## Trigger
+
+| Invocation                    | Notes                                                                      |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| `/kit-add alert`              | Standard generation workflow                                               |
+| `/kit-create warning alert …` | Creator Mode via [`kit-core`](/acss-plugins-docs/acss-kit/skills/kit-core) |
+
+The skill uses `disable-model-invocation: true` — it does **not** auto-trigger on general conversation.
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the skill directory for the canonical TSX template, generation contract, Props Interface, CSS Variables, accessibility requirements, and usage examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If `ui.tsx` is missing, run Step A of `kit-core/SKILL.md` first.
+
+3. **Dependency tree** — `Alert` depends on `Icon`. The skill resolves and generates `Icon.tsx` / `Icon.scss` before `Alert.tsx` / `Alert.scss`.
+
+4. **Show the plan** — display every file that will be created or skipped before writing.
+
+5. **Generate** — write files bottom-up (Icon first, then Alert).
+
+6. **Summary** — print the created/skipped file list and the import statement.
+
+</Steps>
+
+## Generation contract
+
+| File         | Output path (default)             |
+| ------------ | --------------------------------- |
+| `Icon.tsx`   | `src/components/fpkit/Icon.tsx`   |
+| `Icon.scss`  | `src/components/fpkit/Icon.scss`  |
+| `Alert.tsx`  | `src/components/fpkit/Alert.tsx`  |
+| `Alert.scss` | `src/components/fpkit/Alert.scss` |
+
+## Props
+
+| Prop          | Type                                  | Required | Default | Description                               |
+| ------------- | ------------------------------------- | -------- | ------- | ----------------------------------------- |
+| `children`    | `ReactNode`                           | Yes      | —       | Alert body content                        |
+| `severity`    | `info \| success \| warning \| error` | No       | `info`  | Severity level controls color and icon    |
+| `title`       | `string`                              | No       | —       | Optional bold heading above the body      |
+| `dismissible` | `boolean`                             | No       | `false` | Show a dismiss button                     |
+| `onDismiss`   | `() => void`                          | No       | —       | Called when the dismiss button is clicked |
+| `className`   | `string`                              | No       | —       | Additional CSS classes                    |
+
+## CSS tokens
+
+| Token               | Role               | Fallback                   |
+| ------------------- | ------------------ | -------------------------- |
+| `--alert-bg`        | Background color   | Severity-matched surface   |
+| `--alert-color`     | Text color         | Severity-matched text      |
+| `--alert-border`    | Border color       | Severity-matched border    |
+| `--alert-radius`    | Border radius      | `var(--radius-md, 0.5rem)` |
+| `--alert-padding-x` | Horizontal padding | `1rem`                     |
+| `--alert-padding-y` | Vertical padding   | `1rem`                     |
+
+## Accessibility
+
+- The root element uses `role="alert"` (assertive) or `role="status"` (polite) — set via the `live` prop when provided.
+- Severity-appropriate icon is included with `aria-hidden="true"` so screen readers rely on the text content.
+- The dismiss button carries an explicit `aria-label="Dismiss alert"`.
+
+<Aside type="tip">
+  Run `/kit-list alert` to preview the full generation contract before
+  generating.
+</Aside>
