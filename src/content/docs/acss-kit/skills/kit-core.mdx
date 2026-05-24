@@ -1,0 +1,120 @@
+---
+title: kit-core skill
+description: Internal orchestrator for /kit-create, /kit-list, /kit-sync, /kit-update and Form/HTML/Style-Tune modes. Per-component generation lives in dedicated component skills.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+`kit-core` is the internal orchestrator that drives `/kit-create`, `/kit-list`, `/kit-sync`, and `/kit-update`. Per-component generation was split out into dedicated `component-<name>` skills in acss-kit v1.2.0. This skill handles shared initialization, Creator Mode, Form Mode, and the read-only inspection workflow.
+
+<Aside type="note">
+  As of acss-kit v1.2.0, each component has its own dedicated skill at
+  `skills/component-<name>/SKILL.md`. `kit-core` orchestrates across them but
+  does not generate component code directly.
+</Aside>
+
+## Purpose
+
+`kit-core` provides:
+
+- **Step A — First-Run Initialization** shared by all `/kit-add` invocations
+- **Creator Mode** — natural-language description → component instance (used by `/kit-create`)
+- **Form Mode** — form-shaped descriptions (e.g. "signup form with email and password")
+- **`/kit-list` workflow** — read-only inspection of the component catalogue
+- **Bulk install workflow** — used by `/kit-sync`
+
+## Prerequisites
+
+- React + TypeScript project
+- `sass` or `sass-embedded` in `devDependencies`
+
+## Step A — First-Run Initialization
+
+Every `/kit-add` invocation starts here.
+
+<Steps>
+
+1. **A1 — Detect project type.** Read `tsconfig.json` and `package.json` to confirm React + TypeScript is present.
+
+2. **A2 — Check sass.** Look for `sass` or `sass-embedded` in `devDependencies`. If neither is found, halt with an install command.
+
+3. **A3 — Detect target dir.** Run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>` to locate or create `.acss-target.json`.
+
+4. **A4 — Foundation install matrix.** Apply the three-case matrix for `ui.tsx` and `foundation.css`:
+
+   | Project state                             | Action                                      |
+   | ----------------------------------------- | ------------------------------------------- |
+   | No `ui.tsx` + no `foundation.css`         | Copy both + `sass/` tree; print import hint |
+   | `ui.tsx` present, `foundation.css` absent | Prompt before copying                       |
+   | Both present                              | Skip silently                               |
+
+</Steps>
+
+## Step B — Component generation (dispatched to per-component skills)
+
+After initialization, `/kit-add` dispatches to the matching `component-<name>` skill. Normalize the component name to lowercase before resolving the path:
+
+```
+${CLAUDE_PLUGIN_ROOT}/skills/component-<name>/SKILL.md
+```
+
+The per-component skill owns: the canonical TSX/SCSS templates, the Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and dependency resolution.
+
+## Creator Mode
+
+`/kit-create` enters Creator Mode. The workflow:
+
+<Steps>
+
+1. **Dispatch** — match the component noun against per-component skills at `skills/component-<name>/`. Halt if no match is found.
+2. **Parse** — load the matched reference doc, read its Props Interface, and resolve the user's phrases against the prop set (global colour/size synonyms + per-component union literals).
+3. **Resolve target** — run `detect_target.py` to locate `componentsDir`.
+4. **Vendor** — run `/kit-add <component> [...dependencies]` if any are not yet present.
+5. **Validate** — generic rules (empty slots, >80-char content, two-axis conflicts, missing required props) plus any component-specific rules.
+6. **Choose mode** — snippet (default) or standalone file at `src/components/<Name>.tsx`.
+7. **Generate** — emit JSX with only the props the description resolved; never silently default a colour-family prop.
+8. **Summarise** — print the resolved spec, deferred sub-components, and a "Refine" prompt for follow-up tweaks.
+
+</Steps>
+
+**Refinement:** Follow-up phrases like "make it larger", "swap to secondary", "drop the full width" merge into the in-memory spec and re-emit. Say "start over" to clear the spec.
+
+**Out of scope for v0.1:**
+
+- Multi-component compositions in one prompt — generate the outer component, then refine.
+- Form-shaped descriptions — handled by Form Mode.
+
+## `/kit-list` workflow
+
+`/kit-list` is read-only. Component inventory comes from per-component skills only:
+
+- `${CLAUDE_PLUGIN_ROOT}/skills/component-*/SKILL.md` (reads `name:` + `description:` from frontmatter)
+
+| Invocation          | Output                                                                                       |
+| ------------------- | -------------------------------------------------------------------------------------------- |
+| No arguments        | Categorized listing of all components                                                        |
+| With component name | Per-component detail: Generation Contract, Dependencies, Props, CSS Variables, Usage Example |
+
+Lowercase the argument before lookup (e.g. `/kit-list Button` → look for `button`).
+
+## References
+
+The `kit-core` skill ships with shared reference documents used by all component skills:
+
+| File                              | Contents                                               |
+| --------------------------------- | ------------------------------------------------------ |
+| `references/accessibility.md`     | ARIA roles, keyboard patterns, focus management rules  |
+| `references/architecture.md`      | Component architecture decisions                       |
+| `references/composition.md`       | Compound component patterns                            |
+| `references/css-variables.md`     | CSS custom property conventions                        |
+| `references/foundation.md`        | `ui.tsx` polymorphic base and `foundation.css`         |
+| `references/form.md`              | Form component patterns                                |
+| `references/inline-components.md` | Badge, Tag, Heading, Text/Paragraph, Details, Progress |
+
+## Related
+
+- [/kit-add](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [/kit-create](/acss-plugins-docs/acss-kit/commands/kit-create)
+- [/kit-list](/acss-plugins-docs/acss-kit/commands/kit-list)
+- [/kit-sync](/acss-plugins-docs/acss-kit/commands/kit-sync)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)
