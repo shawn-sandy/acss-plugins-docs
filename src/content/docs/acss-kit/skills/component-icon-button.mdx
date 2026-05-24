@@ -1,0 +1,65 @@
+---
+title: component-icon-button skill
+description: Generate an accessible IconButton component — icon-only button with required aria-label, tooltip fallback, and Button dependency — directly into your project.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-icon-button` skill generates an fpkit-style accessible IconButton component directly into a developer's project. It is invoked by [`/kit-add icon-button`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for an icon button), or by calling the `component-icon-button` skill by name.
+
+|                  |                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add icon-button`, `/kit-create` → "icon button", or direct skill invocation         |
+| **Output**       | `<targetDir>/icon-button.tsx` + `<targetDir>/icon-button.module.scss`                     |
+| **Dependencies** | `button` — generated first if `<targetDir>/button.tsx` is absent                          |
+| **Hint**         | Describe the icon, the required aria-label, size, and whether a visible tooltip is needed |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the `component-icon-button` skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of the [`kit-core` skill](/acss-plugins-docs/acss-kit/skills/kit-core) to initialize it before generating this component.
+
+3. **Dependencies** — IconButton depends on `button`. Before generating IconButton, check whether `<targetDir>/button.tsx` already exists. If missing, invoke the [`component-button` skill](/acss-plugins-docs/acss-kit/skills/component-button) first, then continue.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/icon-button.tsx` from the `## TSX Template` section
+   - `<targetDir>/icon-button.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary to the developer.
+
+</Steps>
+
+## Invocation hints
+
+```text
+/kit-add icon-button
+```
+
+```text
+/kit-create — "create an icon-only close button with aria-label and tooltip"
+```
+
+## CSS variable prefix
+
+IconButton tokens follow the `--icon-btn-*` naming convention, e.g. `--icon-btn-size`, `--icon-btn-bg`.
+
+## Accessibility
+
+IconButton **requires** an `aria-label` prop — it is enforced by the generation contract and TypeScript interface. The label describes the button's action, not the icon name.
+
+<Aside type="note">
+  IconButton depends on the `component-button` skill. Running `/kit-add
+  icon-button` in a project that does not yet have `button.tsx` will generate
+  Button first, then IconButton.
+</Aside>
+
+## Related
+
+- [component-button skill](/acss-plugins-docs/acss-kit/skills/component-button)
+- [component-icon skill](/acss-plugins-docs/acss-kit/skills/component-icon)
+- [/kit-add](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [kit-core skill](/acss-plugins-docs/acss-kit/skills/kit-core)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

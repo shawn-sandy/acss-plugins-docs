@@ -1,0 +1,59 @@
+---
+title: component-alert skill
+description: Generate an accessible Alert component — status/error/info/warning notification with ARIA live regions and icon support — directly into your project.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-alert` skill generates an fpkit-style accessible Alert component directly into a developer's project. It is invoked by [`/kit-add alert`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for an alert), or by calling the `component-alert` skill by name.
+
+|                  |                                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Triggered by** | `/kit-add alert`, `/kit-create` → "alert", or direct skill invocation                                                                            |
+| **Output**       | `<targetDir>/alert.tsx` + `<targetDir>/alert.module.scss`                                                                                        |
+| **Dependencies** | None — leaf component                                                                                                                            |
+| **Hint**         | Describe the severity (info/success/warning/error), whether it is dismissible, the ARIA live politeness (polite/assertive), and any leading icon |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the `component-alert` skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of the [`kit-core` skill](/acss-plugins-docs/acss-kit/skills/kit-core) to initialize it before generating this component.
+
+3. **Dependencies** — Alert has no upstream dependencies. Skip dep resolution.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/alert.tsx` from the `## TSX Template` section
+   - `<targetDir>/alert.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary to the developer.
+
+</Steps>
+
+## Invocation hints
+
+Describe the severity and live politeness when invoking:
+
+```text
+/kit-add alert
+```
+
+```text
+/kit-create — "create a dismissible error alert with an icon"
+```
+
+## CSS variable prefix
+
+Alert tokens follow the `--alert-*` naming convention, e.g. `--alert-bg`, `--alert-color`, `--alert-border`.
+
+## Accessibility
+
+Alert uses `role="alert"` (implicit `aria-live="assertive"`) or `role="status"` (implicit `aria-live="polite"`) depending on severity. Icon-only leading icons use `aria-hidden="true"`.
+
+## Related
+
+- [/kit-add](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [kit-core skill](/acss-plugins-docs/acss-kit/skills/kit-core)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

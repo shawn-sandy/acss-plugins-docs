@@ -1,0 +1,57 @@
+---
+title: component-popover skill
+description: Generate an accessible Popover component — tooltip/popover using the Popover API with focus trap, aria-expanded, and light-dismiss — directly into your project.
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+The `component-popover` skill generates an fpkit-style accessible Popover component directly into a developer's project. It is invoked by [`/kit-add popover`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for a popover), or by calling the `component-popover` skill by name.
+
+|                  |                                                                                                                                                               |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add popover`, `/kit-create` → "popover", or direct skill invocation                                                                                     |
+| **Output**       | `<targetDir>/popover.tsx` + `<targetDir>/popover.module.scss`                                                                                                 |
+| **Dependencies** | None — leaf component                                                                                                                                         |
+| **Hint**         | Describe the trigger element, whether light-dismiss should close the popover, the anchor position (top/bottom/left/right), and whether a focus trap is needed |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the `component-popover` skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of the [`kit-core` skill](/acss-plugins-docs/acss-kit/skills/kit-core) to initialize it before generating this component.
+
+3. **Dependencies** — Popover has no upstream dependencies. Skip dep resolution.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/popover.tsx` from the `## TSX Template` section
+   - `<targetDir>/popover.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary to the developer.
+
+</Steps>
+
+## Invocation hints
+
+```text
+/kit-add popover
+```
+
+```text
+/kit-create — "create a popover anchored below its trigger with light-dismiss"
+```
+
+## CSS variable prefix
+
+Popover tokens follow the `--popover-*` naming convention, e.g. `--popover-bg`, `--popover-border`, `--popover-shadow`.
+
+## Accessibility
+
+Popover uses the native Popover API (`popover` attribute) where supported, with an `aria-expanded` fallback for the trigger button. The trigger and popover are linked via `aria-controls` / `aria-haspopup`.
+
+## Related
+
+- [/kit-add](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [kit-core skill](/acss-plugins-docs/acss-kit/skills/kit-core)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

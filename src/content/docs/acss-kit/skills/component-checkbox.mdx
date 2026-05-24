@@ -1,0 +1,58 @@
+---
+title: component-checkbox skill
+description: Generate an accessible Checkbox component — with indeterminate state, aria-checked, custom indicator, and Input dependency — directly into your project.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-checkbox` skill generates an fpkit-style accessible Checkbox component directly into a developer's project. It is invoked by [`/kit-add checkbox`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for a checkbox), or by calling the `component-checkbox` skill by name.
+
+|                  |                                                                                                            |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add checkbox`, `/kit-create` → "checkbox", or direct skill invocation                                |
+| **Output**       | `<targetDir>/checkbox.tsx` + `<targetDir>/checkbox.module.scss`                                            |
+| **Dependencies** | `input` — generated first if `<targetDir>/input.tsx` is absent                                             |
+| **Hint**         | Describe whether the checkbox is indeterminate, whether it needs a label, and any custom indicator styling |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the `component-checkbox` skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of the [`kit-core` skill](/acss-plugins-docs/acss-kit/skills/kit-core) to initialize it before generating this component.
+
+3. **Dependencies** — Checkbox depends on `input`. Before generating Checkbox, check whether `<targetDir>/input.tsx` already exists. If missing, invoke the [`component-input` skill](/acss-plugins-docs/acss-kit/skills/component-input) first, then continue.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/checkbox.tsx` from the `## TSX Template` section
+   - `<targetDir>/checkbox.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary to the developer.
+
+</Steps>
+
+## Invocation hints
+
+```text
+/kit-add checkbox
+```
+
+```text
+/kit-create — "create a checkbox with indeterminate state"
+```
+
+## CSS variable prefix
+
+Checkbox tokens follow the `--chk-*` naming convention, e.g. `--chk-bg`, `--chk-border`, `--chk-indicator`.
+
+## Accessibility
+
+Checkbox uses `aria-checked` (including `"mixed"` for indeterminate state) and `aria-disabled="true"` for the disabled state. Labels are always associated via `htmlFor` or wrapping.
+
+## Related
+
+- [component-input skill](/acss-plugins-docs/acss-kit/skills/component-input)
+- [/kit-add](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [kit-core skill](/acss-plugins-docs/acss-kit/skills/kit-core)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

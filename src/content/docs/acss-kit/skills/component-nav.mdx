@@ -1,0 +1,57 @@
+---
+title: component-nav skill
+description: Generate an accessible Nav component — navigation landmark with aria-label, current-page link marking, and horizontal/vertical layout — directly into your project.
+---
+
+import { Steps } from "@astrojs/starlight/components";
+
+The `component-nav` skill generates an fpkit-style accessible Nav component directly into a developer's project. It is invoked by [`/kit-add nav`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for a nav), or by calling the `component-nav` skill by name.
+
+|                  |                                                                                                                                   |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add nav`, `/kit-create` → "nav", or direct skill invocation                                                                 |
+| **Output**       | `<targetDir>/nav.tsx` + `<targetDir>/nav.module.scss`                                                                             |
+| **Dependencies** | None — leaf component                                                                                                             |
+| **Hint**         | Describe the layout direction (horizontal/vertical), whether items need current-page marking, and the aria-label for the landmark |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the `component-nav` skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of the [`kit-core` skill](/acss-plugins-docs/acss-kit/skills/kit-core) to initialize it before generating this component.
+
+3. **Dependencies** — Nav has no upstream dependencies. Skip dep resolution.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/nav.tsx` from the `## TSX Template` section
+   - `<targetDir>/nav.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary to the developer.
+
+</Steps>
+
+## Invocation hints
+
+```text
+/kit-add nav
+```
+
+```text
+/kit-create — "create a horizontal nav with aria-label and current-page highlighting"
+```
+
+## CSS variable prefix
+
+Nav tokens follow the `--nav-*` naming convention, e.g. `--nav-gap`, `--nav-item-color`, `--nav-item-color-active`.
+
+## Accessibility
+
+Nav wraps its content in a `<nav>` landmark with a required `aria-label` to distinguish multiple nav regions on the same page. Active items use `aria-current="page"`.
+
+## Related
+
+- [/kit-add](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [kit-core skill](/acss-plugins-docs/acss-kit/skills/kit-core)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

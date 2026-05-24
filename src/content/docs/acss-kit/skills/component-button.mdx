@@ -1,0 +1,65 @@
+---
+title: component-button skill
+description: Generate an accessible Button component — primary/secondary/destructive variants with a11y — directly into your project.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-button` skill generates an fpkit-style accessible Button component directly into a developer's project. It is invoked by [`/kit-add button`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for a button), or by calling the `component-button` skill by name.
+
+|                  |                                                                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add button`, `/kit-create` → "button", or direct skill invocation                                                                 |
+| **Output**       | `<targetDir>/button.tsx` + `<targetDir>/button.module.scss`                                                                             |
+| **Dependencies** | None — leaf component                                                                                                                   |
+| **Hint**         | Describe the variant (primary/secondary/destructive/ghost), size, state (loading/disabled), and any leading/trailing icon or aria-label |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the `component-button` skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of the [`kit-core` skill](/acss-plugins-docs/acss-kit/skills/kit-core) to initialize it before generating this component.
+
+3. **Dependencies** — Button has no upstream dependencies. Skip dep resolution.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/button.tsx` from the `## TSX Template` section
+   - `<targetDir>/button.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary to the developer.
+
+</Steps>
+
+## Invocation hints
+
+Describe the variant and any state when invoking:
+
+```text
+/kit-add button
+```
+
+```text
+/kit-create — "create a primary button with a loading spinner"
+```
+
+## CSS variable prefix
+
+Button tokens follow the `--btn-*` naming convention, e.g. `--btn-bg`, `--btn-color`, `--btn-radius`.
+
+## Accessibility
+
+Button uses `aria-disabled="true"` (never the native `disabled` attribute) so disabled buttons remain keyboard-focusable. Icon-only buttons require an `aria-label`.
+
+<Aside type="note">
+  Button is a **leaf dependency** for several other components:
+  `component-dialog`, `component-icon-button`. It is generated first when those
+  skills resolve their dependency tree.
+</Aside>
+
+## Related
+
+- [/kit-add](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [kit-core skill](/acss-plugins-docs/acss-kit/skills/kit-core)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

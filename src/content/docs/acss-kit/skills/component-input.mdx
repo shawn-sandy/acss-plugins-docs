@@ -1,0 +1,64 @@
+---
+title: component-input skill
+description: Generate an accessible Input component — text/number/email input with aria-invalid, error state, and controlled/uncontrolled patterns — directly into your project.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-input` skill generates an fpkit-style accessible Input component directly into a developer's project. It is invoked by [`/kit-add input`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for an input), or by calling the `component-input` skill by name.
+
+|                  |                                                                                                                                              |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add input`, `/kit-create` → "input", or direct skill invocation                                                                        |
+| **Output**       | `<targetDir>/input.tsx` + `<targetDir>/input.module.scss`                                                                                    |
+| **Dependencies** | None — leaf component                                                                                                                        |
+| **Hint**         | Describe the input type (text/email/number/password), whether it needs controlled or uncontrolled patterns, and error/invalid state handling |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the `component-input` skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of the [`kit-core` skill](/acss-plugins-docs/acss-kit/skills/kit-core) to initialize it before generating this component.
+
+3. **Dependencies** — Input has no upstream dependencies. Skip dep resolution.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/input.tsx` from the `## TSX Template` section
+   - `<targetDir>/input.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary to the developer.
+
+</Steps>
+
+## Invocation hints
+
+```text
+/kit-add input
+```
+
+```text
+/kit-create — "create an email input with error state and aria-invalid"
+```
+
+## CSS variable prefix
+
+Input tokens follow the `--input-*` naming convention, e.g. `--input-bg`, `--input-border`, `--input-focus-ring`.
+
+## Accessibility
+
+Input uses `aria-invalid="true"` when in error state and `aria-describedby` to associate error messages. The `disabled` state is handled via `aria-disabled="true"` to preserve focusability.
+
+<Aside type="note">
+  Input is a **leaf dependency** for `component-checkbox`. Running `/kit-add
+  checkbox` in a project without `input.tsx` will generate Input first, then
+  Checkbox.
+</Aside>
+
+## Related
+
+- [component-checkbox skill](/acss-plugins-docs/acss-kit/skills/component-checkbox)
+- [/kit-add](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [kit-core skill](/acss-plugins-docs/acss-kit/skills/kit-core)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)
