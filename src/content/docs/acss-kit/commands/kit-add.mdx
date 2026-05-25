@@ -41,27 +41,25 @@ Generate a complex component (dependencies resolved automatically):
 
 ## Workflow
 
-When you run `/kit-add`, the `components` skill executes these steps:
+When you run `/kit-add`, the skill routes to the dedicated per-component skill at `skills/component-<name>/SKILL.md` for the requested component. Component names are normalized to lowercase before the path is resolved.
 
 <Steps>
 
-1. **Resolve component name** — looks up the component in the reference catalogue and finds its spec doc.
+1. **Init check** — verifies that `sass` is in `devDependencies` and that `ui.tsx` exists in the target directory. On first run, also handles the foundation CSS install matrix (see [Foundation CSS install](#foundation-css-install) below).
 
-2. **Verify sass and copy `ui.tsx`** — checks that `sass` is in `devDependencies`. If missing, stops and tells you how to install it. Copies the polymorphic `UI` base component to your components folder if it doesn't exist already. On first run, also handles the foundation CSS install matrix (see [Foundation CSS install](#foundation-css-install) below).
+2. **Lookup** — finds the component skill at `skills/component-<name>/SKILL.md`. If no matching skill exists, the command stops and lists available components.
 
-3. **Detect build stack** — runs `detect_stack.py` to classify framework, bundler, CSS pipeline, and entrypoint. Persists the result into `.acss-target.json` under a `stack` key. If Tailwind is detected, notes that fpkit components and Tailwind utilities coexist without conflict.
+3. **Dependency tree** — reads the component's Generation Contract to identify all dependencies, then recursively resolves them.
 
-4. **Resolve dependency tree** — recursively resolves all dependencies. For example, `dialog` → `button`, `icon-button`, `icon`; `alert` → `icon`.
+4. **Show the plan** — displays every file that will be created (and any that will be skipped) and waits for confirmation before writing anything.
 
-5. **Show the plan** — displays every file that will be created (and any that will be skipped) and waits for confirmation before writing anything.
+5. **Generate bottom-up** — leaf dependencies are written first, then the requested component. This ensures imports resolve correctly from the start.
 
-6. **Generate bottom-up** — leaf dependencies are written first, then the requested component. This ensures imports resolve correctly from the start.
+6. **Handle existing files** — files that already exist are skipped (not overwritten). The existing file's import is used instead.
 
-7. **Handle existing files** — files that already exist are skipped (not overwritten). The existing file's import is used instead.
+7. **Display summary** — shows which files were created, which were skipped, and the import statement to add to your code.
 
-8. **Display summary** — shows which files were created, which were skipped, and the import statement to add to your code.
-
-9. **Verify integration** — runs `verify_integration.py` against the recorded entry point. Missing imports are surfaced as a numbered fix-up list. The plugin never auto-edits your entry file.
+8. **Verify integration** — runs `verify_integration.py` against the recorded entry point. Missing imports are surfaced as a numbered fix-up list. The plugin never auto-edits your entry file.
 
 </Steps>
 
@@ -131,15 +129,18 @@ This is safe to run repeatedly without risk of clobbering your edits.
 
 ## Available components
 
-Run `/kit-list` for the full catalogue. Quick reference by category:
+Run `/kit-list` for the full catalogue. As of acss-kit v1.2.0, each component has its own dedicated skill at `skills/component-<name>/`. Quick reference:
 
-| Category    | Components                                           |
-| ----------- | ---------------------------------------------------- |
-| Simple      | `badge`, `icon`, `link`, `divider`                   |
-| Interactive | `button`, `checkbox`, `toggle`, `tabs`               |
-| Form        | `field`, `input`, `select`, `textarea`, `form-group` |
-| Layout      | `card`, `alert`, `banner`                            |
-| Complex     | `dialog`, `nav`, `popover`, `table`, `toast`         |
+| Category    | Components                                               |
+| ----------- | -------------------------------------------------------- |
+| Simple      | `icon`, `img`, `link`, `list`                            |
+| Interactive | `button`, `checkbox`, `icon-button`                      |
+| Form        | `field`, `input`                                         |
+| Layout      | `card`, `alert`, `nav`                                   |
+| Complex     | `dialog`, `popover`, `table`                             |
+| Inline only | `badge`, `tag`, `heading`, `text`, `details`, `progress` |
+
+Inline-only components (Badge, Tag, etc.) live in `kit-core/references/inline-components.md` and are not supported by `/kit-create`. Use `/kit-add` to include them.
 
 ## CSS variables
 
