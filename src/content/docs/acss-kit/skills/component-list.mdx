@@ -4,6 +4,7 @@ description: Generate an accessible List component — ordered/unordered list wi
 ---
 
 import { Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 The `component-list` skill generates an fpkit-style accessible List component directly into a developer's project. It is invoked by [`/kit-add list`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for a list), or by calling the `component-list` skill by name.
 
@@ -49,6 +50,17 @@ List tokens follow the `--list-*` naming convention, e.g. `--list-gap`, `--list-
 ## Accessibility
 
 List applies `role="list"` explicitly to restore list semantics when CSS `list-style: none` is used (required for VoiceOver compatibility). Item elements use `role="listitem"`.
+
+## Example output
+
+<ComponentPreview
+  code={`<ul role="list" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0.5rem">
+  <li role="listitem" style="padding:0.5rem 0.75rem;border:1px solid #e5e7eb;border-radius:0.25rem">Item one</li>
+  <li role="listitem" style="padding:0.5rem 0.75rem;border:1px solid #e5e7eb;border-radius:0.25rem">Item two</li>
+  <li role="listitem" style="padding:0.5rem 0.75rem;border:1px solid #e5e7eb;border-radius:0.25rem">Item three</li>
+</ul>`}
+  label="List component preview — role=list with item slots"
+/>
 
 ## Related
 

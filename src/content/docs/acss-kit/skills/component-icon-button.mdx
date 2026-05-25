@@ -4,6 +4,7 @@ description: Generate an accessible IconButton component — icon-only button wi
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 The `component-icon-button` skill generates an fpkit-style accessible IconButton component directly into a developer's project. It is invoked by [`/kit-add icon-button`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for an icon button), or by calling the `component-icon-button` skill by name.
 
@@ -55,6 +56,15 @@ IconButton **requires** an `aria-label` prop — it is enforced by the generatio
   icon-button` in a project that does not yet have `button.tsx` will generate
   Button first, then IconButton.
 </Aside>
+
+## Example output
+
+<ComponentPreview
+  code={`<button aria-label="Close dialog" style="display:inline-flex;align-items:center;justify-content:center;width:2.5rem;height:2.5rem;border-radius:0.25rem;border:1px solid #e5e7eb;background:#fff;cursor:pointer">
+  <svg width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+</button>`}
+  label="IconButton component preview"
+/>
 
 ## Related
 

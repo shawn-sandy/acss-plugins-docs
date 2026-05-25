@@ -4,6 +4,7 @@ description: Generate an accessible Img component — image wrapper with require
 ---
 
 import { Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 The `component-img` skill generates an fpkit-style accessible Img component directly into a developer's project. It is invoked by [`/kit-add img`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for an image component), or by calling the `component-img` skill by name.
 
@@ -49,6 +50,15 @@ Img tokens follow the `--img-*` naming convention, e.g. `--img-radius`, `--img-a
 ## Accessibility
 
 Decorative images use `alt=""`. All other images require a descriptive `alt` prop — enforced by the TypeScript interface. `loading="lazy"` is applied by default.
+
+## Example output
+
+<ComponentPreview
+  code={`<div role="img" aria-label="Sample image placeholder" style="width:100%;max-width:320px;aspect-ratio:16/9;background:#e5e7eb;border-radius:0.5rem;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:0.875rem">
+  <span aria-hidden="true">16:9 image placeholder</span>
+</div>`}
+  label="Img component preview — 16/9 aspect ratio with lazy loading"
+/>
 
 ## Related
 

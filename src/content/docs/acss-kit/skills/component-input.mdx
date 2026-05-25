@@ -4,6 +4,7 @@ description: Generate an accessible Input component — text/number/email input 
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 The `component-input` skill generates an fpkit-style accessible Input component directly into a developer's project. It is invoked by [`/kit-add input`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for an input), or by calling the `component-input` skill by name.
 
@@ -55,6 +56,17 @@ Input uses `aria-invalid="true"` when in error state and `aria-describedby` to a
   checkbox` in a project without `input.tsx` will generate Input first, then
   Checkbox.
 </Aside>
+
+## Example output
+
+<ComponentPreview
+  code={`<div style="display:flex;flex-direction:column;gap:0.5rem;max-width:320px">
+  <input type="email" placeholder="you@example.com" style="padding:0.5rem;border:1px solid #d1d5db;border-radius:0.25rem" />
+  <input type="email" aria-invalid="true" aria-describedby="input-err" placeholder="invalid@" style="padding:0.5rem;border:1px solid #ef4444;border-radius:0.25rem" />
+  <span id="input-err" style="font-size:0.75rem;color:#ef4444">Please enter a valid email address.</span>
+</div>`}
+  label="Input component preview — default and aria-invalid states"
+/>
 
 ## Related
 

@@ -4,6 +4,7 @@ description: Generate an accessible Field component — form field wrapper with 
 ---
 
 import { Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 The `component-field` skill generates an fpkit-style accessible Field component directly into a developer's project. It is invoked by [`/kit-add field`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for a field), or by calling the `component-field` skill by name.
 
@@ -49,6 +50,17 @@ Field tokens follow the `--field-*` naming convention, e.g. `--field-label-color
 ## Accessibility
 
 Field associates its label, hint, and error message with the wrapped input via `aria-describedby`. Required fields use `aria-required="true"` on the inner control.
+
+## Example output
+
+<ComponentPreview
+  code={`<div style="display:flex;flex-direction:column;gap:0.25rem;max-width:320px">
+  <label for="email" style="font-weight:600;font-size:0.875rem">Email address <span aria-hidden="true" style="color:#ef4444">*</span></label>
+  <input id="email" type="email" aria-required="true" aria-describedby="email-hint" style="padding:0.5rem;border:1px solid #d1d5db;border-radius:0.25rem" placeholder="you@example.com" />
+  <span id="email-hint" style="font-size:0.75rem;color:#6b7280">We'll never share your email.</span>
+</div>`}
+  label="Field component preview"
+/>
 
 ## Related
 

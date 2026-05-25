@@ -4,6 +4,7 @@ description: Generate an accessible Dialog component — modal with focus trap, 
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 The `component-dialog` skill generates an fpkit-style accessible Dialog component directly into a developer's project. It is invoked by [`/kit-add dialog`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for a dialog), or by calling the `component-dialog` skill by name.
 
@@ -55,6 +56,20 @@ Dialog uses the native `<dialog>` element with `aria-modal="true"` and a focus t
   project that does not yet have `button.tsx` will generate Button first, then
   Dialog.
 </Aside>
+
+## Example output
+
+<ComponentPreview
+  code={`<div role="dialog" aria-modal="true" aria-labelledby="dlg-title" style="border:1px solid #e5e7eb;border-radius:0.5rem;padding:1.5rem;max-width:400px">
+  <h2 id="dlg-title" style="margin:0 0 0.5rem">Confirm action</h2>
+  <p style="margin:0 0 1rem;color:#6b7280">Are you sure you want to continue?</p>
+  <div style="display:flex;gap:0.5rem">
+    <button style="padding:0.5rem 1rem;background:#3b82f6;color:#fff;border:none;border-radius:0.25rem;cursor:pointer">Confirm</button>
+    <button style="padding:0.5rem 1rem;background:#f3f4f6;border:1px solid #e5e7eb;border-radius:0.25rem;cursor:pointer">Cancel</button>
+  </div>
+</div>`}
+  label="Dialog component preview"
+/>
 
 ## Related
 

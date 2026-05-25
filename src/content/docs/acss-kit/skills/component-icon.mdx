@@ -4,6 +4,7 @@ description: Generate an accessible Icon component — SVG icon wrapper with ari
 ---
 
 import { Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 The `component-icon` skill generates an fpkit-style accessible Icon component directly into a developer's project. It is invoked by [`/kit-add icon`](/acss-plugins-docs/acss-kit/commands/kit-add), [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) (when asking for an icon), or by calling the `component-icon` skill by name.
 
@@ -49,6 +50,16 @@ Icon tokens follow the `--icon-*` naming convention, e.g. `--icon-size`, `--icon
 ## Accessibility
 
 Decorative icons use `aria-hidden="true"` and are excluded from the accessibility tree. Semantic icons (used without adjacent label text) require an `aria-label` prop.
+
+## Example output
+
+<ComponentPreview
+  code={`<span style="display:inline-flex;gap:1rem;align-items:center">
+  <svg width="24" height="24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+  <svg width="16" height="16" aria-label="Checkmark" role="img" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+</span>`}
+  label="Icon component preview — decorative (aria-hidden) and semantic (aria-label)"
+/>
 
 ## Related
 

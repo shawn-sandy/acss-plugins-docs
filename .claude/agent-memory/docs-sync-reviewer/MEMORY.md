@@ -10,11 +10,11 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 ## Plugin roots
 
-| Plugin         | Path under upstream clone root |
-| -------------- | ------------------------------ |
-| acss-kit       | `plugins/acss-kit`             |
-| acss-utilities | `plugins/acss-utilities`       |
-| style-agent    | `plugins/style-agent`          |
+| Plugin         | Path under upstream clone root | Status                                  |
+| -------------- | ------------------------------ | --------------------------------------- |
+| acss-kit       | `plugins/acss-kit`             | active                                  |
+| acss-utilities | `plugins/acss-utilities`       | **deleted upstream** (commit `c6049e5`) |
+| style-agent    | `plugins/style-agent`          | active                                  |
 
 ## Invalidation
 
