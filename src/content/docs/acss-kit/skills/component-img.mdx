@@ -1,0 +1,113 @@
+---
+title: component-img skill
+description: Generates an accessible Img component — image with required alt, lazy-loading, aspect-ratio containment, and decorative mode.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+The `component-img` skill generates an fpkit-style accessible Img component directly into a developer's project. It is invoked by [`/kit-add img`](/acss-plugins-docs/acss-kit/commands/kit-add) or [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create).
+
+<ComponentPreview
+  code={`<div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap">
+  <div style="width:8rem;aspect-ratio:16/9;background:var(--color-surface-raised,#f3f4f6);border-radius:0.375rem;border:1px solid var(--color-border,#e5e7eb);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted,#9ca3af);font-size:0.75rem;">16:9</div>
+  <div style="width:6rem;aspect-ratio:1/1;background:var(--color-surface-raised,#f3f4f6);border-radius:0.375rem;border:1px solid var(--color-border,#e5e7eb);display:flex;align-items:center;justify-content:center;color:var(--color-text-muted,#9ca3af);font-size:0.75rem;">1:1</div>
+</div>`}
+  label="Img aspect-ratio variants preview"
+/>
+
+|                  |                                                         |
+| ---------------- | ------------------------------------------------------- |
+| **Triggered by** | `/kit-add img`, `/kit-create` with an image description |
+| **Output**       | `img.tsx` + `img.module.scss`                           |
+| **Dependencies** | None (leaf component)                                   |
+| **Skill path**   | `plugins/acss-kit/skills/component-img/SKILL.md`        |
+
+## Workflow
+
+<Steps>
+
+1. **Read `reference.md`** in the skill directory for canonical templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — runs `detect_target.py` to verify `ui.tsx` is present. If missing, runs `kit-core` Step A initialization first.
+
+3. **Dependencies** — Img has no upstream component dependencies (it is a leaf component). Dependency resolution is skipped.
+
+4. **Generate** — writes `img.tsx` and `img.module.scss` to the configured target directory.
+
+5. **Verify** — runs `verify_integration.py` and prints the integration summary.
+
+</Steps>
+
+## Decorative vs informative mode
+
+| Mode        | `alt` value      | Rendered attribute               |
+| ----------- | ---------------- | -------------------------------- |
+| Informative | Non-empty string | `alt="description"`              |
+| Decorative  | `""` (empty)     | `alt=""` + `role="presentation"` |
+
+## Props
+
+| Prop          | Type                | Required | Default  |
+| ------------- | ------------------- | -------- | -------- |
+| `src`         | `string`            | Yes      | —        |
+| `alt`         | `string`            | Yes      | —        |
+| `aspectRatio` | `string`            | No       | `"auto"` |
+| `loading`     | `"lazy" \| "eager"` | No       | `"lazy"` |
+| `srcSet`      | `string`            | No       | —        |
+| `sizes`       | `string`            | No       | —        |
+| `className`   | `string`            | No       | —        |
+
+## CSS tokens
+
+| Token          | Role              | Fallback                               |
+| -------------- | ----------------- | -------------------------------------- |
+| `--img-radius` | Border radius     | `0`                                    |
+| `--img-aspect` | Aspect ratio      | `auto`                                 |
+| `--img-fit`    | Object-fit        | `cover`                                |
+| `--img-bg`     | Placeholder color | `var(--color-surface-raised, #f3f4f6)` |
+
+## Accessibility
+
+- `alt` is always required — passing an empty string marks the image as decorative and adds `role="presentation"`.
+- `loading="lazy"` is the default to avoid layout shifts on page load.
+- `srcSet` and `sizes` are passed through for responsive image support.
+
+<Aside type="caution">
+  Always pass a meaningful `alt` string for informative images. Pass `alt=""`
+  (empty string, not omitted) only for purely decorative images that add no
+  information to the page.
+</Aside>
+
+## Usage example
+
+```tsx
+{
+  /* Informative */
+}
+<Img
+  src="/hero.jpg"
+  alt="Team working at a standing desk"
+  aspectRatio="16/9"
+/>;
+
+{
+  /* Decorative */
+}
+<Img src="/divider-wave.svg" alt="" />;
+
+{
+  /* Responsive */
+}
+<Img
+  src="/photo-800.jpg"
+  alt="Product on a white background"
+  srcSet="/photo-400.jpg 400w, /photo-800.jpg 800w"
+  sizes="(max-width: 600px) 400px, 800px"
+/>;
+```
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

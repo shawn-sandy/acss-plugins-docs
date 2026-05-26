@@ -1,0 +1,98 @@
+---
+title: component-icon skill
+description: Generates an accessible Icon component — SVG icon wrapper with aria-hidden/aria-label toggle, size variants, and decorative/semantic modes.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+The `component-icon` skill generates an fpkit-style accessible Icon component directly into a developer's project. It is invoked by [`/kit-add icon`](/acss-plugins-docs/acss-kit/commands/kit-add) or [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create).
+
+<ComponentPreview
+  code={`<div style="display:flex;align-items:center;gap:1rem">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" style="color:var(--color-primary,#4f46e5)"><circle cx="8" cy="8" r="7"/></svg>
+  <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" style="color:var(--color-text-muted,#6b7280)"><circle cx="8" cy="8" r="7"/></svg>
+  <svg width="32" height="32" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" style="color:var(--color-danger,#dc2626)"><circle cx="8" cy="8" r="7"/></svg>
+</div>`}
+  label="Icon size variants preview"
+/>
+
+|                  |                                                         |
+| ---------------- | ------------------------------------------------------- |
+| **Triggered by** | `/kit-add icon`, `/kit-create` with an icon description |
+| **Output**       | `icon.tsx` + `icon.module.scss`                         |
+| **Dependencies** | None (leaf component)                                   |
+| **Skill path**   | `plugins/acss-kit/skills/component-icon/SKILL.md`       |
+
+## Workflow
+
+<Steps>
+
+1. **Read `reference.md`** in the skill directory for canonical templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — runs `detect_target.py` to verify `ui.tsx` is present. If missing, runs `kit-core` Step A initialization first.
+
+3. **Dependencies** — Icon has no upstream component dependencies (it is a leaf component). Dependency resolution is skipped.
+
+4. **Generate** — writes `icon.tsx` and `icon.module.scss` to the configured target directory.
+
+5. **Verify** — runs `verify_integration.py` and prints the integration summary.
+
+</Steps>
+
+## Decorative vs semantic mode
+
+| Mode       | `aria-label` set? | SVG attribute        | Use case                          |
+| ---------- | ----------------- | -------------------- | --------------------------------- |
+| Decorative | No                | `aria-hidden="true"` | Icon accompanies visible text     |
+| Semantic   | Yes               | `role="img"`         | Icon conveys meaning without text |
+
+## Props
+
+| Prop        | Type                                   | Required | Default          |
+| ----------- | -------------------------------------- | -------- | ---------------- |
+| `children`  | `ReactNode` (SVG content)              | Yes      | —                |
+| `size`      | `"xs" \| "sm" \| "md" \| "lg" \| "xl"` | No       | `"md"`           |
+| `label`     | `string`                               | No       | —                |
+| `color`     | `string`                               | No       | `"currentColor"` |
+| `className` | `string`                               | No       | —                |
+
+When `label` is provided, the icon renders in semantic mode (`role="img"`, `aria-label`). When omitted, the icon renders in decorative mode (`aria-hidden="true"`).
+
+## CSS tokens
+
+| Token          | Role         | Fallback       |
+| -------------- | ------------ | -------------- |
+| `--icon-size`  | Width/height | `1em`          |
+| `--icon-color` | Fill/stroke  | `currentColor` |
+
+## Usage example
+
+```tsx
+{
+  /* Decorative — label comes from surrounding text */
+}
+<Icon size="md">
+  <path d="..." />
+</Icon>;
+
+{
+  /* Semantic — icon alone conveys meaning */
+}
+<Icon size="lg" label="Settings">
+  <path d="..." />
+</Icon>;
+```
+
+<Aside type="note">
+  Always provide `label` when the icon appears without accompanying visible
+  text. Icon-only interactive controls should use
+  [`component-icon-button`](/acss-plugins-docs/acss-kit/skills/component-icon-button)
+  instead.
+</Aside>
+
+## Related
+
+- [`component-icon-button skill`](/acss-plugins-docs/acss-kit/skills/component-icon-button)
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

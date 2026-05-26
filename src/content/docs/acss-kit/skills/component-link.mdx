@@ -1,0 +1,98 @@
+---
+title: component-link skill
+description: Generates an accessible Link component — anchor with external/new-tab detection, aria-label injection, and current-page indication.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+The `component-link` skill generates an fpkit-style accessible Link component directly into a developer's project. It is invoked by [`/kit-add link`](/acss-plugins-docs/acss-kit/commands/kit-add) or [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create).
+
+<ComponentPreview
+  code={`<div style="display:flex;flex-direction:column;gap:0.5rem">
+  <a href="#" style="color:var(--color-primary,#4f46e5);text-decoration:underline;text-underline-offset:2px;">Internal link</a>
+  <a href="https://example.com" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary,#4f46e5);text-decoration:underline;text-underline-offset:2px;">External link ↗</a>
+  <a href="#" aria-current="page" style="color:var(--color-text,#111);font-weight:600;text-decoration:none;">Current page</a>
+</div>`}
+  label="Link variants preview"
+/>
+
+|                  |                                                        |
+| ---------------- | ------------------------------------------------------ |
+| **Triggered by** | `/kit-add link`, `/kit-create` with a link description |
+| **Output**       | `link.tsx` + `link.module.scss`                        |
+| **Dependencies** | None (leaf component)                                  |
+| **Skill path**   | `plugins/acss-kit/skills/component-link/SKILL.md`      |
+
+## Workflow
+
+<Steps>
+
+1. **Read `reference.md`** in the skill directory for canonical templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — runs `detect_target.py` to verify `ui.tsx` is present. If missing, runs `kit-core` Step A initialization first.
+
+3. **Dependencies** — Link has no upstream component dependencies (it is a leaf component). Dependency resolution is skipped.
+
+4. **Generate** — writes `link.tsx` and `link.module.scss` to the configured target directory.
+
+5. **Verify** — runs `verify_integration.py` and prints the integration summary.
+
+</Steps>
+
+## External link handling
+
+When `href` starts with `http://` or `https://`, or when `external={true}` is set, the component automatically:
+
+- Adds `target="_blank"` and `rel="noopener noreferrer"`.
+- Appends a visually-hidden `" (opens in new tab)"` string for screen readers.
+- Optionally renders an external-link icon (decorative, `aria-hidden="true"`).
+
+## Props
+
+| Prop        | Type        | Required | Default       |
+| ----------- | ----------- | -------- | ------------- |
+| `href`      | `string`    | Yes      | —             |
+| `children`  | `ReactNode` | Yes      | —             |
+| `external`  | `boolean`   | No       | auto-detected |
+| `current`   | `boolean`   | No       | `false`       |
+| `label`     | `string`    | No       | —             |
+| `className` | `string`    | No       | —             |
+
+## CSS tokens
+
+| Token              | Role             | Fallback                        |
+| ------------------ | ---------------- | ------------------------------- |
+| `--link-color`     | Default color    | `var(--color-primary, #4f46e5)` |
+| `--link-visited`   | Visited color    | `var(--color-secondary)`        |
+| `--link-hover`     | Hover color      | `var(--color-primary-dark)`     |
+| `--link-underline` | Underline offset | `2px`                           |
+
+## Accessibility
+
+- External links get `rel="noopener noreferrer"` and a visually-hidden new-tab warning.
+- `aria-current="page"` is set when `current={true}`.
+- `aria-label` overrides the accessible name when `label` is provided — use sparingly.
+- `:focus-visible` styles use `--color-focus-ring`.
+
+## Usage example
+
+```tsx
+<Link href="/acss-plugins-docs/getting-started/introduction">Get started</Link>
+<Link href="https://github.com/shawn-sandy/agentic-acss-plugins" external>
+  View on GitHub
+</Link>
+<Link href="/acss-plugins-docs/acss-kit/overview" current>acss-kit</Link>
+```
+
+<Aside type="tip">
+  For icon-only interactive elements, use
+  [`component-icon-button`](/acss-plugins-docs/acss-kit/skills/component-icon-button)
+  instead — it has an enforced `aria-label` prop.
+</Aside>
+
+## Related
+
+- [`component-icon-button skill`](/acss-plugins-docs/acss-kit/skills/component-icon-button)
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

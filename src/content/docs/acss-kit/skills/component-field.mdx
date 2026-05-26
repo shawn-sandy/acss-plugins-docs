@@ -1,0 +1,97 @@
+---
+title: component-field skill
+description: Generates an accessible Field component — form field wrapper with label, hint, and error message association via aria-describedby.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+The `component-field` skill generates an fpkit-style accessible Field component directly into a developer's project. It is invoked by [`/kit-add field`](/acss-plugins-docs/acss-kit/commands/kit-add) or [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create).
+
+<ComponentPreview
+  code={`<div style="display:flex;flex-direction:column;gap:0.25rem;max-width:20rem">
+  <label style="font-size:0.875rem;font-weight:500;color:var(--color-text,#111);">Email address <span style="color:var(--color-danger,#dc2626)">*</span></label>
+  <input type="email" placeholder="you@example.com" style="padding:0.5rem 0.75rem;border:1px solid var(--color-border,#e5e7eb);border-radius:0.375rem;font-size:0.875rem;" />
+  <span style="font-size:0.75rem;color:var(--color-text-muted,#6b7280);">We'll never share your email.</span>
+</div>`}
+  label="Field component preview"
+/>
+
+|                  |                                                          |
+| ---------------- | -------------------------------------------------------- |
+| **Triggered by** | `/kit-add field`, `/kit-create` with a field description |
+| **Output**       | `field.tsx` + `field.module.scss`                        |
+| **Dependencies** | None (leaf component)                                    |
+| **Skill path**   | `plugins/acss-kit/skills/component-field/SKILL.md`       |
+
+## Workflow
+
+<Steps>
+
+1. **Read `reference.md`** in the skill directory for canonical templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — runs `detect_target.py` to verify `ui.tsx` is present. If missing, runs `kit-core` Step A initialization first.
+
+3. **Dependencies** — Field has no upstream component dependencies (it is a leaf component). Dependency resolution is skipped.
+
+4. **Generate** — writes `field.tsx` and `field.module.scss` to the configured target directory.
+
+5. **Verify** — runs `verify_integration.py` and prints the integration summary.
+
+</Steps>
+
+## Purpose
+
+Field is a layout wrapper — it wires together a `<label>`, an optional hint string, an optional error message, and any child input control. It generates the `id`/`htmlFor` relationship automatically and connects hint and error text via `aria-describedby`.
+
+## Props
+
+| Prop        | Type        | Required | Default |
+| ----------- | ----------- | -------- | ------- |
+| `label`     | `string`    | Yes      | —       |
+| `children`  | `ReactNode` | Yes      | —       |
+| `hint`      | `string`    | No       | —       |
+| `error`     | `string`    | No       | —       |
+| `required`  | `boolean`   | No       | `false` |
+| `className` | `string`    | No       | —       |
+
+## CSS tokens
+
+| Token                  | Role              | Fallback                           |
+| ---------------------- | ----------------- | ---------------------------------- |
+| `--field-label-size`   | Label font size   | `0.875rem`                         |
+| `--field-label-weight` | Label font weight | `500`                              |
+| `--field-hint-color`   | Hint text color   | `var(--color-text-muted, #6b7280)` |
+| `--field-error-color`  | Error text color  | `var(--color-danger, #dc2626)`     |
+| `--field-gap`          | Vertical spacing  | `0.25rem`                          |
+
+## Accessibility
+
+- `<label>` is always associated with the child control via `htmlFor` / `id`.
+- Hint and error text are connected via `aria-describedby` on the child input.
+- `aria-invalid="true"` is set on the child control when `error` is present.
+- Required indicator (`*`) has `aria-hidden="true"` — the semantic `required` attribute carries the meaning.
+
+## Usage example
+
+```tsx
+<Field label="Email address" hint="We'll never share your email." required>
+  <Input type="email" placeholder="you@example.com" />
+</Field>
+
+<Field label="Username" error="That username is already taken.">
+  <Input type="text" value={username} onChange={handleChange} />
+</Field>
+```
+
+<Aside type="tip">
+  Field wraps any child input control — use it with `Input`, `Checkbox`,
+  `select`, or a custom control. The label association and ARIA wiring are
+  handled automatically.
+</Aside>
+
+## Related
+
+- [`component-input skill`](/acss-plugins-docs/acss-kit/skills/component-input)
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

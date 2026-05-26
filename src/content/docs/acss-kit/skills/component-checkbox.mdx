@@ -1,0 +1,98 @@
+---
+title: component-checkbox skill
+description: Generates an accessible Checkbox component with indeterminate state, aria-checked, and Input dependency.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+The `component-checkbox` skill generates an fpkit-style accessible Checkbox component directly into a developer's project. It is invoked by [`/kit-add checkbox`](/acss-plugins-docs/acss-kit/commands/kit-add) or [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create).
+
+<ComponentPreview
+  code={`<div style="display:flex;flex-direction:column;gap:0.5rem">
+  <label style="display:inline-flex;align-items:center;gap:0.5rem;cursor:pointer;">
+    <input type="checkbox" style="accent-color:var(--color-primary,#4f46e5);width:1rem;height:1rem;" />
+    Unchecked
+  </label>
+  <label style="display:inline-flex;align-items:center;gap:0.5rem;cursor:pointer;">
+    <input type="checkbox" checked style="accent-color:var(--color-primary,#4f46e5);width:1rem;height:1rem;" />
+    Checked
+  </label>
+</div>`}
+  label="Checkbox component preview"
+/>
+
+|                  |                                                                |
+| ---------------- | -------------------------------------------------------------- |
+| **Triggered by** | `/kit-add checkbox`, `/kit-create` with a checkbox description |
+| **Output**       | `checkbox.tsx` + `checkbox.module.scss`                        |
+| **Dependencies** | `input` (resolved automatically if missing)                    |
+| **Skill path**   | `plugins/acss-kit/skills/component-checkbox/SKILL.md`          |
+
+## Workflow
+
+<Steps>
+
+1. **Read `reference.md`** in the skill directory for canonical templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — runs `detect_target.py` to verify `ui.tsx` is present. If missing, runs `kit-core` Step A initialization first.
+
+3. **Dependencies** — Checkbox depends on `input`. Before generating Checkbox, the skill checks whether `<targetDir>/input.tsx` already exists. If missing, it invokes `component-input` first.
+
+4. **Generate** — writes `checkbox.tsx` and `checkbox.module.scss` to the configured target directory.
+
+5. **Verify** — runs `verify_integration.py` and prints the integration summary.
+
+</Steps>
+
+## Props
+
+| Prop            | Type                 | Required | Default |
+| --------------- | -------------------- | -------- | ------- |
+| `label`         | `string`             | Yes      | —       |
+| `checked`       | `boolean`            | No       | `false` |
+| `indeterminate` | `boolean`            | No       | `false` |
+| `disabled`      | `boolean`            | No       | `false` |
+| `required`      | `boolean`            | No       | `false` |
+| `error`         | `string`             | No       | —       |
+| `onChange`      | `ChangeEventHandler` | No       | —       |
+| `className`     | `string`             | No       | —       |
+
+## CSS tokens
+
+| Token          | Role            | Fallback                        |
+| -------------- | --------------- | ------------------------------- |
+| `--chk-color`  | Indicator color | `var(--color-primary, #4f46e5)` |
+| `--chk-bg`     | Background      | `var(--color-surface, #fff)`    |
+| `--chk-border` | Border color    | `var(--color-border, #6b7280)`  |
+| `--chk-radius` | Border radius   | `var(--radius-sm, 0.25rem)`     |
+| `--chk-size`   | Indicator size  | `1rem`                          |
+
+## Accessibility
+
+- `aria-checked` tracks three states: `"true"`, `"false"`, `"mixed"` (indeterminate).
+- `aria-disabled="true"` pattern preserves focusability when `disabled={true}`.
+- `aria-required` is set when `required={true}`.
+- Error message is associated via `aria-describedby`.
+
+## Usage example
+
+```tsx
+<Checkbox
+  label="I agree to the terms of service"
+  checked={agreed}
+  onChange={(e) => setAgreed(e.target.checked)}
+  required
+/>
+```
+
+<Aside type="note">
+  Checkbox automatically generates its `Input` dependency if `input.tsx` is not
+  already present in the target directory — no manual step required.
+</Aside>
+
+## Related
+
+- [`component-input skill`](/acss-plugins-docs/acss-kit/skills/component-input)
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

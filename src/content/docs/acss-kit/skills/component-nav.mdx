@@ -1,0 +1,102 @@
+---
+title: component-nav skill
+description: Generates an accessible Nav component — navigation landmark with aria-label, current-page link marking, and horizontal/vertical layout.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+The `component-nav` skill generates an fpkit-style accessible Nav component directly into a developer's project. It is invoked by [`/kit-add nav`](/acss-plugins-docs/acss-kit/commands/kit-add) or [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create).
+
+<ComponentPreview
+  code={`<nav aria-label="Main navigation" style="display:flex;gap:0.25rem;padding:0.5rem;background:var(--color-surface,#fff);border-bottom:1px solid var(--color-border,#e5e7eb)">
+  <a href="#" aria-current="page" style="padding:0.4rem 0.75rem;border-radius:0.375rem;background:var(--color-primary,#4f46e5);color:var(--color-text-inverse,#fff);font-size:0.875rem;font-weight:500;text-decoration:none;">Home</a>
+  <a href="#" style="padding:0.4rem 0.75rem;border-radius:0.375rem;color:var(--color-text,#111);font-size:0.875rem;font-weight:500;text-decoration:none;">Docs</a>
+  <a href="#" style="padding:0.4rem 0.75rem;border-radius:0.375rem;color:var(--color-text,#111);font-size:0.875rem;font-weight:500;text-decoration:none;">Examples</a>
+</nav>`}
+  label="Nav component preview"
+/>
+
+|                  |                                                      |
+| ---------------- | ---------------------------------------------------- |
+| **Triggered by** | `/kit-add nav`, `/kit-create` with a nav description |
+| **Output**       | `nav.tsx` + `nav.module.scss`                        |
+| **Dependencies** | None (leaf component)                                |
+| **Skill path**   | `plugins/acss-kit/skills/component-nav/SKILL.md`     |
+
+## Workflow
+
+<Steps>
+
+1. **Read `reference.md`** in the skill directory for canonical templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — runs `detect_target.py` to verify `ui.tsx` is present. If missing, runs `kit-core` Step A initialization first.
+
+3. **Dependencies** — Nav has no upstream component dependencies (it is a leaf component). Dependency resolution is skipped.
+
+4. **Generate** — writes `nav.tsx` and `nav.module.scss` to the configured target directory.
+
+5. **Verify** — runs `verify_integration.py` and prints the integration summary.
+
+</Steps>
+
+## Props
+
+| Prop          | Type                         | Required | Default        |
+| ------------- | ---------------------------- | -------- | -------------- |
+| `label`       | `string`                     | Yes      | —              |
+| `items`       | `NavItem[]`                  | Yes      | —              |
+| `layout`      | `"horizontal" \| "vertical"` | No       | `"horizontal"` |
+| `currentHref` | `string`                     | No       | —              |
+| `className`   | `string`                     | No       | —              |
+
+`NavItem` shape:
+
+```ts
+interface NavItem {
+  label: string;
+  href: string;
+}
+```
+
+## CSS tokens
+
+| Token                | Role               | Fallback                          |
+| -------------------- | ------------------ | --------------------------------- |
+| `--nav-bg`           | Nav background     | `var(--color-surface, #fff)`      |
+| `--nav-gap`          | Item spacing       | `0.25rem`                         |
+| `--nav-item-color`   | Link color         | `var(--color-text, #111)`         |
+| `--nav-active-bg`    | Current-page bg    | `var(--color-primary, #4f46e5)`   |
+| `--nav-active-color` | Current-page color | `var(--color-text-inverse, #fff)` |
+| `--nav-radius`       | Item border radius | `var(--radius-md, 0.375rem)`      |
+
+## Accessibility
+
+- Renders a `<nav>` landmark — `aria-label` is **always required** to distinguish multiple nav landmarks on the same page.
+- `aria-current="page"` is applied to the item matching `currentHref`.
+- All link items are `<a>` elements — no `<button>` inside a nav unless the item triggers a non-navigation action.
+
+<Aside type="caution">
+  The `label` prop is required. Without it, screen reader users cannot
+  distinguish this navigation region from others on the page (WCAG 2.4.1).
+</Aside>
+
+## Usage example
+
+```tsx
+<Nav
+  label="Main navigation"
+  currentHref={router.pathname}
+  items={[
+    { label: "Home", href: "/" },
+    { label: "Docs", href: "/docs" },
+    { label: "Examples", href: "/examples" },
+  ]}
+/>
+```
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

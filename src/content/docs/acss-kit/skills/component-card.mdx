@@ -1,0 +1,101 @@
+---
+title: component-card skill
+description: Generates an accessible Card component — content container with header/body/footer slots and interactive variant support.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+The `component-card` skill generates an fpkit-style accessible Card component directly into a developer's project. It is invoked by [`/kit-add card`](/acss-plugins-docs/acss-kit/commands/kit-add) or [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create).
+
+<ComponentPreview
+  code={`<div style="border:1px solid var(--color-border,#e5e7eb);border-radius:0.5rem;padding:1.25rem;background:var(--color-surface,#fff);max-width:20rem;">
+  <h3 style="margin:0 0 0.5rem;font-size:1rem;font-weight:600;">Card title</h3>
+  <p style="margin:0 0 1rem;color:var(--color-text-muted,#6b7280);font-size:0.875rem;">Card body content with supporting description.</p>
+  <button style="padding:0.4em 1em;border-radius:0.375rem;border:none;background:var(--color-primary,#4f46e5);color:var(--color-text-inverse,#fff);font-size:0.875rem;font-weight:600;cursor:pointer;">Action</button>
+</div>`}
+  label="Card component preview"
+/>
+
+|                  |                                                        |
+| ---------------- | ------------------------------------------------------ |
+| **Triggered by** | `/kit-add card`, `/kit-create` with a card description |
+| **Output**       | `card.tsx` + `card.module.scss`                        |
+| **Dependencies** | None (leaf component)                                  |
+| **Skill path**   | `plugins/acss-kit/skills/component-card/SKILL.md`      |
+
+## Workflow
+
+<Steps>
+
+1. **Read `reference.md`** in the skill directory for canonical templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — runs `detect_target.py` to verify `ui.tsx` is present. If missing, runs `kit-core` Step A initialization first.
+
+3. **Dependencies** — Card has no upstream component dependencies (it is a leaf component). Dependency resolution is skipped.
+
+4. **Generate** — writes `card.tsx` and `card.module.scss` to the configured target directory.
+
+5. **Verify** — runs `verify_integration.py` and prints the integration summary.
+
+</Steps>
+
+## Slots
+
+Card exposes three named slots:
+
+| Slot   | Prop       | Description                          |
+| ------ | ---------- | ------------------------------------ |
+| Header | `header`   | Card title or leading content area   |
+| Body   | `children` | Main content (always rendered)       |
+| Footer | `footer`   | Action row or metadata at the bottom |
+
+## Props
+
+| Prop          | Type        | Required | Default |
+| ------------- | ----------- | -------- | ------- |
+| `children`    | `ReactNode` | Yes      | —       |
+| `header`      | `ReactNode` | No       | —       |
+| `footer`      | `ReactNode` | No       | —       |
+| `interactive` | `boolean`   | No       | `false` |
+| `href`        | `string`    | No       | —       |
+| `className`   | `string`    | No       | —       |
+
+## CSS tokens
+
+| Token              | Role               | Fallback                       |
+| ------------------ | ------------------ | ------------------------------ |
+| `--card-bg`        | Background color   | `var(--color-surface, #fff)`   |
+| `--card-border`    | Border color       | `var(--color-border, #e5e7eb)` |
+| `--card-radius`    | Border radius      | `var(--radius-lg, 0.5rem)`     |
+| `--card-padding-x` | Horizontal padding | `1.25rem`                      |
+| `--card-padding-y` | Vertical padding   | `1.25rem`                      |
+| `--card-shadow`    | Box shadow         | `none`                         |
+
+## Accessibility
+
+- Interactive cards (`interactive={true}` or `href` set) use a `<button>` or `<a>` wrapper with keyboard activation.
+- `card:activate` custom event is dispatched on activation for vanilla-JS consumers.
+- Non-interactive cards are plain `<div>` with no redundant ARIA.
+
+## Usage example
+
+```tsx
+<Card
+  header={<h2>Pricing plan</h2>}
+  footer={<Button variant="primary">Get started</Button>}
+>
+  Premium tier with all features unlocked.
+</Card>
+```
+
+<Aside type="tip">
+  Pass `interactive` and an `href` to make the entire card keyboard-navigable as
+  a link — useful for content grids and dashboards.
+</Aside>
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

@@ -1,0 +1,105 @@
+---
+title: component-popover skill
+description: Generates an accessible Popover component — tooltip/popover using the Popover API with focus trap, aria-expanded, and light-dismiss.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+The `component-popover` skill generates an fpkit-style accessible Popover component directly into a developer's project. It is invoked by [`/kit-add popover`](/acss-plugins-docs/acss-kit/commands/kit-add) or [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create).
+
+<ComponentPreview
+  code={`<div style="position:relative;display:inline-block">
+  <button style="padding:0.4em 1em;border-radius:0.375rem;border:1px solid var(--color-border,#e5e7eb);background:transparent;cursor:pointer;font-size:0.875rem;">Open popover</button>
+  <div role="tooltip" style="position:absolute;top:calc(100% + 0.5rem);left:0;min-width:14rem;padding:0.75rem 1rem;background:var(--color-surface,#fff);border:1px solid var(--color-border,#e5e7eb);border-radius:0.5rem;box-shadow:0 4px 16px rgba(0,0,0,.1);font-size:0.875rem;z-index:10;">
+    Popover content goes here.
+  </div>
+</div>`}
+  label="Popover component preview"
+/>
+
+|                  |                                                              |
+| ---------------- | ------------------------------------------------------------ |
+| **Triggered by** | `/kit-add popover`, `/kit-create` with a popover description |
+| **Output**       | `popover.tsx` + `popover.module.scss`                        |
+| **Dependencies** | None (leaf component)                                        |
+| **Skill path**   | `plugins/acss-kit/skills/component-popover/SKILL.md`         |
+
+## Workflow
+
+<Steps>
+
+1. **Read `reference.md`** in the skill directory for canonical templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — runs `detect_target.py` to verify `ui.tsx` is present. If missing, runs `kit-core` Step A initialization first.
+
+3. **Dependencies** — Popover has no upstream component dependencies (it is a leaf component). Dependency resolution is skipped.
+
+4. **Generate** — writes `popover.tsx` and `popover.module.scss` to the configured target directory.
+
+5. **Verify** — runs `verify_integration.py` and prints the integration summary.
+
+</Steps>
+
+## Popover API vs fallback
+
+The component uses the native [Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) (`popover` attribute + `popovertarget`) when available, falling back to a controlled `open` prop + `aria-expanded` for older browsers.
+
+## Props
+
+| Prop           | Type                                     | Required | Default    |
+| -------------- | ---------------------------------------- | -------- | ---------- |
+| `trigger`      | `ReactNode`                              | Yes      | —          |
+| `children`     | `ReactNode`                              | Yes      | —          |
+| `open`         | `boolean`                                | No       | —          |
+| `onOpenChange` | `(open: boolean) => void`                | No       | —          |
+| `placement`    | `"top" \| "bottom" \| "left" \| "right"` | No       | `"bottom"` |
+| `lightDismiss` | `boolean`                                | No       | `true`     |
+| `className`    | `string`                                 | No       | —          |
+
+## CSS tokens
+
+| Token             | Role               | Fallback                       |
+| ----------------- | ------------------ | ------------------------------ |
+| `--pop-bg`        | Background color   | `var(--color-surface, #fff)`   |
+| `--pop-border`    | Border color       | `var(--color-border, #e5e7eb)` |
+| `--pop-radius`    | Border radius      | `var(--radius-lg, 0.5rem)`     |
+| `--pop-padding-x` | Horizontal padding | `1rem`                         |
+| `--pop-padding-y` | Vertical padding   | `0.75rem`                      |
+| `--pop-shadow`    | Box shadow         | `0 4px 16px rgba(0,0,0,.1)`    |
+| `--pop-z`         | Z-index            | `100`                          |
+
+## Accessibility
+
+- `aria-expanded` on the trigger reflects open/closed state.
+- `aria-controls` links the trigger to the popover panel by id.
+- Focus is trapped inside the popover when `lightDismiss={false}`.
+- `Escape` key and outside click close the popover when `lightDismiss={true}`.
+- The popover panel has `role="dialog"` for rich content, or `role="tooltip"` for read-only hints.
+
+## Usage example
+
+```tsx
+<Popover
+  trigger={<Button variant="secondary">More options</Button>}
+  placement="bottom"
+>
+  <ul>
+    <li>Edit</li>
+    <li>Duplicate</li>
+    <li>Delete</li>
+  </ul>
+</Popover>
+```
+
+<Aside type="tip">
+  For simple read-only tooltips, set `role="tooltip"` on the popover children
+  and keep `lightDismiss={true}`. For action menus or rich content, use the
+  default `role="dialog"` with focus trapping.
+</Aside>
+
+## Related
+
+- [`component-button skill`](/acss-plugins-docs/acss-kit/skills/component-button)
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

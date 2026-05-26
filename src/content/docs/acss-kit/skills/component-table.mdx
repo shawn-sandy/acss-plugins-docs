@@ -1,0 +1,133 @@
+---
+title: component-table skill
+description: Generates an accessible Table component — data table with caption, scope headers, responsive scroll wrapper, and sortable column support.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+The `component-table` skill generates an fpkit-style accessible Table component directly into a developer's project. It is invoked by [`/kit-add table`](/acss-plugins-docs/acss-kit/commands/kit-add) or [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create).
+
+<ComponentPreview
+  code={`<div style="overflow-x:auto">
+  <table style="width:100%;border-collapse:collapse;font-size:0.875rem">
+    <caption style="text-align:left;font-weight:600;margin-bottom:0.5rem;color:var(--color-text,#111)">Sample data</caption>
+    <thead>
+      <tr style="border-bottom:2px solid var(--color-border,#e5e7eb)">
+        <th scope="col" style="padding:0.5rem 0.75rem;text-align:left;font-weight:600;color:var(--color-text,#111)">Name</th>
+        <th scope="col" style="padding:0.5rem 0.75rem;text-align:left;font-weight:600;color:var(--color-text,#111)">Role</th>
+        <th scope="col" style="padding:0.5rem 0.75rem;text-align:left;font-weight:600;color:var(--color-text,#111)">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--color-border,#e5e7eb)">
+        <td style="padding:0.5rem 0.75rem;color:var(--color-text,#111)">Alex</td>
+        <td style="padding:0.5rem 0.75rem;color:var(--color-text-muted,#6b7280)">Engineer</td>
+        <td style="padding:0.5rem 0.75rem;color:var(--color-success,#16a34a)">Active</td>
+      </tr>
+      <tr>
+        <td style="padding:0.5rem 0.75rem;color:var(--color-text,#111)">Sam</td>
+        <td style="padding:0.5rem 0.75rem;color:var(--color-text-muted,#6b7280)">Designer</td>
+        <td style="padding:0.5rem 0.75rem;color:var(--color-text-muted,#6b7280)">Inactive</td>
+      </tr>
+    </tbody>
+  </table>
+</div>`}
+  label="Table component preview"
+/>
+
+|                  |                                                          |
+| ---------------- | -------------------------------------------------------- |
+| **Triggered by** | `/kit-add table`, `/kit-create` with a table description |
+| **Output**       | `table.tsx` + `table.module.scss`                        |
+| **Dependencies** | None (leaf component)                                    |
+| **Skill path**   | `plugins/acss-kit/skills/component-table/SKILL.md`       |
+
+## Workflow
+
+<Steps>
+
+1. **Read `reference.md`** in the skill directory for canonical templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — runs `detect_target.py` to verify `ui.tsx` is present. If missing, runs `kit-core` Step A initialization first.
+
+3. **Dependencies** — Table has no upstream component dependencies (it is a leaf component). Dependency resolution is skipped.
+
+4. **Generate** — writes `table.tsx` and `table.module.scss` to the configured target directory.
+
+5. **Verify** — runs `verify_integration.py` and prints the integration summary.
+
+</Steps>
+
+## Column definition
+
+Columns are defined as an array of `ColumnDef` objects:
+
+```ts
+interface ColumnDef<T> {
+  key: keyof T;
+  header: string;
+  sortable?: boolean;
+  render?: (value: T[keyof T], row: T) => ReactNode;
+}
+```
+
+## Props
+
+| Prop        | Type                     | Required | Default |
+| ----------- | ------------------------ | -------- | ------- |
+| `columns`   | `ColumnDef<T>[]`         | Yes      | —       |
+| `rows`      | `T[]`                    | Yes      | —       |
+| `caption`   | `string`                 | Yes      | —       |
+| `sortKey`   | `keyof T`                | No       | —       |
+| `sortDir`   | `"asc" \| "desc"`        | No       | `"asc"` |
+| `onSort`    | `(key: keyof T) => void` | No       | —       |
+| `className` | `string`                 | No       | —       |
+
+## CSS tokens
+
+| Token               | Role               | Fallback                       |
+| ------------------- | ------------------ | ------------------------------ |
+| `--tbl-border`      | Cell border color  | `var(--color-border, #e5e7eb)` |
+| `--tbl-head-bg`     | Header background  | `var(--color-surface, #fff)`   |
+| `--tbl-head-weight` | Header font weight | `600`                          |
+| `--tbl-row-hover`   | Row hover bg       | `var(--color-surface-raised)`  |
+| `--tbl-padding-x`   | Cell h-padding     | `0.75rem`                      |
+| `--tbl-padding-y`   | Cell v-padding     | `0.5rem`                       |
+| `--tbl-radius`      | Outer radius       | `var(--radius-md, 0.375rem)`   |
+
+## Accessibility
+
+- `<caption>` is always required — it provides the table's accessible name.
+- All column headers use `scope="col"` and all row headers use `scope="row"`.
+- Sortable columns set `aria-sort="ascending"` or `aria-sort="descending"` on the active header; inactive sortable headers get `aria-sort="none"`.
+- The table is wrapped in a `<div>` with `overflow-x: auto` for responsive scrolling; the scroll container has `tabindex="0"` so keyboard users can scroll it.
+
+<Aside type="caution">
+  The `caption` prop is required. A table without a caption has no accessible
+  name — screen reader users cannot distinguish it from other tables on the
+  page.
+</Aside>
+
+## Usage example
+
+```tsx
+<Table
+  caption="Team members"
+  columns={[
+    { key: "name", header: "Name", sortable: true },
+    { key: "role", header: "Role" },
+    { key: "status", header: "Status" },
+  ]}
+  rows={teamMembers}
+  sortKey={sortKey}
+  sortDir={sortDir}
+  onSort={handleSort}
+/>
+```
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

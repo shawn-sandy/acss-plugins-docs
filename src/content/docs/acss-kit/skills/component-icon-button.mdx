@@ -1,0 +1,93 @@
+---
+title: component-icon-button skill
+description: Generates an accessible IconButton component — icon-only button with required aria-label, tooltip fallback, and Button dependency.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+The `component-icon-button` skill generates an fpkit-style accessible IconButton component directly into a developer's project. It is invoked by [`/kit-add icon-button`](/acss-plugins-docs/acss-kit/commands/kit-add) or [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create).
+
+<ComponentPreview
+  code={`<div style="display:flex;gap:0.5rem;align-items:center">
+  <button aria-label="Close" style="display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:0.375rem;border:none;background:var(--color-surface-raised,#f3f4f6);cursor:pointer;">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+  </button>
+  <button aria-label="Settings" style="display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:0.375rem;border:none;background:var(--color-primary,#4f46e5);color:#fff;cursor:pointer;">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
+  </button>
+</div>`}
+  label="IconButton component preview"
+/>
+
+|                  |                                                                       |
+| ---------------- | --------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add icon-button`, `/kit-create` with an icon button description |
+| **Output**       | `icon-button.tsx` + `icon-button.module.scss`                         |
+| **Dependencies** | `button` (resolved automatically if missing)                          |
+| **Skill path**   | `plugins/acss-kit/skills/component-icon-button/SKILL.md`              |
+
+## Workflow
+
+<Steps>
+
+1. **Read `reference.md`** in the skill directory for canonical templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — runs `detect_target.py` to verify `ui.tsx` is present. If missing, runs `kit-core` Step A initialization first.
+
+3. **Dependencies** — IconButton depends on `button`. Before generating IconButton, the skill checks whether `<targetDir>/button.tsx` already exists. If missing, it invokes `component-button` first.
+
+4. **Generate** — writes `icon-button.tsx` and `icon-button.module.scss` to the configured target directory.
+
+5. **Verify** — runs `verify_integration.py` and prints the integration summary.
+
+</Steps>
+
+## Props
+
+| Prop        | Type                                              | Required | Default   |
+| ----------- | ------------------------------------------------- | -------- | --------- |
+| `label`     | `string`                                          | Yes      | —         |
+| `icon`      | `ReactNode`                                       | Yes      | —         |
+| `variant`   | `"primary" \| "secondary" \| "ghost" \| "danger"` | No       | `"ghost"` |
+| `size`      | `"sm" \| "md" \| "lg"`                            | No       | `"md"`    |
+| `disabled`  | `boolean`                                         | No       | `false`   |
+| `tooltip`   | `string`                                          | No       | —         |
+| `onClick`   | `MouseEventHandler`                               | No       | —         |
+| `className` | `string`                                          | No       | —         |
+
+## CSS tokens
+
+Inherits all `--btn-*` tokens from the `Button` component, plus:
+
+| Token               | Role              | Fallback                     |
+| ------------------- | ----------------- | ---------------------------- |
+| `--icon-btn-size`   | Button dimensions | `2rem`                       |
+| `--icon-btn-radius` | Border radius     | `var(--radius-md, 0.375rem)` |
+
+## Accessibility
+
+- `aria-label` is **always required** — icon-only buttons have no visible text, so the label is the only accessible name.
+- The inner SVG icon always gets `aria-hidden="true"` to prevent duplicate announcements.
+- `aria-disabled="true"` pattern preserves focusability when `disabled={true}`.
+- When `tooltip` is provided, the tooltip is connected via `aria-describedby`.
+
+<Aside type="caution">
+  The `label` prop is required with no default. Omitting it will cause a
+  TypeScript error at compile time and an accessibility violation at runtime.
+</Aside>
+
+## Usage example
+
+```tsx
+<IconButton label="Close dialog" icon={<CloseIcon />} onClick={handleClose} />
+<IconButton label="Account settings" icon={<SettingsIcon />} variant="ghost" />
+<IconButton label="Delete item" icon={<TrashIcon />} variant="danger" disabled />
+```
+
+## Related
+
+- [`component-button skill`](/acss-plugins-docs/acss-kit/skills/component-button)
+- [`component-icon skill`](/acss-plugins-docs/acss-kit/skills/component-icon)
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

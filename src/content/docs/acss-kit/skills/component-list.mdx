@@ -1,0 +1,94 @@
+---
+title: component-list skill
+description: Generates an accessible List component — ordered/unordered list with role="list" reset, item slots, and inline/stacked layout variants.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+The `component-list` skill generates an fpkit-style accessible List component directly into a developer's project. It is invoked by [`/kit-add list`](/acss-plugins-docs/acss-kit/commands/kit-add) or [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create).
+
+<ComponentPreview
+  code={`<div style="display:flex;gap:2rem;align-items:flex-start;flex-wrap:wrap">
+  <ul role="list" style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0.5rem">
+    <li style="padding:0.25rem 0;color:var(--color-text,#111);font-size:0.875rem;">First item</li>
+    <li style="padding:0.25rem 0;color:var(--color-text,#111);font-size:0.875rem;">Second item</li>
+    <li style="padding:0.25rem 0;color:var(--color-text,#111);font-size:0.875rem;">Third item</li>
+  </ul>
+  <ul role="list" style="list-style:none;margin:0;padding:0;display:flex;gap:0.75rem;flex-wrap:wrap">
+    <li style="padding:0.25rem 0.5rem;border:1px solid var(--color-border,#e5e7eb);border-radius:0.25rem;font-size:0.875rem;">Inline</li>
+    <li style="padding:0.25rem 0.5rem;border:1px solid var(--color-border,#e5e7eb);border-radius:0.25rem;font-size:0.875rem;">Layout</li>
+    <li style="padding:0.25rem 0.5rem;border:1px solid var(--color-border,#e5e7eb);border-radius:0.25rem;font-size:0.875rem;">Variant</li>
+  </ul>
+</div>`}
+  label="List stacked and inline variants preview"
+/>
+
+|                  |                                                        |
+| ---------------- | ------------------------------------------------------ |
+| **Triggered by** | `/kit-add list`, `/kit-create` with a list description |
+| **Output**       | `list.tsx` + `list.module.scss`                        |
+| **Dependencies** | None (leaf component)                                  |
+| **Skill path**   | `plugins/acss-kit/skills/component-list/SKILL.md`      |
+
+## Workflow
+
+<Steps>
+
+1. **Read `reference.md`** in the skill directory for canonical templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — runs `detect_target.py` to verify `ui.tsx` is present. If missing, runs `kit-core` Step A initialization first.
+
+3. **Dependencies** — List has no upstream component dependencies (it is a leaf component). Dependency resolution is skipped.
+
+4. **Generate** — writes `list.tsx` and `list.module.scss` to the configured target directory.
+
+5. **Verify** — runs `verify_integration.py` and prints the integration summary.
+
+</Steps>
+
+## Props
+
+| Prop        | Type                    | Required | Default     |
+| ----------- | ----------------------- | -------- | ----------- |
+| `items`     | `ReactNode[]`           | Yes      | —           |
+| `ordered`   | `boolean`               | No       | `false`     |
+| `layout`    | `"stacked" \| "inline"` | No       | `"stacked"` |
+| `marker`    | `boolean`               | No       | `false`     |
+| `className` | `string`                | No       | —           |
+
+## CSS tokens
+
+| Token              | Role            | Fallback                  |
+| ------------------ | --------------- | ------------------------- |
+| `--list-gap`       | Item gap        | `0.5rem`                  |
+| `--list-padding`   | List padding    | `0`                       |
+| `--list-color`     | Item text color | `var(--color-text, #111)` |
+| `--list-font-size` | Item font size  | `inherit`                 |
+
+## Accessibility
+
+- `role="list"` is always set to restore list semantics in browsers that strip them when `list-style: none` is applied (Safari VoiceOver).
+- Use `ordered={true}` to render `<ol>` (implying sequence matters) instead of `<ul>`.
+- Set `marker={true}` only when the bullet or number character is meaningful to the content — otherwise the marker is decorative and suppressed.
+
+## Usage example
+
+```tsx
+<List items={['First step', 'Second step', 'Third step']} ordered />
+
+<List
+  items={tags.map(t => <Tag key={t}>{t}</Tag>)}
+  layout="inline"
+/>
+```
+
+<Aside type="note">
+  `role="list"` is applied automatically. Do not add it manually — doing so
+  would create a duplicate role attribute.
+</Aside>
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

@@ -41,7 +41,7 @@ Generate a complex component (dependencies resolved automatically):
 
 ## Workflow
 
-When you run `/kit-add`, the `components` skill executes these steps:
+When you run `/kit-add`, the dedicated per-component skill at `skills/component-<name>/SKILL.md` executes these steps:
 
 <Steps>
 
@@ -133,13 +133,15 @@ This is safe to run repeatedly without risk of clobbering your edits.
 
 Run `/kit-list` for the full catalogue. Quick reference by category:
 
-| Category    | Components                                           |
-| ----------- | ---------------------------------------------------- |
-| Simple      | `badge`, `icon`, `link`, `divider`                   |
-| Interactive | `button`, `checkbox`, `toggle`, `tabs`               |
-| Form        | `field`, `input`, `select`, `textarea`, `form-group` |
-| Layout      | `card`, `alert`, `banner`                            |
-| Complex     | `dialog`, `nav`, `popover`, `table`, `toast`         |
+| Category    | Components                          |
+| ----------- | ----------------------------------- |
+| Simple      | `icon`, `img`, `link`, `list`       |
+| Interactive | `button`, `checkbox`, `icon-button` |
+| Form        | `field`, `input`                    |
+| Layout      | `alert`, `card`                     |
+| Complex     | `dialog`, `nav`, `popover`, `table` |
+
+Each component has a dedicated skill at `plugins/acss-kit/skills/component-<name>/SKILL.md`. Run `/kit-list <component>` to see the full generation contract, props, and CSS tokens for any component before generating.
 
 ## CSS variables
 

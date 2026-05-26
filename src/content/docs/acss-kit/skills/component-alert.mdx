@@ -1,0 +1,98 @@
+---
+title: component-alert skill
+description: Generates an accessible Alert component — status/error/info/warning notification with ARIA live regions and icon support.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+The `component-alert` skill generates an fpkit-style accessible Alert component directly into a developer's project. It is invoked by [`/kit-add alert`](/acss-plugins-docs/acss-kit/commands/kit-add) or [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create).
+
+<ComponentPreview
+  code={`<div role="alert" style="display:flex;gap:0.75rem;padding:1rem;border-radius:0.5rem;border:1px solid var(--color-info,#3b82f6);background:color-mix(in oklch,var(--color-info,#3b82f6) 12%,var(--color-surface,#fff));">
+  <span style="font-weight:600;color:var(--color-info,#3b82f6);">Info</span>
+  <span style="color:var(--color-text,#111);">This is an informational alert message.</span>
+</div>`}
+  label="Alert component preview"
+/>
+
+|                  |                                                           |
+| ---------------- | --------------------------------------------------------- |
+| **Triggered by** | `/kit-add alert`, `/kit-create` with an alert description |
+| **Output**       | `alert.tsx` + `alert.module.scss`                         |
+| **Dependencies** | None (leaf component)                                     |
+| **Skill path**   | `plugins/acss-kit/skills/component-alert/SKILL.md`        |
+
+## Workflow
+
+<Steps>
+
+1. **Read `reference.md`** in the skill directory for canonical templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — runs `detect_target.py` to verify `ui.tsx` is present. If missing, runs `kit-core` Step A initialization first.
+
+3. **Dependencies** — Alert has no upstream component dependencies (it is a leaf component). Dependency resolution is skipped.
+
+4. **Generate** — writes `alert.tsx` and `alert.module.scss` to the configured target directory using the TSX/SCSS templates from `reference.md`.
+
+5. **Verify** — runs `verify_integration.py` and prints the integration summary.
+
+</Steps>
+
+## Supported severity levels
+
+Alert supports four severity values via the `severity` prop:
+
+| Severity  | ARIA live   | Token             |
+| --------- | ----------- | ----------------- |
+| `info`    | `polite`    | `--color-info`    |
+| `success` | `polite`    | `--color-success` |
+| `warning` | `polite`    | `--color-warning` |
+| `error`   | `assertive` | `--color-danger`  |
+
+## Props
+
+| Prop          | Type                                          | Required | Default  |
+| ------------- | --------------------------------------------- | -------- | -------- |
+| `children`    | `ReactNode`                                   | Yes      | —        |
+| `severity`    | `"info" \| "success" \| "warning" \| "error"` | No       | `"info"` |
+| `dismissible` | `boolean`                                     | No       | `false`  |
+| `icon`        | `ReactNode`                                   | No       | —        |
+| `className`   | `string`                                      | No       | —        |
+
+## CSS tokens
+
+| Token               | Role               | Fallback                   |
+| ------------------- | ------------------ | -------------------------- |
+| `--alert-bg`        | Background color   | severity-tinted surface    |
+| `--alert-border`    | Border color       | `var(--color-info)`        |
+| `--alert-color`     | Text color         | `var(--color-text)`        |
+| `--alert-radius`    | Border radius      | `var(--radius-md, 0.5rem)` |
+| `--alert-padding-x` | Horizontal padding | `1rem`                     |
+| `--alert-padding-y` | Vertical padding   | `0.75rem`                  |
+
+## Accessibility
+
+- Uses `role="alert"` for dynamic announcements.
+- `aria-live="polite"` for `info`/`success`/`warning`; `aria-live="assertive"` for `error`.
+- Dismiss button (when `dismissible={true}`) uses `aria-label="Dismiss"` and the `aria-disabled` pattern.
+- Leading icon is decorative (`aria-hidden="true"`) — accessible meaning comes from `children`.
+
+## Usage example
+
+```tsx
+<Alert severity="warning" dismissible>
+  Your card expires next month. Update your payment method.
+</Alert>
+```
+
+<Aside type="tip">
+  Use `/kit-create soft warning alert titled "Heads up"` to compose a specific
+  Alert instance without manually setting props.
+</Aside>
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — generates the component files
+- [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) — creator mode for one-off instances
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

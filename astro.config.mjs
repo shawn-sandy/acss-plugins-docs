@@ -149,6 +149,71 @@ export default defineConfig({
                   label: "utilities skill",
                   slug: "acss-kit/skills/utilities",
                 },
+                {
+                  label: "Component Skills",
+                  items: [
+                    {
+                      label: "component-alert",
+                      slug: "acss-kit/skills/component-alert",
+                    },
+                    {
+                      label: "component-button",
+                      slug: "acss-kit/skills/component-button",
+                    },
+                    {
+                      label: "component-card",
+                      slug: "acss-kit/skills/component-card",
+                    },
+                    {
+                      label: "component-checkbox",
+                      slug: "acss-kit/skills/component-checkbox",
+                    },
+                    {
+                      label: "component-dialog",
+                      slug: "acss-kit/skills/component-dialog",
+                    },
+                    {
+                      label: "component-field",
+                      slug: "acss-kit/skills/component-field",
+                    },
+                    {
+                      label: "component-icon",
+                      slug: "acss-kit/skills/component-icon",
+                    },
+                    {
+                      label: "component-icon-button",
+                      slug: "acss-kit/skills/component-icon-button",
+                    },
+                    {
+                      label: "component-img",
+                      slug: "acss-kit/skills/component-img",
+                    },
+                    {
+                      label: "component-input",
+                      slug: "acss-kit/skills/component-input",
+                    },
+                    {
+                      label: "component-link",
+                      slug: "acss-kit/skills/component-link",
+                    },
+                    {
+                      label: "component-list",
+                      slug: "acss-kit/skills/component-list",
+                    },
+                    {
+                      label: "component-nav",
+                      slug: "acss-kit/skills/component-nav",
+                    },
+                    {
+                      label: "component-popover",
+                      slug: "acss-kit/skills/component-popover",
+                    },
+                    {
+                      label: "component-table",
+                      slug: "acss-kit/skills/component-table",
+                    },
+                  ],
+                },
               ],
             },
             {

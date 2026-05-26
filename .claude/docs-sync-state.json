@@ -1,14 +1,15 @@
 {
-  "lastUpstreamSha": "d4c8498a956cba9b7c44d4e83de93f6cb7170759",
-  "lastSyncedAt": "2026-05-17T00:00:00Z",
+  "lastUpstreamSha": "0f4023ae41aa62f42a5812112301fc0b266b93d9",
+  "lastSyncedAt": "2026-05-26T00:00:00Z",
   "plugins": {
     "acss-kit": {
-      "lastUpstreamSha": "d4c8498a956cba9b7c44d4e83de93f6cb7170759",
-      "lastSyncedAt": "2026-05-17T00:00:00Z"
+      "lastUpstreamSha": "0f4023ae41aa62f42a5812112301fc0b266b93d9",
+      "lastSyncedAt": "2026-05-26T00:00:00Z"
     },
     "acss-utilities": {
-      "lastUpstreamSha": "d4c8498a956cba9b7c44d4e83de93f6cb7170759",
-      "lastSyncedAt": "2026-05-17T00:00:00Z"
+      "lastUpstreamSha": "0f4023ae41aa62f42a5812112301fc0b266b93d9",
+      "lastSyncedAt": "2026-05-26T00:00:00Z",
+      "note": "Plugin removed upstream in c6049e5 (2026-05-21). Docs preserved pending human decision."
     }
   }
 }
