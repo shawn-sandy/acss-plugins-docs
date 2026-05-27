@@ -35,11 +35,12 @@ Any component with a dedicated per-component skill at `plugins/acss-kit/skills/c
 | Form        | Input, Field                 |
 | Collections | List, Table, Nav             |
 
-<Aside type="caution">
-  Badge, Tag, Heading, Text/Paragraph, Details, and Progress exist only as
-  inline entries in `kit-core/references/inline-components.md` and are **not**
-  supported by `/kit-create` in v0.1. Promote them via the
-  `/acss-kit-component-author` maintainer skill first.
+<Aside type="note">
+  Badge, Tag, Heading, Text/Paragraph, Details, and Progress do not have
+  dedicated `component-<name>` skills. They are defined in
+  `kit-core/references/inline-components.md` and can be generated via
+  `/kit-create` using a natural-language description — Creator Mode reads that
+  reference directly instead of routing to a per-component skill.
 </Aside>
 
 ## How it works
