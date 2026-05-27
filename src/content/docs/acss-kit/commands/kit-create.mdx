@@ -24,7 +24,7 @@ import { Aside } from "@astrojs/starlight/components";
 
 ## Supported components
 
-Any component with a dedicated reference doc under `plugins/acss-kit/skills/components/references/components/`:
+Any component with a dedicated per-component skill at `plugins/acss-kit/skills/component-<name>/` (introduced in v1.2.0):
 
 | Group       | Components                   |
 | ----------- | ---------------------------- |
@@ -36,13 +36,15 @@ Any component with a dedicated reference doc under `plugins/acss-kit/skills/comp
 | Collections | List, Table, Nav             |
 
 <Aside type="caution">
-  Badge, Tag, Heading, Text/Paragraph, Details, and Progress are catalogue-only
-  and not yet supported by `/kit-create`. Use `/kit-add` for those.
+  Badge, Tag, Heading, Text/Paragraph, Details, and Progress exist only as
+  inline entries in `kit-core/references/inline-components.md` and are **not**
+  supported by `/kit-create` in v0.1. Promote them via the
+  `/acss-kit-component-author` maintainer skill first.
 </Aside>
 
 ## How it works
 
-The Creator Mode workflow lives in the `## Creator Mode` section of `skills/components/SKILL.md` (steps CM-0 through CM-G):
+The Creator Mode workflow lives in the `## Creator Mode` section of `skills/kit-core/SKILL.md` (updated from `skills/components/SKILL.md` in v1.2.0):
 
 1. **Parse the description** against the component's reference doc and prop vocabulary.
 2. **Resolve the components directory** via `detect_target.py` and bootstrap missing dependencies through `/kit-add` if needed.
@@ -87,6 +89,6 @@ The skill explicitly refuses to:
 
 ## Related
 
-- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — generates the catalogue source files
-- [`components` skill](/acss-plugins-docs/acss-kit/skills/components) — Creator Mode and Form Mode live in this skill
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — generates the component source files
+- [`kit-core skill`](/acss-plugins-docs/acss-kit/skills/kit-core) — Creator Mode and Form Mode live in this skill (renamed from `components` skill in v1.2.0)
 - [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

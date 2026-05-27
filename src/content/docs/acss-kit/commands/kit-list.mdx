@@ -35,36 +35,44 @@ Inspect a specific component:
 /kit-list card
 ```
 
+## How `/kit-list` works
+
+As of v1.2.0, component inventory is sourced from per-component skills only — `catalog.md` has been removed. The command globs `skills/component-*/SKILL.md` and reads the `name:` and `description:` frontmatter from each. Lowercase the argument before lookup (e.g. `/kit-list Button` → looks for `button`).
+
+The full workflow is documented in the [`kit-core skill`](/acss-plugins-docs/acss-kit/skills/kit-core).
+
 ## Output: full catalogue
 
-Without a component name, `/kit-list` prints every available component organized by category. Components whose static-HTML output has been **Verified** are marked `[HTML]` — use `/kit-add --target=html` to generate them:
+Without a component name, `/kit-list` prints every available component organized by category. The 15 per-component skills are:
 
 ```
-Available Components (acss-kit)
+Available Components (acss-kit v1.2)
 
-Simple (no dependencies):
-  badge       — Status indicator with count or text
-  tag         — Categorical label with optional removal
-  heading     — Semantic heading (h1-h6) with styles
-  text        — Inline/block text with variants
+Leaf components (no dependencies):
+  alert       — Accessible status/error/info/warning notification with ARIA live regions
+  button      — Accessible button with primary/secondary/destructive/ghost variants
+  card        — Content container with header/body/footer slots
+  field       — Form field wrapper with label, hint, and error association
+  icon        — SVG icon wrapper with decorative/semantic modes
+  img         — Accessible image with required alt and aspect-ratio containment
+  input       — Text/number/email input with aria-invalid and error state
+  link        — Anchor with external/new-tab detection and current-page indication
+  list        — Ordered/unordered list with role="list" reset
+  nav         — Navigation landmark with aria-label and current-page marking
+  popover     — Popover API popover with focus trap and light-dismiss
+  table       — Data table with caption, scope headers, and sortable columns
 
-Interactive (useDisabledState pattern):
-  button      — Primary interactive element (all variants)              [HTML]
-  link        — Accessible anchor with hover/visited states
+Components with dependencies:
+  checkbox    — Checkbox with indeterminate state (depends on: input)
+  dialog      — Modal dialog with focus trap (depends on: button)
+  icon-button — Icon-only button with required aria-label (depends on: button)
 
-Layout:
-  card        — Compound component (Card.Title, Card.Content, Card.Footer)  [HTML]
-  nav         — Navigation landmark with compound Nav.List, Nav.Item
+Inline-only (no dedicated skill):
+  badge, tag, heading, text/paragraph, details, progress
+  → Use /kit-create to generate these from a natural-language description.
 
-Complex (multiple dependencies):
-  alert       — Severity-aware notification (needs icon)                 [HTML]
-  dialog      — Modal dialog with focus trap (needs button, icon)        [HTML]
-  form        — Form controls (input, textarea, select, checkbox, toggle)
-
-Run /kit-add <component> to generate React components, or /kit-add --target=html <component> for static HTML versions of the [HTML]-marked entries.
+Run /kit-add <component> to generate React components.
 ```
-
-Components without `[HTML]` exist as React only — `/kit-add --target=html` will warn if you try to generate them.
 
 ## Output: component inspect
 

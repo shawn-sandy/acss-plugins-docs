@@ -1,0 +1,53 @@
+---
+title: component-field skill
+description: Generates an fpkit-style accessible Field component — form field wrapper with label, hint, and error message association via aria-describedby.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-field` skill generates a self-contained accessible Field component directly into a developer's project. It is invoked via `/kit-add field` or `/kit-create` (then ask for a field).
+
+<Aside type="note">
+  This skill was added in acss-kit v1.2.0. It sets `disable-model-invocation:
+  true` so it stays out of session auto-context. Invoke it explicitly via
+  `/kit-add field`, `/kit-create`, or by calling `component-field` by name.
+</Aside>
+
+|                  |                                                                                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add field`, `/kit-create` (field description), direct `component-field` skill name                                           |
+| **Output**       | `field.tsx` + `field.module.scss`                                                                                                  |
+| **Dependencies** | None (leaf component)                                                                                                              |
+| **Hint**         | Describe the label, hint text, error message, required flag, and which child input control (input/checkbox/select) the field wraps |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md` to initialize it before generating this component.
+
+3. **Dependencies** — Field has no upstream dependencies. Skip dep resolution.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/field.tsx` from the `## TSX Template` section
+   - `<targetDir>/field.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary.
+
+</Steps>
+
+## Accessibility
+
+- `<label>` is always rendered and associated with the child input via `htmlFor`/`id` pairing.
+- Hint text and error message are associated via `aria-describedby`.
+- `aria-required` and `aria-invalid` propagate to the child control when `required` or `error` props are set.
+- Error message uses `role="alert"` so screen readers announce it immediately when it appears.
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — invokes this skill
+- [`component-input skill`](/acss-plugins-docs/acss-kit/skills/component-input) — typical child control
+- [`component-checkbox skill`](/acss-plugins-docs/acss-kit/skills/component-checkbox) — alternative child control
+- [`kit-core skill`](/acss-plugins-docs/acss-kit/skills/kit-core) — shared init and orchestration

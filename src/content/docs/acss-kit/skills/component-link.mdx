@@ -1,0 +1,52 @@
+---
+title: component-link skill
+description: Generates an fpkit-style accessible Link component — anchor with external/new-tab detection, aria-label injection, and current-page indication.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-link` skill generates a self-contained accessible Link component directly into a developer's project. It is invoked via `/kit-add link` or `/kit-create` (then ask for a link).
+
+<Aside type="note">
+  This skill was added in acss-kit v1.2.0. It sets `disable-model-invocation:
+  true` so it stays out of session auto-context. Invoke it explicitly via
+  `/kit-add link`, `/kit-create`, or by calling `component-link` by name.
+</Aside>
+
+|                  |                                                                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add link`, `/kit-create` (link description), direct `component-link` skill name                                                   |
+| **Output**       | `link.tsx` + `link.module.scss`                                                                                                         |
+| **Dependencies** | None (leaf component)                                                                                                                   |
+| **Hint**         | Describe the href, the link text, whether it opens in a new tab/external (so rel and aria-label can be set), and any current-page state |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md` to initialize it before generating this component.
+
+3. **Dependencies** — Link has no upstream dependencies. Skip dep resolution.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/link.tsx` from the `## TSX Template` section
+   - `<targetDir>/link.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary.
+
+</Steps>
+
+## Accessibility
+
+- External links automatically receive `rel="noopener noreferrer"` and an `aria-label` suffix indicating they open in a new tab (e.g. `"Visit example.com (opens in new tab)"`).
+- `aria-current="page"` applied when the `current` prop is set, indicating the current page in navigation contexts.
+- `:focus-visible` outline preserved in SCSS using `--color-focus-ring`.
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — invokes this skill
+- [`component-nav skill`](/acss-plugins-docs/acss-kit/skills/component-nav) — navigation landmark that uses Link internally
+- [`kit-core skill`](/acss-plugins-docs/acss-kit/skills/kit-core) — shared init and orchestration
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

@@ -1,0 +1,53 @@
+---
+title: component-icon skill
+description: Generates an fpkit-style accessible Icon component — SVG icon wrapper with aria-hidden/aria-label toggle, size variants, and decorative/semantic modes.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-icon` skill generates a self-contained accessible Icon component directly into a developer's project. It is invoked via `/kit-add icon` or `/kit-create` (then ask for an icon).
+
+<Aside type="note">
+  This skill was added in acss-kit v1.2.0. It sets `disable-model-invocation:
+  true` so it stays out of session auto-context. Invoke it explicitly via
+  `/kit-add icon`, `/kit-create`, or by calling `component-icon` by name.
+</Aside>
+
+|                  |                                                                                                                                                          |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add icon`, `/kit-create` (icon description), direct `component-icon` skill name                                                                    |
+| **Output**       | `icon.tsx` (no SCSS — renders via CSS custom properties on the host element)                                                                             |
+| **Dependencies** | None (leaf component)                                                                                                                                    |
+| **Hint**         | Describe the icon source (name or SVG path), the size, whether it is decorative (aria-hidden) or semantic (aria-label), and any color or stroke override |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the skill directory for the canonical TSX template, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md` to initialize it before generating this component.
+
+3. **Dependencies** — Icon has no upstream dependencies. Skip dep resolution.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/icon.tsx` from the `## TSX Template` section
+   - Icon has no SCSS template — it renders via CSS custom properties on the host element.
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary.
+
+</Steps>
+
+## Decorative vs semantic mode
+
+| Mode       | Props                       | Accessibility                                    |
+| ---------- | --------------------------- | ------------------------------------------------ |
+| Decorative | No `aria-label`             | `aria-hidden="true"` — screen readers skip it    |
+| Semantic   | `aria-label="..."` required | `role="img"` — screen readers announce the label |
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — invokes this skill
+- [`component-icon-button skill`](/acss-plugins-docs/acss-kit/skills/component-icon-button) — icon-only button built on Button + Icon patterns
+- [`kit-core skill`](/acss-plugins-docs/acss-kit/skills/kit-core) — shared init and orchestration
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

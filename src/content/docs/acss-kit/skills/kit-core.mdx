@@ -1,0 +1,112 @@
+---
+title: kit-core skill
+description: Internal orchestrator for /kit-create, /kit-list, /kit-sync, /kit-update and Form/HTML/Style-Tune modes. Per-component generation lives in component-<name> skills.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+The `kit-core` skill is the orchestrator for `/kit-create`, `/kit-list`, `/kit-sync`, `/kit-update`, and Form/HTML/Style-Tune modes. Per-component generation was extracted into dedicated `component-<name>` skills in acss-kit v1.2.0.
+
+<Aside type="note">
+  In acss-kit v1.2.0, the monolithic `skills/components/` directory was renamed
+  to `skills/kit-core/` and scoped to orchestration duties. The fifteen
+  per-component skills (`component-alert`, `component-button`, etc.) now handle
+  all component generation. See the [Component Skills](#component-skills)
+  section below for the full list.
+</Aside>
+
+|                     |                                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Triggered by**    | `/kit-create`, `/kit-list`, `/kit-sync`, `/kit-update` plus Form Mode and HTML/Style-Tune mode phrases |
+| **Does not handle** | Per-component `/kit-add <name>` requests — those route to `component-<name>` skills directly           |
+| **Version**         | `0.4.0`                                                                                                |
+
+## Purpose
+
+`kit-core` generates self-contained, production-quality React components from markdown specs. The developer owns the generated code and can freely modify it. Components use local imports — never `@fpkit/acss`.
+
+## Prerequisites
+
+- React + TypeScript project
+- `sass` or `sass-embedded` in `devDependencies`
+
+## Component skills
+
+As of v1.2.0, each component has its own dedicated skill with `disable-model-invocation: true` (so it stays out of auto-context) and a `reference.md` that embeds the canonical TSX/SCSS templates:
+
+| Skill                                                                               | Invocation             | Dependencies |
+| ----------------------------------------------------------------------------------- | ---------------------- | ------------ |
+| [`component-alert`](/acss-plugins-docs/acss-kit/skills/component-alert)             | `/kit-add alert`       | none         |
+| [`component-button`](/acss-plugins-docs/acss-kit/skills/component-button)           | `/kit-add button`      | none         |
+| [`component-card`](/acss-plugins-docs/acss-kit/skills/component-card)               | `/kit-add card`        | none         |
+| [`component-checkbox`](/acss-plugins-docs/acss-kit/skills/component-checkbox)       | `/kit-add checkbox`    | input        |
+| [`component-dialog`](/acss-plugins-docs/acss-kit/skills/component-dialog)           | `/kit-add dialog`      | button       |
+| [`component-field`](/acss-plugins-docs/acss-kit/skills/component-field)             | `/kit-add field`       | none         |
+| [`component-icon`](/acss-plugins-docs/acss-kit/skills/component-icon)               | `/kit-add icon`        | none         |
+| [`component-icon-button`](/acss-plugins-docs/acss-kit/skills/component-icon-button) | `/kit-add icon-button` | button       |
+| [`component-img`](/acss-plugins-docs/acss-kit/skills/component-img)                 | `/kit-add img`         | none         |
+| [`component-input`](/acss-plugins-docs/acss-kit/skills/component-input)             | `/kit-add input`       | none         |
+| [`component-link`](/acss-plugins-docs/acss-kit/skills/component-link)               | `/kit-add link`        | none         |
+| [`component-list`](/acss-plugins-docs/acss-kit/skills/component-list)               | `/kit-add list`        | none         |
+| [`component-nav`](/acss-plugins-docs/acss-kit/skills/component-nav)                 | `/kit-add nav`         | none         |
+| [`component-popover`](/acss-plugins-docs/acss-kit/skills/component-popover)         | `/kit-add popover`     | none         |
+| [`component-table`](/acss-plugins-docs/acss-kit/skills/component-table)             | `/kit-add table`       | none         |
+
+### Inline-only components
+
+Six components live as inline entries in `kit-core/references/inline-components.md` and are not supported via `/kit-add` as standalone skills: Badge, Tag, Heading, Text/Paragraph, Details, Progress. Promote them via the `/acss-kit-component-author` maintainer skill to create a dedicated per-component skill.
+
+## First-run initialization (Step A)
+
+`kit-core` performs a shared init check that each component skill invokes via `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md`:
+
+1. **Detect project type** — reads `tsconfig.json` and `package.json` to confirm React + TypeScript.
+2. **Check sass** — looks for `sass` or `sass-embedded` in `devDependencies`.
+3. **Detect package manager** — reads lockfiles (`pnpm-lock.yaml`, `yarn.lock`, `bun.lock`, `package-lock.json`).
+4. **Write `.acss-target.json`** — records `componentsDir`, `stack`, and `cssEntryFile`.
+5. **Foundation CSS install matrix**:
+
+| Project state                                                | Action                                      |
+| ------------------------------------------------------------ | ------------------------------------------- |
+| No `ui.tsx` + no `foundation.css` (fresh install)            | Copy both + `sass/` tree; print import hint |
+| `ui.tsx` present, `foundation.css` absent (existing install) | Prompt before copying                       |
+| Both present                                                 | Skip silently (idempotent)                  |
+
+## Creator Mode
+
+When `/kit-create` is invoked, `kit-core` runs Creator Mode:
+
+1. **Dispatch** — match the component noun against `skills/component-<name>/`. Halt if no match.
+2. **Parse** — load the matched `reference.md`, read its Props Interface, and resolve user phrases against the prop set.
+3. **Resolve target** — `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py` to locate `componentsDir`.
+4. **Vendor** — run `/kit-add <component> [...dependencies]` if any are missing.
+5. **Validate** — generic rules plus any per-reference-doc `## Generation Notes — Creator Mode` rules.
+6. **Choose mode** — snippet (default) or standalone file.
+7. **Generate** — emit JSX with only the props the description resolved.
+8. **Summarise** — print resolved spec, deferred sub-components, and a "Refine" prompt.
+
+## Form Mode
+
+Form-shaped requests ("create a signup form with email and password") route to Form Mode inside `kit-core`. Form Mode generates a form component by composing Input, Field, Checkbox, and Button components bottom-up.
+
+## References
+
+The `kit-core/references/` directory holds shared reference documents:
+
+| File                   | Purpose                                                     |
+| ---------------------- | ----------------------------------------------------------- |
+| `accessibility.md`     | ARIA patterns, focus management rules                       |
+| `architecture.md`      | Component composition and layer architecture                |
+| `composition.md`       | Slot patterns and compound component conventions            |
+| `css-variables.md`     | CSS custom property naming and fallback strategy            |
+| `form.md`              | Form component reference                                    |
+| `foundation.md`        | `ui.tsx` polymorphic base component spec                    |
+| `inline-components.md` | Badge, Tag, Heading, Text, Details, Progress inline entries |
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — per-component generation
+- [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) — Creator Mode
+- [`/kit-list`](/acss-plugins-docs/acss-kit/commands/kit-list) — component catalogue
+- [`/kit-sync`](/acss-plugins-docs/acss-kit/commands/kit-sync) — bulk install
+- [`components skill`](/acss-plugins-docs/acss-kit/skills/components) — predecessor (v0.x–v1.1)
