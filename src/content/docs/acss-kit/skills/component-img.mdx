@@ -1,0 +1,52 @@
+---
+title: component-img skill
+description: Generates an fpkit-style accessible Img component — required alt, lazy-loading, aspect-ratio containment, and decorative mode.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-img` skill generates a self-contained accessible Img component directly into a developer's project. It is invoked via `/kit-add img` or `/kit-create` (then ask for an image).
+
+<Aside type="note">
+  This skill was added in acss-kit v1.2.0. It sets `disable-model-invocation:
+  true` so it stays out of session auto-context. Invoke it explicitly via
+  `/kit-add img`, `/kit-create`, or by calling `component-img` by name.
+</Aside>
+
+|                  |                                                                                                                                            |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Triggered by** | `/kit-add img`, `/kit-create` (image description), direct `component-img` skill name                                                       |
+| **Output**       | `img.tsx` + `img.module.scss`                                                                                                              |
+| **Dependencies** | None (leaf component)                                                                                                                      |
+| **Hint**         | Describe the src, the alt text (or mark decorative), the aspect ratio, lazy vs eager loading, and any srcset/sizes for responsive variants |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md` to initialize it before generating this component.
+
+3. **Dependencies** — Img has no upstream dependencies. Skip dep resolution.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/img.tsx` from the `## TSX Template` section
+   - `<targetDir>/img.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary.
+
+</Steps>
+
+## Accessibility
+
+- `alt` is required for informative images — the skill halts if it is missing and the image is not marked decorative.
+- Decorative images pass `alt=""` and `role="presentation"` to suppress screen reader announcement.
+- `loading="lazy"` is the default; pass `loading="eager"` for above-the-fold images.
+- Aspect-ratio containment via CSS prevents layout shift while the image loads.
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — invokes this skill
+- [`kit-core skill`](/acss-plugins-docs/acss-kit/skills/kit-core) — shared init and orchestration
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

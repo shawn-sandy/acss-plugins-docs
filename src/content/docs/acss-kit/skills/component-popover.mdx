@@ -1,0 +1,52 @@
+---
+title: component-popover skill
+description: Generates an fpkit-style accessible Popover component — tooltip/popover using the Popover API with focus trap, aria-expanded, and light-dismiss.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-popover` skill generates a self-contained accessible Popover component directly into a developer's project. It is invoked via `/kit-add popover` or `/kit-create` (then ask for a popover).
+
+<Aside type="note">
+  This skill was added in acss-kit v1.2.0. It sets `disable-model-invocation:
+  true` so it stays out of session auto-context. Invoke it explicitly via
+  `/kit-add popover`, `/kit-create`, or by calling `component-popover` by name.
+</Aside>
+
+|                  |                                                                                                                                        |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add popover`, `/kit-create` (popover description), direct `component-popover` skill name                                         |
+| **Output**       | `popover.tsx` + `popover.module.scss`                                                                                                  |
+| **Dependencies** | None (leaf component)                                                                                                                  |
+| **Hint**         | Describe the trigger element, the popover content, anchor/positioning, and whether light-dismiss and focus-trap behaviour are required |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md` to initialize it before generating this component.
+
+3. **Dependencies** — Popover has no upstream dependencies. Skip dep resolution.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/popover.tsx` from the `## TSX Template` section
+   - `<targetDir>/popover.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary.
+
+</Steps>
+
+## Accessibility
+
+- Uses the [Popover API](https://developer.mozilla.org/en-US/docs/Web/API/Popover_API) (`popover` attribute) for native browser light-dismiss and top-layer stacking.
+- `aria-expanded` on the trigger button reflects the open/closed state.
+- Focus trap: when `focusTrap` prop is set, Tab/Shift+Tab cycles within the popover content.
+- `aria-haspopup` on the trigger describes the control type to assistive technologies.
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — invokes this skill
+- [`kit-core skill`](/acss-plugins-docs/acss-kit/skills/kit-core) — shared init and orchestration
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

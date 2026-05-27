@@ -1,0 +1,78 @@
+---
+title: component-button skill
+description: Generates an fpkit-style accessible Button component — primary/secondary/destructive variants with a11y and aria-disabled pattern.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-button` skill generates a self-contained accessible Button component directly into a developer's project. It is invoked via `/kit-add button` or `/kit-create` (then ask for a button).
+
+<Aside type="note">
+  This skill was added in acss-kit v1.2.0. It sets `disable-model-invocation:
+  true` so it stays out of session auto-context. Invoke it explicitly via
+  `/kit-add button`, `/kit-create`, or by calling `component-button` by name.
+</Aside>
+
+|                  |                                                                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add button`, `/kit-create` (button description), direct `component-button` skill name                                             |
+| **Output**       | `button.tsx` + `button.module.scss`                                                                                                     |
+| **Dependencies** | None (leaf component)                                                                                                                   |
+| **Hint**         | Describe the variant (primary/secondary/destructive/ghost), size, state (loading/disabled), and any leading/trailing icon or aria-label |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md` to initialize it before generating this component.
+
+3. **Dependencies** — Button has no upstream dependencies. Skip dep resolution.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/button.tsx` from the `## TSX Template` section
+   - `<targetDir>/button.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary.
+
+</Steps>
+
+## Variants
+
+Button supports the following variants via a `variant` prop:
+
+| Value                    | Description                                |
+| ------------------------ | ------------------------------------------ |
+| `primary`                | Filled background, high contrast (default) |
+| `secondary`              | Outlined or lower-emphasis                 |
+| `destructive` / `danger` | Red destructive action                     |
+| `ghost`                  | No background, text-only                   |
+
+## Accessibility
+
+- Uses `aria-disabled="true"` instead of the native `disabled` attribute, keeping the element focusable (WCAG 2.1.1).
+- `aria-busy` on the loading state.
+- `useDisabledState` hook ensures click handlers are suppressed when `aria-disabled` is true.
+- JSDoc annotations are embedded in the generated TSX template for AI-assistant and IDE support (added v1.2.0).
+
+## CSS tokens
+
+All button styles use `--btn-*` custom properties with hardcoded fallbacks:
+
+```css
+--btn-bg          /* background color */
+--btn-color       /* text color */
+--btn-border      /* border color */
+--btn-radius      /* border radius */
+--btn-padding-x   /* horizontal padding */
+--btn-padding-y   /* vertical padding */
+```
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — invokes this skill
+- [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) — Creator Mode for natural-language buttons
+- [`component-icon-button skill`](/acss-plugins-docs/acss-kit/skills/component-icon-button) — icon-only button (depends on this skill)
+- [`component-dialog skill`](/acss-plugins-docs/acss-kit/skills/component-dialog) — also depends on this skill
+- [`kit-core skill`](/acss-plugins-docs/acss-kit/skills/kit-core) — shared init and orchestration

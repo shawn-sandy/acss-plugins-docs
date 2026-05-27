@@ -1,0 +1,54 @@
+---
+title: component-dialog skill
+description: Generates an fpkit-style accessible Dialog component — modal dialog with focus trap, aria-modal, return-focus on close, and Button dependency.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-dialog` skill generates a self-contained accessible Dialog component directly into a developer's project. It is invoked via `/kit-add dialog` or `/kit-create` (then ask for a dialog).
+
+<Aside type="note">
+  This skill was added in acss-kit v1.2.0. It sets `disable-model-invocation:
+  true` so it stays out of session auto-context. Invoke it explicitly via
+  `/kit-add dialog`, `/kit-create`, or by calling `component-dialog` by name.
+</Aside>
+
+|                  |                                                                                                                               |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add dialog`, `/kit-create` (dialog description), direct `component-dialog` skill name                                   |
+| **Output**       | `dialog.tsx` + `dialog.module.scss`                                                                                           |
+| **Dependencies** | `button` — generates Button first if missing                                                                                  |
+| **Hint**         | Describe the title, modal vs non-modal, the trigger element, the body content, and any footer action buttons (confirm/cancel) |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md` to initialize it before generating this component.
+
+3. **Dependencies** — Dialog depends on `button`. Before generating Dialog, check whether `<targetDir>/button.tsx` already exists. If missing, invoke the `component-button` skill first, then continue.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/dialog.tsx` from the `## TSX Template` section
+   - `<targetDir>/dialog.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary.
+
+</Steps>
+
+## Accessibility
+
+- Uses the native `<dialog>` element with `showModal()` for true modal behavior.
+- `aria-modal="true"` and `aria-labelledby` wired to the dialog title.
+- Focus trap implemented — Tab/Shift+Tab cycles within the dialog.
+- Return focus to the trigger element on close.
+- Backdrop click and Escape key close the dialog.
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — invokes this skill
+- [`component-button skill`](/acss-plugins-docs/acss-kit/skills/component-button) — required dependency
+- [`kit-core skill`](/acss-plugins-docs/acss-kit/skills/kit-core) — shared init and orchestration
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)

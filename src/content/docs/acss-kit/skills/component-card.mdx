@@ -1,0 +1,61 @@
+---
+title: component-card skill
+description: Generates an fpkit-style accessible Card component — content container with header/body/footer slots and interactive variant support.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `component-card` skill generates a self-contained accessible Card component directly into a developer's project. It is invoked via `/kit-add card` or `/kit-create` (then ask for a card).
+
+<Aside type="note">
+  This skill was added in acss-kit v1.2.0. It sets `disable-model-invocation:
+  true` so it stays out of session auto-context. Invoke it explicitly via
+  `/kit-add card`, `/kit-create`, or by calling `component-card` by name.
+</Aside>
+
+|                  |                                                                                                                                                      |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by** | `/kit-add card`, `/kit-create` (card description), direct `component-card` skill name                                                                |
+| **Output**       | `card.tsx` + `card.module.scss`                                                                                                                      |
+| **Dependencies** | None (leaf component)                                                                                                                                |
+| **Hint**         | Describe which slots you need (header/body/footer/media), whether the card is interactive (link or button wrapper), and any elevation/border styling |
+
+## Workflow
+
+<Steps>
+
+1. **Read** `reference.md` in the skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+
+2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md` to initialize it before generating this component.
+
+3. **Dependencies** — Card has no upstream dependencies. Skip dep resolution.
+
+4. **Generate** — apply the Generation Contract from `reference.md` to produce:
+   - `<targetDir>/card.tsx` from the `## TSX Template` section
+   - `<targetDir>/card.module.scss` from the `## SCSS Template` section
+
+5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary.
+
+</Steps>
+
+## Slots
+
+Card is a compound component with optional named slots:
+
+| Slot     | Element       | Notes                           |
+| -------- | ------------- | ------------------------------- |
+| `header` | `Card.Header` | Optional title/subtitle area    |
+| `body`   | `Card.Body`   | Primary content                 |
+| `footer` | `Card.Footer` | Actions or supplemental content |
+| `media`  | `Card.Media`  | Image/video above the header    |
+
+## Interactive variant
+
+When the card wraps a link or acts as a button, the interactive variant adds keyboard activation, `role="button"` or an `<a>` wrapper, and focus styles — ensuring the entire card surface is accessible without trapping inner links.
+
+## Related
+
+- [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) — invokes this skill
+- [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create) — Creator Mode for natural-language cards
+- [`kit-core skill`](/acss-plugins-docs/acss-kit/skills/kit-core) — shared init and orchestration
+- [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue)
