@@ -1,17 +1,25 @@
 ---
 title: inline-style-to-class skill
-description: How the inline-style-to-class skill parses inline styles, discovers the project stylesheet, and appends a named CSS class to it.
+description: How the inline-style-to-class skill parses inline styles, discovers the project stylesheet, tokenizes values to CSS variables, and appends a named CSS class to it.
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
 
-The `inline-style-to-class` skill drives [`/inline-style-to-class`](/acss-plugins-docs/style-agent/commands/inline-style-to-class). It owns all the behavior described in that command — input parsing, name generation, stylesheet discovery, class emission, file append, source refactoring, and summary output. The command is a thin shell that delegates everything here.
+The `inline-style-to-class` skill drives [`/inline-style-to-class`](/acss-plugins-docs/style-agent/commands/inline-style-to-class). It owns all the behavior described in that command — input parsing, name generation, stylesheet and variable discovery, value tokenizing, class emission, variable declaration, file append, source refactoring, and summary output. The command is a thin shell that delegates everything here.
 
-|                   |                                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------------ |
-| **Triggered by**  | `/inline-style-to-class`                                                                               |
-| **Allowed tools** | `Read`, `Glob`, `Grep`, `Bash`, `Write`, `Edit`, `AskUserQuestion`                                     |
-| **Output**        | A named CSS class appended to the project stylesheet + refactored source with the inline style removed |
+<Aside type="note">
+  As of style-agent v0.4.0, every concrete value in the migrated declarations is
+  replaced with a CSS variable. Existing project variables are reused when a
+  value matches; new variables are created and declared when none does. The
+  original literal is kept as the `var()` fallback so the class renders even
+  when the variable is absent.
+</Aside>
+
+|                   |                                                                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Triggered by**  | `/inline-style-to-class`                                                                                                     |
+| **Allowed tools** | `Read`, `Glob`, `Grep`, `Bash`, `Write`, `Edit`, `AskUserQuestion`                                                           |
+| **Output**        | A named CSS class (with tokenized values) appended to the project stylesheet + new variable declarations + refactored source |
 
 ## Input forms
 
@@ -57,34 +65,81 @@ From the matches, the skill detects syntax flavor (`.css`, `.scss`, `.sass`), in
 
 **Selection:** exactly one candidate → use it. Multiple candidates with one clear entry file named `globals`, `main`, `index`, `styles`, `app`, or `base` → use that one. Otherwise prompt with `AskUserQuestion`. No stylesheet found → emit the CSS block to chat only.
 
+## Variable discovery
+
+Run this alongside Stylesheet discovery so the class can be tokenized.
+
+1. **Collect existing variables.** Across the same glob set (same excludes), grep every custom-property declaration with `^\s*(--[A-Za-z0-9_-]+)\s*:\s*([^;\n]+);?` — the identifier class allows uppercase and underscores (custom-property names are case-sensitive), and the trailing `;` is optional so semicolon-less `.sass` declarations are still captured. Build a **reverse map** of _normalised value → variable name_. This map drives reuse — when a migrated value matches, reference the existing variable instead of creating one.
+2. **Detect the naming convention per value category.** Inspect the discovered names to infer the project's prefix for each category — e.g. colors as `--color-*` vs `--clr-*` vs `--c-*`; spacing as `--space-*` vs `--spacing-*` vs `--size-*`. Use the detected prefix when creating new variables. If a category has no precedent, fall back to the default semantic prefix (see [Naming new variables](#naming-new-variables) below).
+3. **Locate the declaration target** for new variables, in priority order:
+   - A dedicated tokens/variables file already in the project: `tokens.{css,scss,sass}`, `variables.{css,scss,sass}`, or `_variables.{scss,sass}`.
+   - An existing `:root { }` block (preferring an entry file named `globals`, `main`, `index`, `styles`, `app`, or `base`).
+   - Otherwise: the target stylesheet chosen in Stylesheet discovery — a new `:root { }` block is created at the top.
+
+## Value tokenizing rules
+
+Every concrete value is replaced with a variable. Reuse always wins over creation.
+
+1. **Classify the value:**
+   - **color** — `#hex` (3 or 6 digit), `rgb()`/`rgba()`, `hsl()`/`hsla()`, or a named color.
+   - **length / dimension** — a number with a unit (`px`, `rem`, `em`, `%`, `vh`, `vw`, `ch`, …).
+   - **radius / font-size / shadow / z-index** — recognised from the property name (`border-radius`, `font-size`, `box-shadow`, `z-index`).
+   - **keyword** — a bare identifier such as `flex`, `block`, `none`, `auto`, `center`.
+   - **other** — anything else concrete (e.g. multi-value shorthands); tokenize the whole value as one unit.
+2. **Normalise for matching:** for hex colors, lowercase and expand 3-digit to 6-digit; for every value, collapse internal whitespace to single spaces. Do **not** lowercase the value as a whole — preserve case for `url(...)` paths, quoted strings, and case-sensitive identifiers. Matching is **exact on the normalised form only** — values are never converted across color formats (no hex↔rgb↔hsl) and units are never converted (`16px` ≠ `1rem`). Note this limitation in the summary when relevant.
+3. **Skip (do not tokenize):**
+   - Values already a `var(...)` reference (trimmed value begins with `var(`) — pass through unchanged.
+   - Unresolved JSX expressions — emit `<property>: /* unresolved — was JS expression */` in the output class.
+4. **Dedupe within a run:** the same normalised value resolves to one variable. A variable created earlier in the same run is reused for later occurrences rather than created twice.
+
+### Naming new variables
+
+When no existing variable matches, create one using the project's detected prefix for the value's category. If there is no precedent, use the default semantic template:
+
+| Category            | Default prefix       | Example                  |
+| ------------------- | -------------------- | ------------------------ |
+| color               | `--color-*`          | `--color-1`, `--color-2` |
+| length / spacing    | `--space-*`          | `--space-1-5rem`         |
+| size (width/height) | `--size-*`           | `--size-320px`           |
+| radius              | `--radius-*`         | `--radius-md`            |
+| font-size           | `--font-size-*`      | `--font-size-lg`         |
+| shadow              | `--shadow-*`         | `--shadow-card`          |
+| z-index             | `--z-*`              | `--z-modal`              |
+| keyword             | `--<property>-<val>` | `--display-flex`         |
+
+**Sanitise** the candidate to a valid custom-property identifier: lowercase, replace `.` and spaces with `-`, strip characters not in `[a-z0-9-]`, collapse consecutive hyphens (e.g. `1.5rem` → `--space-1-5rem`). **Collision handling:** if the name already exists with a different value, append `-2`, `-3`, … until unique.
+
 ## Workflow
 
 <Steps>
 
 1. **Parse input.** Detect the input form:
    - **HTML inline attribute** — match `style="..."` or `style='...'`; split on `;`; parse `property: value` pairs. Extract the surrounding element tag if present.
-   - **JSX style object** — match `style={{...}}`; extract the object literal body; convert camelCase keys to kebab-case. Numeric literal values get a "verify unit" warning. JS expression values become `/* unresolved: <expr> */` placeholders.
+   - **JSX style object** — match `style={{...}}`; extract the object literal body; split key/value pairs. Convert each camelCase key to kebab-case. For numeric literal values, emit a "verify unit" warning. For JS expression values that cannot be resolved, emit `<property>: /* unresolved — was JS expression */` in the output class.
    - **`<style>` block** — extract content between `<style>` and `</style>`; parse rules. If multiple rules are present, ask via `AskUserQuestion` whether to merge all declarations or pick a specific rule.
 
 2. **Determine the class name.** Apply the name rules. Use the `[name]` argument if provided. Otherwise apply the auto-name algorithm. If the generated name is ambiguous or 3 characters or fewer, ask via `AskUserQuestion` with the suggestion pre-filled.
 
-3. **Discover the target stylesheet.** Follow the stylesheet discovery process. Confirm the chosen file with the user only when the choice is ambiguous.
+3. **Discover the target stylesheet and existing variables.** Follow the Stylesheet discovery and Variable discovery processes. Confirm the chosen file with the user only when the choice is ambiguous.
 
 4. **Build the CSS class block.** Emit using the detected syntax flavor and indentation:
    - Comment header: `/* from: <source summary> */` (e.g. `"style attr on <div>"`, `"JSX style object"`, `"<style> block"`).
    - One property per line.
-   - Unresolved JSX expressions: `/* <property>: unresolved — was JS expression */`.
-   - Numeric values without units: preserve the value and append `/* verify unit */` inline.
+   - **Tokenize every value** via the Value tokenizing rules: reuse a matching existing variable or create a new one, then emit `property: var(--name, <original-literal>);` with the original literal kept as the fallback. Skip values that are already `var(...)` references and unresolved expressions.
+   - Unresolved JSX expressions: emit as `<property>: /* unresolved — was JS expression */`.
+   - Numeric values without units: tokenize but append a `/* verify unit */` inline comment.
    - For Sass-indented (`.sass`) syntax, omit braces and use the detected indentation.
 
-5. **Append to the target stylesheet.** Use `Edit` to append the class block, preceded by one blank line. Preserve any trailing newline the file already had.
+5. **Declare new variables.** For each variable created in step 4, write its `--name: value;` declaration to the target located in Variable discovery. Match the file's detected syntax flavor, indentation, and trailing-newline convention. Reused (already-existing) variables are not re-declared.
 
-6. **Emit refactored source.** Produce a clean version of the original input with the inline style removed:
-   - **HTML** — remove the `style="..."` attribute entirely if all declarations migrated; if some were unresolved, keep only unmigrated declarations in the attribute. Add the new class to the existing `class` attribute (or create one). Preserve all other attributes unchanged.
+6. **Append to the target stylesheet.** Use `Edit` to append the class block, preceded by one blank line. Preserve any trailing newline the file already had.
+
+7. **Emit refactored source.** Produce a clean version of the original input with the inline style removed:
+   - **HTML** — remove the `style="..."` attribute entirely if all declarations migrated; if some were unresolved, keep only unmigrated declarations in the attribute. Add the new class to the existing `class` attribute (or create one). Preserve all other attributes unchanged (`data-*`, `id`, `aria-*`).
    - **JSX** — same logic using `className`. Partially-migrated objects preserve remaining key/value pairs in the style prop.
    - **`<style>` block** — emit `/* rule moved to .<name> in <stylesheet path> */`; do not rewrite the `<style>` block automatically.
 
-7. **Print a summary.** Reports: class name (provided or auto-generated), any coercion warnings, target stylesheet path and confirmation of append (or a note if no file was found), declaration count migrated, unresolved JS expression count, and numeric-value unit warnings.
+8. **Print a summary.** Reports: class name (provided or auto-generated), any coercion warnings, target stylesheet path and confirmation of append (or a note if no file was found), declaration count migrated, variables reused (each `value → --name`), variables created (each `--name: value` and the file it was declared in), unresolved JS expression count, and numeric-value unit warnings.
 
 </Steps>
 
@@ -98,20 +153,29 @@ style={{ backgroundColor: theme.primary, fontSize: 16 }}
 
 // Output CSS
 background-color: /* unresolved — was JS expression */
-font-size: 16; /* verify unit */
+font-size: var(--font-size-16, 16); /* verify unit */
 ```
 
 ## Example output
 
-Given `<div style="background: var(--surface-1); padding: 1rem">`:
+Given `<div style="background: #4f46e5; padding: 1rem">` in a project where no variables exist yet:
+
+**Declared in `:root` (new variables):**
+
+```css
+:root {
+  --color-1: #4f46e5;
+  --space-1rem: 1rem;
+}
+```
 
 **Appended to stylesheet:**
 
 ```css
 /* from: style attr on <div> */
 .div-bg {
-  background: var(--surface-1);
-  padding: 1rem;
+  background: var(--color-1, #4f46e5);
+  padding: var(--space-1rem, 1rem);
 }
 ```
 
@@ -120,6 +184,8 @@ Given `<div style="background: var(--surface-1); padding: 1rem">`:
 ```html
 <div class="div-bg"></div>
 ```
+
+Values already written as `var(--surface-1)` pass through unchanged — they are not double-wrapped.
 
 <Aside type="tip">
   The skill detects your project's stylesheet automatically and appends to it —
