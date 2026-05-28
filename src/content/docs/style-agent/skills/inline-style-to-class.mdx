@@ -89,7 +89,7 @@ Every concrete value is replaced with a variable. Reuse always wins over creatio
 2. **Normalise for matching:** for hex colors, lowercase and expand 3-digit to 6-digit; for every value, collapse internal whitespace to single spaces. Do **not** lowercase the value as a whole — preserve case for `url(...)` paths, quoted strings, and case-sensitive identifiers. Matching is **exact on the normalised form only** — values are never converted across color formats (no hex↔rgb↔hsl) and units are never converted (`16px` ≠ `1rem`). Note this limitation in the summary when relevant.
 3. **Skip (do not tokenize):**
    - Values already a `var(...)` reference (trimmed value begins with `var(`) — pass through unchanged.
-   - Unresolved JSX expressions — keep the existing `/* unresolved */` placeholder behavior.
+   - Unresolved JSX expressions — emit `<property>: /* unresolved — was JS expression */` in the output class.
 4. **Dedupe within a run:** the same normalised value resolves to one variable. A variable created earlier in the same run is reused for later occurrences rather than created twice.
 
 ### Naming new variables
@@ -107,7 +107,7 @@ When no existing variable matches, create one using the project's detected prefi
 | z-index             | `--z-*`              | `--z-modal`              |
 | keyword             | `--<property>-<val>` | `--display-flex`         |
 
-**Sanitise** the candidate to a valid custom-property identifier: lowercase, replace `.` and spaces with `-`, strip characters not in `[a-z0-9-]`, collapse consecutive hyphens (e.g. `1.5rem` → `space-1-5rem`). **Collision handling:** if the name already exists with a different value, append `-2`, `-3`, … until unique.
+**Sanitise** the candidate to a valid custom-property identifier: lowercase, replace `.` and spaces with `-`, strip characters not in `[a-z0-9-]`, collapse consecutive hyphens (e.g. `1.5rem` → `--space-1-5rem`). **Collision handling:** if the name already exists with a different value, append `-2`, `-3`, … until unique.
 
 ## Workflow
 
@@ -115,7 +115,7 @@ When no existing variable matches, create one using the project's detected prefi
 
 1. **Parse input.** Detect the input form:
    - **HTML inline attribute** — match `style="..."` or `style='...'`; split on `;`; parse `property: value` pairs. Extract the surrounding element tag if present.
-   - **JSX style object** — match `style={{...}}`; extract the object literal body; split key/value pairs. Convert each camelCase key to kebab-case. For numeric literal values, emit a "verify unit" warning. For JS expression values, emit a `/* unresolved: <expr> */` placeholder.
+   - **JSX style object** — match `style={{...}}`; extract the object literal body; split key/value pairs. Convert each camelCase key to kebab-case. For numeric literal values, emit a "verify unit" warning. For JS expression values that cannot be resolved, emit `<property>: /* unresolved — was JS expression */` in the output class.
    - **`<style>` block** — extract content between `<style>` and `</style>`; parse rules. If multiple rules are present, ask via `AskUserQuestion` whether to merge all declarations or pick a specific rule.
 
 2. **Determine the class name.** Apply the name rules. Use the `[name]` argument if provided. Otherwise apply the auto-name algorithm. If the generated name is ambiguous or 3 characters or fewer, ask via `AskUserQuestion` with the suggestion pre-filled.
@@ -126,7 +126,7 @@ When no existing variable matches, create one using the project's detected prefi
    - Comment header: `/* from: <source summary> */` (e.g. `"style attr on <div>"`, `"JSX style object"`, `"<style> block"`).
    - One property per line.
    - **Tokenize every value** via the Value tokenizing rules: reuse a matching existing variable or create a new one, then emit `property: var(--name, <original-literal>);` with the original literal kept as the fallback. Skip values that are already `var(...)` references and unresolved expressions.
-   - Unresolved JSX expressions: `/* <property>: unresolved — was JS expression */`.
+   - Unresolved JSX expressions: emit as `<property>: /* unresolved — was JS expression */`.
    - Numeric values without units: tokenize but append a `/* verify unit */` inline comment.
    - For Sass-indented (`.sass`) syntax, omit braces and use the detected indentation.
 
@@ -153,7 +153,7 @@ style={{ backgroundColor: theme.primary, fontSize: 16 }}
 
 // Output CSS
 background-color: /* unresolved — was JS expression */
-font-size: 16; /* verify unit */
+font-size: var(--font-size-16, 16); /* verify unit */
 ```
 
 ## Example output

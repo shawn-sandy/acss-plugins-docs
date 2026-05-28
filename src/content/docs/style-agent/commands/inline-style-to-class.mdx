@@ -65,14 +65,14 @@ Convert a `<style>` block:
 
 1. **Parse input.** Detect the form of the input:
    - **HTML inline attribute** — match `style="..."` or `style='...'`; split on `;`; parse `property: value` pairs. Extract the surrounding element tag if present.
-   - **JSX style object** — match `style={{...}}`; extract the object literal body; convert camelCase keys to kebab-case. Numeric literal values get a "verify unit" warning. JS expression values become `/* unresolved: <expr> */` placeholders.
+   - **JSX style object** — match `style={{...}}`; extract the object literal body; convert camelCase keys to kebab-case. Numeric literal values get a "verify unit" warning. JS expression values that cannot be resolved emit `<property>: /* unresolved — was JS expression */` in the output class.
    - **`<style>` block** — extract content between `<style>` and `</style>`; parse rules. If multiple rules are present, ask via `AskUserQuestion` whether to merge all declarations or pick a specific rule.
 
 2. **Determine the class name.** Apply the name rules. Use the `[name]` argument if provided. Otherwise apply the auto-name algorithm (element tag abbreviation + first-property role hint). If the generated name is ambiguous or 3 characters or fewer, ask via `AskUserQuestion` with the suggestion pre-filled.
 
 3. **Discover the target stylesheet and existing variables.** Search for stylesheets in priority order: `src/**/*.{css,scss,sass}`, then `styles/**`, then `app/**`, then repo root. Simultaneously grep all discovered stylesheets for custom-property declarations to build a reverse map of _normalised value → variable name_ (used for reuse in step 4). If no stylesheet is found, emit the CSS block to chat only.
 
-4. **Build the CSS class block.** Emit using the detected syntax flavor (CSS, SCSS, or Sass-indented) and indentation. **Tokenize every value**: reuse a matching existing variable or create a new one, then emit `property: var(--name, <original-literal>);`. Values already written as `var(...)` pass through unchanged. Unresolved JSX expressions become `/* <property>: unresolved — was JS expression */` comments. Numeric values without units are tokenized but flagged with an inline `/* verify unit */` comment.
+4. **Build the CSS class block.** Emit using the detected syntax flavor (CSS, SCSS, or Sass-indented) and indentation. **Tokenize every value**: reuse a matching existing variable or create a new one, then emit `property: var(--name, <original-literal>);`. Values already written as `var(...)` pass through unchanged. Unresolved JSX expressions emit as `<property>: /* unresolved — was JS expression */`. Numeric values without units are tokenized but flagged with an inline `/* verify unit */` comment.
 
 5. **Declare new variables.** For each variable created in step 4, write its `--name: value;` declaration to the project's tokens/variables file, an existing `:root` block, or a new `:root` block at the top of the target stylesheet — whichever was located in step 3. Already-existing variables are not re-declared.
 
@@ -134,7 +134,7 @@ style={{ backgroundColor: theme.primary, fontSize: 16 }}
 
 // Output CSS
 background-color: /* unresolved — was JS expression */
-font-size: 16; /* verify unit */
+font-size: var(--font-size-16, 16); /* verify unit */
 ```
 
 <Aside type="tip">
