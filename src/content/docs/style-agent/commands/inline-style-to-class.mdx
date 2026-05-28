@@ -1,11 +1,13 @@
 ---
 title: /inline-style-to-class
-description: Convert an inline style attribute, JSX style object, or <style> block into a single named CSS class and append it to the project stylesheet.
+description: Convert an inline style attribute, JSX style object, or <style> block into a named CSS class, replacing hard-coded values with CSS variables and appending the class to the project stylesheet.
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
 
-Migrate inline styles to a reusable, maintainable CSS class. Accepts an HTML `style` attribute, a JSX `style={{ ... }}` object, or a `<style>` block — detects the project stylesheet automatically and appends the new class to it.
+Migrate inline styles to a reusable, maintainable CSS class. Accepts an HTML `style` attribute, a JSX `style={{ ... }}` object, or a `<style>` block — detects the project stylesheet automatically, replaces every hard-coded value with a CSS variable, and appends the new class to the stylesheet.
+
+As of v0.4.0, every concrete color, length, and keyword value is tokenized: the skill reuses an existing project variable when one holds the same value, and creates plus declares a new one when none does. The original literal is always kept as the `var()` fallback so the class renders even when the variable is absent.
 
 ## Syntax
 
@@ -63,32 +65,43 @@ Convert a `<style>` block:
 
 2. **Determine the class name.** Apply the name rules. Use the `[name]` argument if provided. Otherwise apply the auto-name algorithm (element tag abbreviation + first-property role hint). If the generated name is ambiguous or 3 characters or fewer, ask via `AskUserQuestion` with the suggestion pre-filled.
 
-3. **Discover the target stylesheet.** Search for stylesheets in priority order: `src/**/*.{css,scss,sass}`, then `styles/**`, then `app/**`, then repo root. If exactly one candidate exists, use it. If multiple candidates exist and one is a clear entry file (`globals`, `main`, `index`, `styles`, `app`, or `base`), use that one. Otherwise prompt to pick. If no stylesheet is found, emit the CSS block to chat only.
+3. **Discover the target stylesheet and existing variables.** Search for stylesheets in priority order: `src/**/*.{css,scss,sass}`, then `styles/**`, then `app/**`, then repo root. Simultaneously, grep every custom-property declaration to build a reverse map of `value → variable name` for reuse. If no stylesheet is found, emit the CSS block to chat only.
 
-4. **Build the CSS class block.** Emit using the detected syntax flavor (CSS, SCSS, or Sass-indented) and indentation. Unresolved JSX expressions become `/* <property>: unresolved — was JS expression */` comments. Numeric values without units are preserved with an inline `/* verify unit */` comment.
+4. **Build the CSS class block.** Tokenize every value via the [value tokenizing rules](/acss-plugins-docs/style-agent/skills/inline-style-to-class#value-tokenizing-rules): reuse a matching existing variable or create a new one, then emit `property: var(--name, <original-literal>);`. Unresolved JSX expressions become `/* <property>: unresolved — was JS expression */` comments. Numeric values without units are tokenized with an appended `/* verify unit */` comment.
 
-5. **Append to the target stylesheet.** Use `Edit` to append the class block, preceded by one blank line, preserving any trailing newline the file already had.
+5. **Declare new variables.** Write each new `--name: value;` declaration to the target found in variable discovery (a tokens file, an existing `:root` block, or a new `:root` at the top of the stylesheet). Reused variables are not re-declared.
 
-6. **Emit refactored source.** Produce a clean version of the original input with the inline style removed:
+6. **Append to the target stylesheet.** Use `Edit` to append the class block, preceded by one blank line, preserving any trailing newline the file already had.
+
+7. **Emit refactored source.** Produce a clean version of the original input with the inline style removed:
    - **HTML** — remove `style="..."` entirely if all declarations migrated; add the new class to the existing `class` attribute (or create one). All other attributes are preserved unchanged.
    - **JSX** — same logic using `className`. Partially-migrated objects preserve remaining key/value pairs in the style prop.
    - **`<style>` block** — emit a comment noting the rule was extracted; the `<style>` block is not rewritten automatically.
 
-7. **Print a summary.** Reports the class name (provided or auto-generated), any coercion warnings, the target stylesheet path, declaration count migrated, unresolved JS expression count, and numeric unit warnings.
+8. **Print a summary.** Reports the class name (provided or auto-generated), any coercion warnings, the target stylesheet path, declaration count migrated, variables reused (`value → --name`), variables created (`--name: value` + file), unresolved JS expression count, and numeric unit warnings.
 
 </Steps>
 
 ## Output
 
-Given `<div style="background: var(--surface-1); padding: 1rem">`, the command produces:
+Given `<div style="background: #4f46e5; padding: 1rem">` where `#4f46e5` has no existing variable, the command produces:
+
+**New variable declared (in `:root`):**
+
+```css
+:root {
+  --color-1: #4f46e5;
+  --space-1rem: 1rem;
+}
+```
 
 **Appended to stylesheet:**
 
 ```css
 /* from: style attr on <div> */
 .div-bg {
-  background: var(--surface-1);
-  padding: 1rem;
+  background: var(--color-1, #4f46e5);
+  padding: var(--space-1rem, 1rem);
 }
 ```
 
@@ -97,6 +110,8 @@ Given `<div style="background: var(--surface-1); padding: 1rem">`, the command p
 ```html
 <div class="div-bg"></div>
 ```
+
+If the project already has `--color-primary: #4f46e5` declared, the skill reuses it: `background: var(--color-primary, #4f46e5);` — no new variable is created.
 
 ## Name rules
 

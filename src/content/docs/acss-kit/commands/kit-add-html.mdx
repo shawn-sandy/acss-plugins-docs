@@ -1,42 +1,39 @@
 ---
-title: /kit-add-html (deprecated)
-description: Deprecated alias — use /kit-add --target=html instead to generate static HTML components.
+title: /kit-add-html (removed)
+description: Removed command — use /kit-add instead. The /kit-add-html alias was deleted from the plugin in acss-kit v1.1.0.
 ---
 
 import { Aside } from "@astrojs/starlight/components";
 
-<Aside type="caution">
-  `/kit-add-html` is a **deprecated alias**. Use `/kit-add --target=html
-  <component>` instead. The old form still works and prints a deprecation notice,
-  but it will be removed in a future release.
+<Aside type="danger">
+  `/kit-add-html` has been **removed from the plugin** as of acss-kit v1.1.0
+  (2026-05-21). The command file (`plugins/acss-kit/commands/kit-add-html.md`)
+  was deleted from the upstream repository. Use
+  [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) for all component
+  generation.
 </Aside>
 
-`/kit-add-html` previously generated static HTML + SCSS + vanilla JS component
-files for non-React projects. That workflow is now the **HTML Target** section
-of the [`components` skill](/acss-plugins-docs/acss-kit/skills/components) and
-is accessed via `/kit-add --target=html`.
+`/kit-add-html` was a deprecated alias that forwarded to `/kit-add
+--target=html`. The `--target=html` flag itself was retired when the unified
+per-component skill architecture landed in v1.2.0 — every component now has its
+own `component-<name>/SKILL.md` that handles both React and HTML output directly.
 
 ## Migration
 
-| Old command                              | New command                                       |
-| ---------------------------------------- | ------------------------------------------------- |
-| `/kit-add-html button`                   | `/kit-add --target=html button`                   |
-| `/kit-add-html card alert`               | `/kit-add --target=html card alert`               |
-| `/kit-add-html button card alert dialog` | `/kit-add --target=html button card alert dialog` |
+| Old command                              | Replacement                         |
+| ---------------------------------------- | ----------------------------------- |
+| `/kit-add-html button`                   | `/kit-add button`                   |
+| `/kit-add-html card alert`               | `/kit-add card alert`               |
+| `/kit-add-html button card alert dialog` | `/kit-add button card alert dialog` |
 
 ## What happened
 
-As of acss-kit v0.13.0 the React and HTML generation workflows were unified into
-the single `components` skill (`skills/components/SKILL.md`). The HTML Target
-workflow lives under the `## HTML Target` section (steps HT-A through HT-F) of
-that skill.
-
-The `components-html` skill file and the `detect_html_target.py` script were
-removed upstream. All HTML-target detection now runs through the same
-`detect_target.py` used for React output.
+- **v0.13.0** — React and HTML generation unified into the `components` skill; `/kit-add-html` became a forwarding alias.
+- **v1.0.0** — Alias retained but marked deprecated; printed a deprecation notice at runtime.
+- **v1.1.0** — Alias command file deleted from upstream. Use `/kit-add` directly.
 
 <Aside type="tip">
-  See the [`components` skill](/acss-plugins-docs/acss-kit/skills/components)
-  for the full HTML Target workflow, including first-run initialization,
-  dependency resolution, and integration verification.
+  See [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add) for the current
+  component generation workflow, including the full component catalogue,
+  dependency resolution, and per-component skills.
 </Aside>
