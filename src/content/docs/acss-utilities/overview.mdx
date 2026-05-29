@@ -4,6 +4,7 @@ description: Tailwind-style atomic CSS utility classes for fpkit/acss projects, 
 ---
 
 import { Aside, CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
+import UtilityExample from "~/components/UtilityExample.astro";
 
 <Aside type="danger">
   **`acss-utilities` has been removed from the marketplace (v1.1.0, 2026-05-21).**
@@ -26,6 +27,12 @@ upgrade steps and the canonical utility command docs under
 utility classes that connect to your acss-kit theme via a token bridge. This
 page is preserved for historical reference; all functionality is now in
 acss-kit v1.0.0 and the plugin has been retired from the marketplace.
+
+<UtilityExample class="bg-primary" property="--color-primary">
+  <span style="color:var(--color-text-inverse);font-size:0.875rem;padding:0.25rem 0.5rem;">
+    bg-primary
+  </span>
+</UtilityExample>
 
 ## What it includes
 
