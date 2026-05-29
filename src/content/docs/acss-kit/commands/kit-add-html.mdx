@@ -1,20 +1,19 @@
 ---
-title: /kit-add-html (deprecated)
-description: Deprecated alias — use /kit-add --target=html instead to generate static HTML components.
+title: /kit-add-html (removed)
+description: Removed in acss-kit v1.1.0 — use /kit-add --target=html instead to generate static HTML components.
 ---
 
 import { Aside } from "@astrojs/starlight/components";
 
-<Aside type="caution">
-  `/kit-add-html` is a **deprecated alias**. Use `/kit-add --target=html
-  <component>` instead. The old form still works and prints a deprecation notice,
-  but it will be removed in a future release.
+<Aside type="danger">
+  `/kit-add-html` was **removed in acss-kit v1.1.0**. Use `/kit-add
+  --target=html <component>` instead. The alias no longer exists in the plugin.
 </Aside>
 
 `/kit-add-html` previously generated static HTML + SCSS + vanilla JS component
 files for non-React projects. That workflow is now the **HTML Target** section
-of the [`components` skill](/acss-plugins-docs/acss-kit/skills/components) and
-is accessed via `/kit-add --target=html`.
+of the [`kit-core` skill](/acss-plugins-docs/acss-kit/skills/kit-core) and is
+accessed via `/kit-add --target=html`.
 
 ## Migration
 
@@ -26,17 +25,16 @@ is accessed via `/kit-add --target=html`.
 
 ## What happened
 
-As of acss-kit v0.13.0 the React and HTML generation workflows were unified into
-the single `components` skill (`skills/components/SKILL.md`). The HTML Target
-workflow lives under the `## HTML Target` section (steps HT-A through HT-F) of
-that skill.
+In acss-kit v0.13.0, the React and HTML generation workflows were unified into
+the single `components` skill. The HTML Target workflow lives under the
+`## HTML Target` section (steps HT-A through HT-F) of that skill.
 
-The `components-html` skill file and the `detect_html_target.py` script were
-removed upstream. All HTML-target detection now runs through the same
-`detect_target.py` used for React output.
+In acss-kit v1.1.0, the `/kit-add-html` alias was fully removed. The `components`
+skill was also renamed to `kit-core` in v1.2.0. All HTML-target detection runs
+through `detect_target.py` used for React output.
 
 <Aside type="tip">
-  See the [`components` skill](/acss-plugins-docs/acss-kit/skills/components)
-  for the full HTML Target workflow, including first-run initialization,
-  dependency resolution, and integration verification.
+  See the [`kit-core` skill](/acss-plugins-docs/acss-kit/skills/kit-core) for
+  the full orchestration workflow, including Creator Mode, Form Mode, and
+  HTML/Style-Tune modes.
 </Aside>

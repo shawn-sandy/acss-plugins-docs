@@ -3,7 +3,7 @@ title: /setup
 description: Bootstrap a React + TypeScript project for acss-kit — installs ui.tsx, configures the components target, and seeds an optional starter theme.
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps } from "@astrojs/starlight/components";
 
 `/setup` is the one-shot bootstrap command. It front-loads everything acss-kit needs so subsequent commands like `/kit-add` and `/theme-create` work without prompting for project conventions every time.
 
@@ -17,9 +17,9 @@ Run it once after installing the plugin in a new (or existing) React + TypeScrip
 
 ## Flags
 
-| Flag | Description |
-|---|---|
-| `--no-theme` | Skip the starter light/dark theme step. Useful when you already have a theme or plan to run `/theme-create` separately. |
+| Flag             | Description                                                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `--no-theme`     | Skip the starter light/dark theme step. Useful when you already have a theme or plan to run `/theme-create` separately.  |
 | `--target=<dir>` | Override the components directory. Defaults to `src/components/fpkit/` (or whatever is recorded in `.acss-target.json`). |
 
 ## What it does
@@ -68,11 +68,12 @@ Once `/setup` completes, the typical next moves are:
 ```text
 /kit-add button card             # generate your first components
 /theme-create "#4f46e5"          # generate a full WCAG-validated theme
-/utility-add                     # if acss-utilities is also installed
+/utility-add                     # drop in utility classes (included in acss-kit)
 ```
 
 <Aside type="note">
-`.acss-target.json` is committed to your repo. It records the components directory so every teammate's Claude Code session writes to the same place.
+  `.acss-target.json` is committed to your repo. It records the components
+  directory so every teammate's Claude Code session writes to the same place.
 </Aside>
 
 ## Related
