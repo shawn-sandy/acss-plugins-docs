@@ -5,16 +5,15 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 # Upstream layout cache
 
-- **verified-at-sha:** `d4c8498`
-- **verified-at:** `2026-05-17T00:00:00Z`
+- **verified-at-sha:** `9a1da00`
+- **verified-at:** `2026-05-30T00:00:00Z`
 
 ## Plugin roots
 
-| Plugin         | Path under upstream clone root |
-| -------------- | ------------------------------ |
-| acss-kit       | `plugins/acss-kit`             |
-| acss-utilities | `plugins/acss-utilities`       |
-| style-agent    | `plugins/style-agent`          |
+| Plugin      | Path under upstream clone root |
+| ----------- | ------------------------------ |
+| acss-kit    | `plugins/acss-kit`             |
+| style-agent | `plugins/style-agent`          |
 
 ## Invalidation
 
@@ -24,4 +23,5 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 ## Notes
 
+- `acss-utilities` was removed from upstream in commit `c6049e5` (chore: remove deprecated acss-utilities plugin). The `plugins/acss-utilities/` directory no longer exists. Docs in `src/content/docs/acss-utilities/` are preserved for reference and flagged with removal notices.
 - `style-agent` is present upstream and has a corresponding docs section in this repo at `src/content/docs/style-agent/`.
