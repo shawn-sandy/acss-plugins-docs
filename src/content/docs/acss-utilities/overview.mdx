@@ -4,6 +4,8 @@ description: Tailwind-style atomic CSS utility classes for fpkit/acss projects, 
 ---
 
 import { Aside, CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
+import UtilityExample from "~/components/UtilityExample.astro";
 
 <Aside type="danger">
   **`acss-utilities` has been removed from upstream** as of the commit that
@@ -29,6 +31,11 @@ upgrade steps and the canonical utility command docs under
 **acss-utilities** provided a pre-built bundle of Tailwind-style atomic CSS
 utility classes that connect to your acss-kit theme via a token bridge. This
 plugin is preserved for reference; all functionality is now in acss-kit v1.0.0.
+
+<ColorSwatch
+  roles={["primary", "danger", "success", "info", "warning"]}
+  table={false}
+/>
 
 ## What it includes
 
@@ -69,6 +76,10 @@ plugin is preserved for reference; all functionality is now in acss-kit v1.0.0.
 | `shadow`       | No         | `.shadow-sm`, `.shadow-md`, `.shadow-lg`                 |
 | `position`     | No         | `.relative`, `.absolute`, `.fixed`, `.sticky`            |
 | `z-index`      | No         | `.z-10`, `.z-20`, `.z-50`, `.z-auto`                     |
+
+<UtilityExample class="bg-primary" property="--color-primary">
+  .bg-primary
+</UtilityExample>
 
 ## Responsive variants
 
