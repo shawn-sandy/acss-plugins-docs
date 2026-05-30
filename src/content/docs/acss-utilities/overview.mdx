@@ -5,11 +5,15 @@ description: Tailwind-style atomic CSS utility classes for fpkit/acss projects, 
 
 import { Aside, CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
 
-<Aside type="caution">
-  **`acss-utilities` is deprecated as of v1.0.0.** All utility commands
-  (`/utility-add`, `/utility-bridge`, `/utility-list`, `/utility-tune`) and the
-  `utilities` skill have moved to **acss-kit**. Existing installs continue to
-  work but no new features will be added here.
+<Aside type="danger">
+  **`acss-utilities` has been removed from upstream** as of the commit that
+  followed v1.0.0 deprecation. The entire `plugins/acss-utilities/` directory
+  was deleted from the `agentic-acss-plugins` repository (upstream SHA
+  `c6049e5`). No further updates will be made to this plugin.
+
+All utility commands (`/utility-add`, `/utility-bridge`, `/utility-list`,
+`/utility-tune`) and the `utilities` skill are now in **acss-kit**. Migrate
+today:
 
 ```text
 /plugin uninstall acss-utilities@shawn-sandy-agentic-acss-plugins

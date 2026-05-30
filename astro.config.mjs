@@ -69,7 +69,7 @@ export default defineConfig({
                   slug: "acss-kit/commands/color-scale",
                 },
                 {
-                  label: "/kit-add-html",
+                  label: "/kit-add-html (removed)",
                   slug: "acss-kit/commands/kit-add-html",
                 },
                 { label: "/kit-create", slug: "acss-kit/commands/kit-create" },

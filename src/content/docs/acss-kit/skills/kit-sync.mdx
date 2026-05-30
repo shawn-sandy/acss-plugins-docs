@@ -73,7 +73,7 @@ Without normalization, a Prettier or editor save would flip every file to `modif
 
 2. **Step S1 — Preflight.** Detect project root via `detect_target.py`; halt if missing. Confirm `cssPipeline` includes `sass` via `detect_stack.py`. Read any existing manifest via `manifest_read.py` — if present, route every file through the safe-update diff/skip logic before writing.
 
-3. **Step S2 — Enumerate the catalog.** Read `skills/components/references/components/catalog.md`. Every component named in the **Verification Status** table is in scope, plus the inline catalogue entries (Badge, Tag, Heading, Text/Paragraph, Details, Progress) that have a Generation Contract. Excludes `Form` (lives as a skill) and `UI (foundation)` (handled separately as `ui.tsx`).
+3. **Step S2 — Enumerate the catalog.** Glob `skills/component-*/SKILL.md`. Every component with a per-component skill is in scope. Also read `skills/kit-core/references/inline-components.md` to include the inline-only entries (Badge, Tag, Heading, Text/Paragraph, Details, Progress) that have a Generation Contract. Excludes `Form` (lives as a skill) and `UI (foundation)` (handled separately as `ui.tsx`).
 
 4. **Step S3 — Resolve dep tree, dedupe.** For each in-scope component, walk its Generation Contract `dependencies:` recursively. Union all results into one ordered list, leaves first.
 
