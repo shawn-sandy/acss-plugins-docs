@@ -26,7 +26,7 @@ import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
 | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
 | [`/setup`](/acss-plugins-docs/acss-kit/commands/setup)                   | Bootstrap a project — install `ui.tsx`, configure the target, seed a starter theme                   |
 | [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)               | Generate one or more components (with dependency resolution)                                         |
-| [`/kit-add-html`](/acss-plugins-docs/acss-kit/commands/kit-add-html)     | Deprecated alias — use `/kit-add --target=html` to generate static HTML + SCSS + vanilla JS          |
+| [`/kit-add-html`](/acss-plugins-docs/acss-kit/commands/kit-add-html)     | Removed — command file deleted upstream in v1.2.x. Use `/kit-add` for all component generation.      |
 | [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create)         | Generate a single component from a natural-language description                                      |
 | [`/kit-list`](/acss-plugins-docs/acss-kit/commands/kit-list)             | Browse the component catalogue or inspect a specific component                                       |
 | [`/kit-sync`](/acss-plugins-docs/acss-kit/commands/kit-sync)             | Bulk-install every component, foundation, and starter theme in one shot                              |
@@ -45,15 +45,18 @@ import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
 
 ## Skills
 
-| Skill         | Triggered by                                                                                        | Purpose                                                                                                                                              |
-| ------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `setup`       | `/setup`                                                                                            | One-shot project bootstrap (ui.tsx, target, optional seed theme)                                                                                     |
-| `components`  | `/kit-add`, `/kit-create`, natural language ("create a primary pill button", "build a signup form") | Full generation workflow — React + HTML targets, Creator Mode, Form Mode (absorbed `component-creator` and `component-form` pilot skills in v0.12.0) |
-| `styles`      | All `/theme-*` commands                                                                             | OKLCH palette math, WCAG validation, role catalogue                                                                                                  |
-| `style-tune`  | `/style-tune` or natural language ("warmer button")                                                 | Adjusts visual feel via token edits + WCAG validation                                                                                                |
-| `kit-sync`    | `/kit-sync`, `/kit-update`                                                                          | Bulk install and safe re-copy using a SHA256 manifest                                                                                                |
-| `utilities`   | `/utility-add`, `/utility-bridge`, `/utility-list`, `/utility-tune`                                 | Atomic CSS utility classes and token bridge (absorbed from acss-utilities v1.0.0)                                                                    |
-| `prompt-book` | `/prompt-book`                                                                                      | Displays the copy-paste prompt catalogue for all slash commands                                                                                      |
+As of v1.2.0, per-component generation routes to a dedicated `component-<name>` skill for each component. The `components` skill was renamed to `kit-core` and now handles orchestration only.
+
+| Skill                    | Triggered by                                                        | Purpose                                                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `setup`                  | `/setup`                                                            | One-shot project bootstrap (ui.tsx, target, optional seed theme)                                                                        |
+| `kit-core`               | `/kit-create`, `/kit-list`, `/kit-sync`, `/kit-update`, Form Mode   | Orchestrator — Creator Mode, Form Mode, HTML/Style-Tune modes (renamed from `components` in v1.2.0)                                     |
+| `component-<name>` (×15) | `/kit-add <name>`, `/kit-create <name>`                             | Per-component generation (alert, button, card, checkbox, dialog, field, icon, icon-button, img, input, link, list, nav, popover, table) |
+| `styles`                 | All `/theme-*` commands                                             | OKLCH palette math, WCAG validation, role catalogue                                                                                     |
+| `style-tune`             | `/style-tune` or natural language ("warmer button")                 | Adjusts visual feel via token edits + WCAG validation                                                                                   |
+| `kit-sync`               | `/kit-sync`, `/kit-update`                                          | Bulk install and safe re-copy using a SHA256 manifest                                                                                   |
+| `utilities`              | `/utility-add`, `/utility-bridge`, `/utility-list`, `/utility-tune` | Atomic CSS utility classes and token bridge (absorbed from acss-utilities v1.0.0)                                                       |
+| `prompt-book`            | `/prompt-book`                                                      | Displays the copy-paste prompt catalogue for all slash commands                                                                         |
 
 ## Key design decisions
 
@@ -71,13 +74,13 @@ import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
 
 Components are organized into six categories:
 
-| Category         | Components                                                               |
-| ---------------- | ------------------------------------------------------------------------ |
-| **Simple**       | Badge, Tag, Heading, Text, Link, List, Icon, Img                         |
-| **Interactive**  | Button, IconButton                                                       |
-| **Form**         | Field, Input, Checkbox                                                   |
-| **Layout**       | Card, Nav                                                                |
-| **Complex**      | Alert, Dialog, Popover, Table                                            |
-| **Form (skill)** | Auto-generated by the `component-form` skill on natural-language prompts |
+| Category        | Components                                                                                                       |
+| --------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Simple**      | Badge, Tag, Heading, Text, Link, List, Icon, Img                                                                 |
+| **Interactive** | Button, IconButton                                                                                               |
+| **Form**        | Field, Input, Checkbox                                                                                           |
+| **Layout**      | Card, Nav                                                                                                        |
+| **Complex**     | Alert, Dialog, Popover, Table                                                                                    |
+| **Form**        | Generated on-demand via `/kit-create` with a natural-language form description (handled by `kit-core` Form Mode) |
 
 → See the [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue) for the full list with props and CSS tokens.
