@@ -4,6 +4,7 @@ description: What acss-kit does, what it generates, and how the commands and ski
 ---
 
 import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 **acss-kit** is a Claude Code plugin that generates accessible React components and CSS themes for [fpkit/acss](https://github.com/shawn-sandy/acss) projects.
 
@@ -72,13 +73,17 @@ As of v1.2.0, per-component generation routes to a dedicated `component-<name>` 
 
 ## Available components
 
+<ComponentPreview
+  code={`<button class="btn btn--primary">Primary button</button>`}
+/>
+
 Components are organized into six categories:
 
 | Category        | Components                                                                                                       |
 | --------------- | ---------------------------------------------------------------------------------------------------------------- |
 | **Simple**      | Badge, Tag, Heading, Text, Link, List, Icon, Img                                                                 |
 | **Interactive** | Button, IconButton                                                                                               |
-| **Form**        | Field, Input, Checkbox                                                                                           |
+| **Form fields** | Field, Input, Checkbox                                                                                           |
 | **Layout**      | Card, Nav                                                                                                        |
 | **Complex**     | Alert, Dialog, Popover, Table                                                                                    |
 | **Form**        | Generated on-demand via `/kit-create` with a natural-language form description (handled by `kit-core` Form Mode) |
