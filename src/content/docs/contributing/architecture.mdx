@@ -3,6 +3,8 @@ title: Plugin Architecture
 description: How Claude Code plugins are structured, how commands delegate to skills, and how hooks enforce quality.
 ---
 
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
 ## Plugin manifest
 
 Each plugin has a `.claude-plugin/plugin.json` manifest:
@@ -42,7 +44,9 @@ description: Generate fpkit-style React components
 Delegate to the `kit-core` skill (orchestrator). `kit-core` resolves the component name, dispatches to the matching `component-<name>` skill, and handles dependency ordering.
 ```
 
-The skill does all the heavy lifting: file resolution, generation, validation, output.
+The skill does all the heavy lifting: file resolution, generation, validation, output. For example, `/kit-add button` produces:
+
+<ComponentPreview code={`<button class="btn btn--primary">Click me</button>`} />
 
 ## Hooks
 
