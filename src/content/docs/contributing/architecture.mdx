@@ -39,7 +39,7 @@ name: kit-add
 description: Generate fpkit-style React components
 ---
 
-Delegate to the `components` skill with the provided component names.
+Delegate to the `kit-core` skill (orchestrator). `kit-core` resolves the component name, dispatches to the matching `component-<name>` skill, and handles dependency ordering.
 ```
 
 The skill does all the heavy lifting: file resolution, generation, validation, output.
