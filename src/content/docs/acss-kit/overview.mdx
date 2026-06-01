@@ -4,6 +4,7 @@ description: What acss-kit does, what it generates, and how the commands and ski
 ---
 
 import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 **acss-kit** is a Claude Code plugin that generates accessible React components and CSS themes for [fpkit/acss](https://github.com/shawn-sandy/acss) projects.
 
@@ -22,46 +23,41 @@ import { CardGrid, Card, LinkCard } from "@astrojs/starlight/components";
 
 ## Commands
 
-| Command                                                                  | What it does                                                                                         |
-| ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| [`/setup`](/acss-plugins-docs/acss-kit/commands/setup)                   | Bootstrap a project — install `ui.tsx`, configure the target, seed a starter theme                   |
-| [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)               | Generate one or more components (with dependency resolution)                                         |
-| [`/kit-add-html`](/acss-plugins-docs/acss-kit/commands/kit-add-html)     | **Removed in v1.1.0** — this command no longer exists upstream. Use `/kit-add` instead.              |
-| [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create)         | Generate a single component from a natural-language description                                      |
-| [`/kit-list`](/acss-plugins-docs/acss-kit/commands/kit-list)             | Browse the component catalogue or inspect a specific component                                       |
-| [`/kit-sync`](/acss-plugins-docs/acss-kit/commands/kit-sync)             | Bulk-install every component, foundation, and starter theme in one shot                              |
-| [`/kit-update`](/acss-plugins-docs/acss-kit/commands/kit-update)         | Re-copy unmodified components after a plugin upgrade, preserving your edits                          |
-| [`/color-scale`](/acss-plugins-docs/acss-kit/commands/color-scale)       | Generate a 10-step OKLCH color scale from a hex, CSS named color, or theme role                      |
-| [`/theme-create`](/acss-plugins-docs/acss-kit/commands/theme-create)     | Generate a full light/dark theme from a seed hex color                                               |
-| [`/theme-brand`](/acss-plugins-docs/acss-kit/commands/theme-brand)       | Scaffold a brand-specific theme override file                                                        |
-| [`/theme-extract`](/acss-plugins-docs/acss-kit/commands/theme-extract)   | Extract brand colors from an image or Figma URL                                                      |
-| [`/theme-update`](/acss-plugins-docs/acss-kit/commands/theme-update)     | Edit specific color roles in an existing theme file                                                  |
-| [`/style-tune`](/acss-plugins-docs/acss-kit/commands/style-tune)         | Tune theme roles or component tokens with natural-language modifiers                                 |
-| [`/prompt-book`](/acss-plugins-docs/acss-kit/commands/prompt-book)       | Print the copy-paste prompt catalogue for all slash commands                                         |
-| [`/utility-add`](/acss-plugins-docs/acss-kit/commands/utility-add)       | Copy `utilities.css` + `token-bridge.css` into your project (absorbed from acss-utilities v1.0.0)    |
-| [`/utility-bridge`](/acss-plugins-docs/acss-kit/commands/utility-bridge) | Regenerate `token-bridge.css` against the active theme (absorbed from acss-utilities v1.0.0)         |
-| [`/utility-list`](/acss-plugins-docs/acss-kit/commands/utility-list)     | List utility families and classes (absorbed from acss-utilities v1.0.0)                              |
-| [`/utility-tune`](/acss-plugins-docs/acss-kit/commands/utility-tune)     | Adjust spacing, breakpoints, and family settings via natural language (absorbed from acss-utilities) |
+| Command                                                                  | What it does                                                                                            |
+| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| [`/setup`](/acss-plugins-docs/acss-kit/commands/setup)                   | Bootstrap a project — install `ui.tsx`, configure the target, seed a starter theme                      |
+| [`/kit-add`](/acss-plugins-docs/acss-kit/commands/kit-add)               | Generate one or more components (with dependency resolution)                                            |
+| [`/kit-add-html`](/acss-plugins-docs/acss-kit/commands/kit-add-html)     | Removed — command file deleted upstream in v1.2.x. Use `/kit-add --target=html` for static HTML output. |
+| [`/kit-create`](/acss-plugins-docs/acss-kit/commands/kit-create)         | Generate a single component from a natural-language description                                         |
+| [`/kit-list`](/acss-plugins-docs/acss-kit/commands/kit-list)             | Browse the component catalogue or inspect a specific component                                          |
+| [`/kit-sync`](/acss-plugins-docs/acss-kit/commands/kit-sync)             | Bulk-install every component, foundation, and starter theme in one shot                                 |
+| [`/kit-update`](/acss-plugins-docs/acss-kit/commands/kit-update)         | Re-copy unmodified components after a plugin upgrade, preserving your edits                             |
+| [`/color-scale`](/acss-plugins-docs/acss-kit/commands/color-scale)       | Generate a 10-step OKLCH color scale from a hex, CSS named color, or theme role                         |
+| [`/theme-create`](/acss-plugins-docs/acss-kit/commands/theme-create)     | Generate a full light/dark theme from a seed hex color                                                  |
+| [`/theme-brand`](/acss-plugins-docs/acss-kit/commands/theme-brand)       | Scaffold a brand-specific theme override file                                                           |
+| [`/theme-extract`](/acss-plugins-docs/acss-kit/commands/theme-extract)   | Extract brand colors from an image or Figma URL                                                         |
+| [`/theme-update`](/acss-plugins-docs/acss-kit/commands/theme-update)     | Edit specific color roles in an existing theme file                                                     |
+| [`/style-tune`](/acss-plugins-docs/acss-kit/commands/style-tune)         | Tune theme roles or component tokens with natural-language modifiers                                    |
+| [`/prompt-book`](/acss-plugins-docs/acss-kit/commands/prompt-book)       | Print the copy-paste prompt catalogue for all slash commands                                            |
+| [`/utility-add`](/acss-plugins-docs/acss-kit/commands/utility-add)       | Copy `utilities.css` + `token-bridge.css` into your project (absorbed from acss-utilities v1.0.0)       |
+| [`/utility-bridge`](/acss-plugins-docs/acss-kit/commands/utility-bridge) | Regenerate `token-bridge.css` against the active theme (absorbed from acss-utilities v1.0.0)            |
+| [`/utility-list`](/acss-plugins-docs/acss-kit/commands/utility-list)     | List utility families and classes (absorbed from acss-utilities v1.0.0)                                 |
+| [`/utility-tune`](/acss-plugins-docs/acss-kit/commands/utility-tune)     | Adjust spacing, breakpoints, and family settings via natural language (absorbed from acss-utilities)    |
 
 ## Skills
 
-As of acss-kit v1.2.0 the skill layer is split into an **orchestrator tier** and a **component tier**. The orchestrator skills handle cross-cutting workflows; the component skills each own one component (hidden from auto-context to reduce bloat — invoke them explicitly via `/kit-add`, `/kit-create`, or by name).
+As of v1.2.0, per-component generation routes to a dedicated `component-<name>` skill for each component. The `components` skill was renamed to `kit-core` and now handles orchestration only.
 
-### Orchestrator skills
-
-| Skill         | Triggered by                                                        | Purpose                                                                         |
-| ------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `setup`       | `/setup`                                                            | One-shot project bootstrap (ui.tsx, target, optional seed theme)                |
-| `kit-core`    | `/kit-create`, `/kit-list`, `/kit-sync`, `/kit-update`, Form Mode   | Orchestrator for multi-component workflows and Form/HTML/Style-Tune modes       |
-| `styles`      | All `/theme-*` commands                                             | OKLCH palette math, WCAG validation, role catalogue                             |
-| `style-tune`  | `/style-tune` or natural language ("warmer button")                 | Adjusts visual feel via token edits + WCAG validation                           |
-| `kit-sync`    | `/kit-sync`, `/kit-update`                                          | Bulk install and safe re-copy using a SHA256 manifest                           |
-| `utilities`   | `/utility-add`, `/utility-bridge`, `/utility-list`, `/utility-tune` | Atomic CSS utility classes and token bridge (absorbed from acss-utilities v1.0) |
-| `prompt-book` | `/prompt-book`                                                      | Displays the copy-paste prompt catalogue for all slash commands                 |
-
-### Component skills (v1.2.0+)
-
-Each of the fifteen supported components has a dedicated skill (`component-alert`, `component-button`, `component-card`, `component-checkbox`, `component-dialog`, `component-field`, `component-icon`, `component-icon-button`, `component-img`, `component-input`, `component-link`, `component-list`, `component-nav`, `component-popover`, `component-table`). All fifteen set `disable-model-invocation: true` to stay out of session auto-context — they are invoked via `/kit-add <component>`, `/kit-create`, or by name. See the [Component Skills (v1.2)](/acss-plugins-docs/acss-kit/skills/component-button) section in the sidebar for per-component documentation.
+| Skill                    | Triggered by                                                        | Purpose                                                                                                                                 |
+| ------------------------ | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `setup`                  | `/setup`                                                            | One-shot project bootstrap (ui.tsx, target, optional seed theme)                                                                        |
+| `kit-core`               | `/kit-create`, `/kit-list`, `/kit-sync`, `/kit-update`, Form Mode   | Orchestrator — Creator Mode, Form Mode, HTML/Style-Tune modes (renamed from `components` in v1.2.0)                                     |
+| `component-<name>` (×15) | `/kit-add <name>`, `/kit-create <name>`                             | Per-component generation (alert, button, card, checkbox, dialog, field, icon, icon-button, img, input, link, list, nav, popover, table) |
+| `styles`                 | All `/theme-*` commands                                             | OKLCH palette math, WCAG validation, role catalogue                                                                                     |
+| `style-tune`             | `/style-tune` or natural language ("warmer button")                 | Adjusts visual feel via token edits + WCAG validation                                                                                   |
+| `kit-sync`               | `/kit-sync`, `/kit-update`                                          | Bulk install and safe re-copy using a SHA256 manifest                                                                                   |
+| `utilities`              | `/utility-add`, `/utility-bridge`, `/utility-list`, `/utility-tune` | Atomic CSS utility classes and token bridge (absorbed from acss-utilities v1.0.0)                                                       |
+| `prompt-book`            | `/prompt-book`                                                      | Displays the copy-paste prompt catalogue for all slash commands                                                                         |
 
 ## Key design decisions
 
@@ -77,15 +73,19 @@ Each of the fifteen supported components has a dedicated skill (`component-alert
 
 ## Available components
 
+<ComponentPreview
+  code={`<button class="btn btn--primary">Primary button</button>`}
+/>
+
 Components are organized into six categories:
 
-| Category        | Components                                                                                            |
-| --------------- | ----------------------------------------------------------------------------------------------------- |
-| **Simple**      | Link, List, Icon, Img                                                                                 |
-| **Interactive** | Button, IconButton                                                                                    |
-| **Form**        | Field, Input, Checkbox                                                                                |
-| **Layout**      | Card, Nav                                                                                             |
-| **Complex**     | Alert, Dialog, Popover, Table                                                                         |
-| **Inline-only** | Badge, Tag, Heading, Text, Details, Progress — no dedicated skill; pulled from catalog via `/kit-add` |
+| Category        | Components                                                                                                       |
+| --------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Simple**      | Badge, Tag, Heading, Text, Link, List, Icon, Img                                                                 |
+| **Interactive** | Button, IconButton                                                                                               |
+| **Form fields** | Field, Input, Checkbox                                                                                           |
+| **Layout**      | Card, Nav                                                                                                        |
+| **Complex**     | Alert, Dialog, Popover, Table                                                                                    |
+| **Form**        | Generated on-demand via `/kit-create` with a natural-language form description (handled by `kit-core` Form Mode) |
 
 → See the [Component Catalogue](/acss-plugins-docs/acss-kit/component-catalogue) for the full list with props and CSS tokens.
