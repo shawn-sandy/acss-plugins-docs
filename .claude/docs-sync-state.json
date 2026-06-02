@@ -1,0 +1,18 @@
+{
+  "lastUpstreamSha": "9a1da00fae90b6de84d8a9b7a93798969d52a0b7",
+  "lastSyncedAt": "2026-06-02T10:09:00Z",
+  "plugins": {
+    "acss-kit": {
+      "lastUpstreamSha": "9a1da00fae90b6de84d8a9b7a93798969d52a0b7",
+      "lastSyncedAt": "2026-06-02T10:09:00Z"
+    },
+    "acss-utilities": {
+      "lastUpstreamSha": "9a1da00fae90b6de84d8a9b7a93798969d52a0b7",
+      "lastSyncedAt": "2026-06-02T10:09:00Z"
+    },
+    "style-agent": {
+      "lastUpstreamSha": "9a1da00fae90b6de84d8a9b7a93798969d52a0b7",
+      "lastSyncedAt": "2026-06-02T10:09:00Z"
+    }
+  }
+}
