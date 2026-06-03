@@ -1,6 +1,6 @@
 ---
 title: Python Scripts Reference
-description: API reference for every Python script in acss-kit and acss-utilities — inputs, outputs, exit codes, and contract families.
+description: API reference for every Python script in acss-kit and style-agent — inputs, outputs, exit codes, and contract families.
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -702,12 +702,16 @@ No candidate found (exit 1):
 
 ---
 
-## acss-utilities scripts
+## acss-kit utility scripts
+
+All utility scripts moved to `plugins/acss-kit/scripts/` in acss-kit v1.0.0
+when the utility commands were absorbed from the now-deprecated
+`acss-utilities` plugin.
 
 ### `generate_utilities.py`
 
 **Contract:** Generator  
-**Location:** `plugins/acss-utilities/scripts/generate_utilities.py`
+**Location:** `plugins/acss-kit/scripts/generate_utilities.py`
 
 Generates the full utility CSS bundle from `utilities.tokens.json`.
 
@@ -732,7 +736,7 @@ python3 generate_utilities.py [--tokens=<path>] [--out-dir=<dir>] [--families=<l
 ### `validate_utilities.py`
 
 **Contract:** Validator  
-**Location:** `plugins/acss-utilities/scripts/validate_utilities.py`
+**Location:** `plugins/acss-kit/scripts/validate_utilities.py`
 
 Validates the committed utility bundle for integrity, bridge parity, and idempotency.
 
@@ -756,17 +760,46 @@ python3 validate_utilities.py [--bundle=<path>] [--bridge=<path>]
 
 ---
 
-### `detect_utility_target.py`
+### `generate_bridge.py`
 
-**Contract:** Detector  
-**Location:** `plugins/acss-utilities/scripts/detect_utility_target.py`
+**Contract:** Generator  
+**Location:** `plugins/acss-kit/scripts/generate_bridge.py`
 
-Detects the target styles directory for utility output.
+Generates `token-bridge.css` — the alias layer that maps fpkit-style utility
+names (`--color-error`, `--color-primary-light`, etc.) to acss-kit
+`--color-*` theme roles. Run automatically by `/theme-create` and
+`/theme-update` when a `utilitiesDir` is configured; call manually via
+`/utility-bridge` to regenerate after editing theme files directly.
 
 **Inputs:**
 
 ```bash
-python3 detect_utility_target.py [--project-root=<path>]
+python3 generate_bridge.py --theme-dir=<dir> --out=<path>
+```
+
+| Flag          | Description                                      |
+| ------------- | ------------------------------------------------ |
+| `--theme-dir` | Directory containing `light.css` / `dark.css`    |
+| `--out`       | Output path for the generated `token-bridge.css` |
+
+**Output:** `token-bridge.css` with `:root` and `[data-theme="dark"]` blocks.
+
+**Exit codes:** 0 = success, 2 = IO/usage error
+
+---
+
+### `detect_target.py` (utilities mode)
+
+**Contract:** Detector  
+**Location:** `plugins/acss-kit/scripts/detect_target.py`
+
+The unified target detector handles both component and utility detection.
+Pass `--what=utilities` to resolve the utility output directory.
+
+**Inputs:**
+
+```bash
+python3 detect_target.py --what=utilities [project_root]
 ```
 
 **Output (stdout):** JSON
@@ -775,11 +808,13 @@ python3 detect_utility_target.py [--project-root=<path>]
 {
   "source": "configured",
   "utilitiesDir": "src/styles/",
+  "bundlePath": "src/styles/utilities.css",
+  "bridgePath": "src/styles/token-bridge.css",
   "reasons": ["Found .acss-target.json with utilitiesDir: src/styles/"]
 }
 ```
 
-`source` values: `"configured"` (.acss-target.json found), `"default"` (src/styles/ heuristic), `"none"` (no directory found)
+`source` values: `"configured"` (`.acss-target.json` found), `"default"` (`src/styles/` heuristic), `"none"` (no directory found)
 
 **Exit codes:** 0 = directory found, 1 = no directory found
 
@@ -788,9 +823,9 @@ python3 detect_utility_target.py [--project-root=<path>]
 ### `migrate_classnames.py`
 
 **Contract:** Generator/Validator  
-**Location:** `plugins/acss-utilities/scripts/migrate_classnames.py`
+**Location:** `plugins/acss-kit/scripts/migrate_classnames.py`
 
-Migrates acss-utilities class names from the 0.1.x colon form (`sm:hide`, `md:p-6`) to the 0.2.0 hyphen form (`sm-hide`, `md-p-6`) in source files. By default performs a **dry run** and prints a unified diff per modified file. Pass `--write` to apply changes in place.
+Migrates utility class names from the 0.1.x colon form (`sm:hide`, `md:p-6`) to the 0.2.0 hyphen form (`sm-hide`, `md-p-6`) in source files. By default performs a **dry run** and prints a unified diff per modified file. Pass `--write` to apply changes in place.
 
 **Inputs:**
 
@@ -815,7 +850,7 @@ python3 migrate_classnames.py <path> [<path>...] [--write] [--include=<glob>,...
 **Exit codes:** 0 = no changes needed (or all applied with `--write`), 1 = dry-run: changes pending, 2 = usage/IO error
 
 <Aside type="note">
-  `migrate_classnames.py` is a one-time migration tool for upgrading from
-  acss-utilities 0.1.x to 0.2.0. If your project was set up with 0.2.0 or later,
-  you do not need to run it.
+  `migrate_classnames.py` is a one-time migration tool for projects that were
+  set up with acss-utilities 0.1.x. If your project was set up with 0.2.0 or
+  later, you do not need to run it.
 </Aside>

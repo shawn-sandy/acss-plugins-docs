@@ -3,9 +3,9 @@ title: /prompt-book
 description: Display the acss-kit prompt book — copy-paste prompts mapped to every shipped slash command.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
-Display the acss-kit + acss-utilities prompt book — a catalogue of copy-paste prompts mapped to every shipped slash command. Run with no argument to print the full book, or pass a section number to print a single section.
+Display the acss-kit prompt book — a catalogue of copy-paste prompts mapped to every shipped slash command. Run with no argument to print the full book, or pass a section number to print a single section.
 
 ## Syntax
 
@@ -15,9 +15,9 @@ Display the acss-kit + acss-utilities prompt book — a catalogue of copy-paste 
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `section-number` | No | Print only the section whose heading begins with `## <number>.`. Invalid numbers fall back to a table of contents. |
+| Argument         | Required | Description                                                                                                        |
+| ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| `section-number` | No       | Print only the section whose heading begins with `## <number>.`. Invalid numbers fall back to a table of contents. |
 
 ## Examples
 
@@ -38,5 +38,6 @@ Display the acss-kit + acss-utilities prompt book — a catalogue of copy-paste 
 The prompt book lives in the plugin at `plugins/acss-kit/docs/prompt-book.md` and ships with every install. To update it, edit the file there and bump `plugin.json` per the repo's pre-submit checklist.
 
 <Aside type="tip">
-For the matching algorithm and read-only constraints, see the [`prompt-book` skill](/acss-plugins-docs/acss-kit/skills/prompt-book).
+  For the matching algorithm and read-only constraints, see the [`prompt-book`
+  skill](/acss-plugins-docs/acss-kit/skills/prompt-book).
 </Aside>

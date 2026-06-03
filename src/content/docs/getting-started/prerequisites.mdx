@@ -1,9 +1,9 @@
 ---
 title: Prerequisites
-description: What your project needs before installing acss-kit or acss-utilities.
+description: What your project needs before installing acss-kit or style-agent.
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps } from "@astrojs/starlight/components";
 
 Before installing the plugins, make sure your environment meets the following requirements.
 
@@ -18,15 +18,17 @@ claude --version
 
 ## React project with TypeScript
 
-Both plugins assume a React project. TypeScript is strongly recommended — all generated components are `.tsx` files with inline type definitions.
+acss-kit assumes a React project. TypeScript is strongly recommended — all generated components are `.tsx` files with inline type definitions.
 
 A minimal setup that works:
+
 - **React 18+** (17 works but is untested)
 - **TypeScript 5+** with a `tsconfig.json` (strict mode recommended)
 - Any bundler: Vite, Next.js, Remix, Create React App, Parcel
 
 <Aside type="note">
-The plugins generate source files — they don't care what bundler you use, as long as it can handle TSX and SCSS imports.
+  The plugins generate source files — they don't care what bundler you use, as
+  long as it can handle TSX and SCSS imports.
 </Aside>
 
 ## sass (for acss-kit components)
@@ -42,18 +44,19 @@ pnpm add -D sass
 ```
 
 <Aside type="caution">
-`node-sass` (the deprecated C++ binding) is **not** supported. Use `sass` (Dart Sass).
+  `node-sass` (the deprecated C++ binding) is **not** supported. Use `sass`
+  (Dart Sass).
 </Aside>
 
 ## Project structure conventions
 
 The plugins write to predictable paths by default. You can override these with a `.acss-target.json` file at your project root.
 
-| Plugin | Default output path |
-|---|---|
-| acss-kit (components) | `src/components/fpkit/` |
-| acss-kit (themes) | `src/styles/theme/` |
-| acss-utilities | `src/styles/` |
+| Plugin                    | Default output path     |
+| ------------------------- | ----------------------- |
+| acss-kit (components)     | `src/components/fpkit/` |
+| acss-kit (themes)         | `src/styles/theme/`     |
+| acss-kit (utility bundle) | `src/styles/`           |
 
 ### Optional: `.acss-target.json`
 

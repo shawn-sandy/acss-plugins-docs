@@ -3,7 +3,9 @@ title: Troubleshooting
 description: Concrete fixes for the most common failures when using acss-kit and acss-utilities.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
+import UtilityExample from "~/components/UtilityExample.astro";
 
 ## acss-kit
 
@@ -25,6 +27,7 @@ Did you mean: select?
 ```
 
 Run `/kit-list` to see exact component names. Common aliases that don't work:
+
 - `dropdown` → use `select`
 - `modal` → use `dialog`
 - `message` → use `alert`
@@ -39,7 +42,7 @@ Run `/kit-list` to see exact component names. Common aliases that don't work:
 2. Re-run `/kit-add <component>`
 
 <Aside type="caution">
-This will overwrite your edits. Commit or backup your customizations first.
+  This will overwrite your edits. Commit or backup your customizations first.
 </Aside>
 
 ### Theme contrast failure
@@ -54,6 +57,7 @@ Pre-validation failed. No files written.
 Orange and yellow seeds often fail contrast against white backgrounds. Solutions:
 
 1. **Darken the seed** — use a darker shade of the hue as input:
+
    ```text
    /theme-create #b36a00   ← darker amber instead of #ff9900
    ```
@@ -67,7 +71,9 @@ Orange and yellow seeds often fail contrast against white backgrounds. Solutions
    ```
    Then add to `brand-amber-accent.css`:
    ```css
-   :root { --color-accent: #b36a00; }  /* darker amber that passes AA */
+   :root {
+     --color-accent: #b36a00;
+   } /* darker amber that passes AA */
    ```
 
 ### Dark mode not activating
@@ -80,20 +86,24 @@ The dark theme uses `[data-theme="dark"]` on `<html>`, not `@media prefers-color
 
 ---
 
-## acss-utilities
+## Utility classes
 
 ### Utility color classes show wrong colors (hex fallbacks instead of theme values)
+
+When working correctly, color-role utilities like `.bg-primary` resolve through `token-bridge.css` to your theme tokens:
+
+<ColorSwatch roles={["primary", "accent", "danger"]} table={false} />
 
 This means `token-bridge.css` isn't loaded or is loaded after `utilities.css`. Check your import order:
 
 ```tsx
 // ✓ Correct order
-import './styles/token-bridge.css';
-import './styles/utilities.css';
+import "./styles/token-bridge.css";
+import "./styles/utilities.css";
 
 // ✗ Wrong order — bridge aliases aren't defined when utilities load
-import './styles/utilities.css';
-import './styles/token-bridge.css';
+import "./styles/utilities.css";
+import "./styles/token-bridge.css";
 ```
 
 ### Token bridge dark mode colors not working
@@ -107,10 +117,10 @@ Run `/utility-bridge` to regenerate the bridge against your current theme:
 If the bridge still shows incorrect colors in dark mode, check that `dark.css` imports before `token-bridge.css` and `utilities.css`:
 
 ```tsx
-import './styles/theme/light.css';
-import './styles/theme/dark.css';
-import './styles/token-bridge.css';  // reads from dark.css via var()
-import './styles/utilities.css';
+import "./styles/theme/light.css";
+import "./styles/theme/dark.css";
+import "./styles/token-bridge.css"; // reads from dark.css via var()
+import "./styles/utilities.css";
 ```
 
 ### "Bridge parity failure" error
@@ -131,7 +141,7 @@ This means `token-bridge.css` was manually edited or corrupted. Regenerate it:
 Responsive classes use a hyphen prefix (`md-flex`), not a colon (`md:flex`). If you're migrating from Tailwind, check your JSX for colon-prefixed classes — they won't work without custom Tailwind config.
 
 ```tsx
-// ✓ acss-utilities syntax
+// ✓ acss-kit utility syntax
 <div className="flex-col md-flex-row">
 
 // ✗ Tailwind syntax — won't work
