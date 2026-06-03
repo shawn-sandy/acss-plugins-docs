@@ -4,6 +4,8 @@ description: Concrete fixes for the most common failures when using acss-kit and
 ---
 
 import { Aside } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
+import UtilityExample from "~/components/UtilityExample.astro";
 
 ## acss-kit
 
@@ -87,6 +89,10 @@ The dark theme uses `[data-theme="dark"]` on `<html>`, not `@media prefers-color
 ## Utility classes
 
 ### Utility color classes show wrong colors (hex fallbacks instead of theme values)
+
+When working correctly, color-role utilities like `.bg-primary` resolve through `token-bridge.css` to your theme tokens:
+
+<ColorSwatch roles={["primary", "accent", "danger"]} table={false} />
 
 This means `token-bridge.css` isn't loaded or is loaded after `utilities.css`. Check your import order:
 

@@ -4,6 +4,7 @@ description: Read-only catalogue printer for the acss-kit utility bundle — lis
 ---
 
 import { Aside } from "@astrojs/starlight/components";
+import UtilityExample from "~/components/UtilityExample.astro";
 
 <Aside type="note">
   This command moved to **acss-kit v1.0.0** from the now-deprecated
@@ -53,6 +54,11 @@ Show color-bg classes and how they resolve through the token bridge:
 ```text
 /utility-list color-bg
 ```
+
+<UtilityExample class="bg-primary" property="background-color">
+  Example: <code>.bg-primary</code> — background resolves through the token
+  bridge
+</UtilityExample>
 
 ## Output — no arguments
 
