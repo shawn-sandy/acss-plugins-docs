@@ -1,20 +1,25 @@
 ---
 title: Introduction
-description: What acss-kit and acss-utilities are, what they do, and when to use them.
+description: What acss-kit and style-agent are, what they do, and when to use them.
 ---
 
-import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+import { Card, CardGrid, LinkCard } from "@astrojs/starlight/components";
 
-**acss-plugins** is a marketplace of two Claude Code plugins that work together to help you build accessible, themeable React applications faster — without manually writing boilerplate components or calculating WCAG-compliant color palettes.
+**acss-plugins** is a marketplace of Claude Code plugins that help you build accessible, themeable React applications faster — without manually writing boilerplate components or calculating WCAG-compliant color palettes.
 
-## The two plugins
+## The plugins
 
 <CardGrid>
   <Card title="acss-kit" icon="puzzle">
-    Generates accessible React components (TSX + SCSS) and OKLCH-based CSS themes directly into your project. No runtime npm dependency — components are vendored in as source files you own.
+    Generates accessible React components (TSX + SCSS), OKLCH-based CSS themes,
+    and Tailwind-style atomic utility classes directly into your project. No
+    runtime npm dependency — everything is vendored in as source files you own.
   </Card>
-  <Card title="acss-utilities" icon="seti:css">
-    Provides Tailwind-style atomic CSS utility classes tied to your acss-kit theme tokens via a token bridge. Drop in a pre-built bundle or tune it with natural language.
+  <Card title="style-agent" icon="seti:css">
+    Framework-agnostic CSS authoring skills. Extracts utility-class lists into
+    single named CSS classes, converts inline styles or JSX style objects into
+    named classes, and generates utility class strings from plain-language
+    descriptions.
   </Card>
 </CardGrid>
 
@@ -40,14 +45,23 @@ import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 ## When to use these plugins
 
-| Situation | Recommended approach |
-|---|---|
-| Starting a new React app | Install both plugins, run `/kit-add` for core components, `/theme-create` for your palette, `/utility-add` for utility classes |
-| Adding accessible components to an existing app | Install acss-kit only; run `/kit-add` for the specific components you need |
-| Theming an fpkit/acss project | Install acss-kit; use `/theme-create` + `/theme-brand` |
-| Utility-class layer on top of a custom theme | Install acss-utilities; use `/utility-add --no-bridge` to skip the token bridge |
+| Situation                                              | Recommended approach                                                                                                       |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Starting a new React app                               | Install acss-kit, run `/kit-add` for core components, `/theme-create` for your palette, `/utility-add` for utility classes |
+| Adding accessible components to an existing app        | Install acss-kit; run `/kit-add` for the specific components you need                                                      |
+| Theming an fpkit/acss project                          | Install acss-kit; use `/theme-create` + `/theme-brand`                                                                     |
+| Utility-class layer on top of a custom theme           | Install acss-kit; use `/utility-add --no-bridge` to skip the token bridge                                                  |
+| Migrating inline styles or utility soup to CSS classes | Install style-agent; use `/inline-style-to-class` or `/css-to-class`                                                       |
 
 ## Next steps
 
-<LinkCard title="Prerequisites" href="/acss-plugins-docs/getting-started/prerequisites" description="What your project needs before you install the plugins." />
-<LinkCard title="Installation" href="/acss-plugins-docs/getting-started/installation" description="Install both plugins from the Claude Code marketplace in one command." />
+<LinkCard
+  title="Prerequisites"
+  href="/acss-plugins-docs/getting-started/prerequisites"
+  description="What your project needs before you install the plugins."
+/>
+<LinkCard
+  title="Installation"
+  href="/acss-plugins-docs/getting-started/installation"
+  description="Install the plugins from the Claude Code marketplace."
+/>

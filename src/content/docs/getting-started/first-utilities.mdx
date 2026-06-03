@@ -3,18 +3,18 @@ title: Your First Utilities
 description: Drop in atomic CSS utility classes and wire them to your acss-kit theme with /utility-add.
 ---
 
-import { Steps, Aside } from '@astrojs/starlight/components';
+import { Steps, Aside } from "@astrojs/starlight/components";
 
-This tutorial shows you how to add the acss-utilities bundle to your project and use utility classes in your components.
+This tutorial shows you how to add the acss-kit utility bundle to your project and use utility classes in your components.
 
 ## What gets added
 
 Running `/utility-add` copies two files into `src/styles/`:
 
-| File | Purpose |
-|---|---|
-| `utilities.css` | ~12 families of atomic utility classes (spacing, flex, grid, color, etc.) |
-| `token-bridge.css` | Maps acss-utilities' class names to your acss-kit `--color-*` tokens |
+| File               | Purpose                                                                   |
+| ------------------ | ------------------------------------------------------------------------- |
+| `utilities.css`    | ~12 families of atomic utility classes (spacing, flex, grid, color, etc.) |
+| `token-bridge.css` | Maps utility class names to your acss-kit `--color-*` tokens              |
 
 The token bridge is what connects `.bg-primary` → `var(--color-primary)` from your theme.
 
@@ -34,12 +34,12 @@ The token bridge is what connects `.bg-primary` → `var(--color-primary)` from 
 
    ```
    Detected styles dir: src/styles/
-   
+
    Writing src/styles/token-bridge.css  ✓
    Writing src/styles/utilities.css     ✓
-   
+
    Bundle: 8.4 KB · 312 classes · 12 families
-   
+
    Import order (add to your entry point):
      import './styles/token-bridge.css';   // first
      import './styles/utilities.css';
@@ -49,16 +49,18 @@ The token bridge is what connects `.bg-primary` → `var(--color-primary)` from 
 
    ```tsx
    // src/main.tsx
-   import './styles/theme/light.css';
-   import './styles/theme/dark.css';
-   import './styles/token-bridge.css';  // ← bridge first
-   import './styles/utilities.css';     // ← then utilities
+   import "./styles/theme/light.css";
+   import "./styles/theme/dark.css";
+   import "./styles/token-bridge.css"; // ← bridge first
+   import "./styles/utilities.css"; // ← then utilities
    ```
 
 </Steps>
 
 <Aside type="caution">
-Import order matters. `token-bridge.css` defines the CSS custom properties that `utilities.css` references. If utilities loads first, the `var()` fallbacks kick in rather than your theme values.
+  Import order matters. `token-bridge.css` defines the CSS custom properties
+  that `utilities.css` references. If utilities loads first, the `var()`
+  fallbacks kick in rather than your theme values.
 </Aside>
 
 ## Use utility classes
@@ -115,7 +117,7 @@ You can adjust the spacing scale, enable/disable families, or change breakpoints
 
 The bundle is regenerated and validated after each tune. Changes roll back if validation fails.
 
-→ See [/utility-tune](/acss-plugins-docs/acss-utilities/commands/utility-tune) for the full reference.
+→ See [/utility-tune](/acss-plugins-docs/acss-kit/commands/utility-tune) for the full reference.
 
 ## Using utilities without acss-kit
 

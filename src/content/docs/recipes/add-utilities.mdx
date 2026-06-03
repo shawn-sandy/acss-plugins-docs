@@ -1,41 +1,37 @@
 ---
 title: Add Utilities to an Existing App
-description: How to drop acss-utilities into a project that already has components or a design system.
+description: How to add the acss-kit utility bundle to a project that already has components or a design system.
 ---
 
-import { Steps, Aside } from '@astrojs/starlight/components';
+import { Steps, Aside } from "@astrojs/starlight/components";
 
-This recipe covers adding acss-utilities to an existing React app — including apps that aren't using acss-kit.
+This recipe covers adding the acss-kit utility bundle to an existing React app
+— including apps that aren't using acss-kit components.
 
 ## With acss-kit (recommended)
 
-If you already have acss-kit components and a generated theme:
+If you already have acss-kit components and a generated theme, utility commands
+are already available — no extra install needed.
 
 <Steps>
 
-1. Install acss-utilities from the marketplace:
-
-   ```text
-   /plugin marketplace add shawn-sandy/agentic-acss-plugins
-   /plugin install acss-utilities@shawn-sandy-agentic-acss-plugins
-   ```
-
-2. Run `/utility-add` — it auto-detects your styles directory and finds your existing theme:
+1. Run `/utility-add` — it auto-detects your styles directory and finds your
+   existing theme:
 
    ```text
    /utility-add
    ```
 
-3. Check the import order in your entry file:
+2. Check the import order in your entry file:
 
    ```tsx
-   import './styles/theme/light.css';
-   import './styles/theme/dark.css';
-   import './styles/token-bridge.css';   // ← after theme
-   import './styles/utilities.css';      // ← last
+   import "./styles/theme/light.css";
+   import "./styles/theme/dark.css";
+   import "./styles/token-bridge.css"; // ← after theme
+   import "./styles/utilities.css"; // ← last
    ```
 
-4. Start using utility classes alongside your components:
+3. Start using utility classes alongside your components:
 
    ```tsx
    <div className="flex gap-4 p-6">
@@ -46,17 +42,27 @@ If you already have acss-kit components and a generated theme:
 
 </Steps>
 
-## Without acss-kit (standalone)
+## Without acss-kit themes (standalone)
 
-If you have your own component system and just want utility classes:
+If you have your own component system and just want utility classes without the
+token bridge:
 
 ```text
 /utility-add --no-bridge
 ```
 
-This installs `utilities.css` only. Color utilities use hardcoded hex fallbacks — no token bridge needed.
+This installs `utilities.css` only. Color utilities use hardcoded hex fallbacks
+— no token bridge needed.
 
-If your own design system uses CSS custom properties with compatible names (e.g., `--color-primary`, `--color-danger`), the utility classes will automatically pick them up via the `var()` fallbacks in the CSS.
+If your own design system uses CSS custom properties with compatible names
+(e.g., `--color-primary`, `--color-danger`), the utility classes will
+automatically pick them up via the `var()` fallbacks in the CSS.
+
+<Aside type="note">
+  `acss-kit` must be installed for `/utility-add` to be available. The utility
+  commands (`/utility-add`, `/utility-list`, `/utility-tune`, `/utility-bridge`)
+  ship as part of acss-kit since v1.0.0.
+</Aside>
 
 ## Only install the families you need
 
@@ -81,5 +87,7 @@ Or set it permanently in `.acss-target.json`:
 ```
 
 <Aside type="tip">
-After adding utilities, run `/utility-list` to see all available classes. If the spacing scale or breakpoints don't match your project's grid, use `/utility-tune` to adjust them.
+  After adding utilities, run `/utility-list` to see all available classes. If
+  the spacing scale or breakpoints don't match your project's grid, use
+  `/utility-tune` to adjust them.
 </Aside>

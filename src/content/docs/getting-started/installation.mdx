@@ -1,13 +1,17 @@
 ---
 title: Installation
-description: Install acss-kit and acss-utilities from the Claude Code plugin marketplace.
+description: Install acss-kit (and optionally style-agent) from the Claude Code plugin marketplace.
 ---
 
-import { Steps, Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import { Steps, Aside, Tabs, TabItem } from "@astrojs/starlight/components";
 
-Both plugins are distributed through the Claude Code plugin marketplace under the `shawn-sandy` namespace.
+Plugins are distributed through the Claude Code plugin marketplace under the
+`shawn-sandy` namespace.
 
-## Install both plugins
+## Install acss-kit
+
+acss-kit ships components, themes, and utility-class commands (`/utility-add`,
+`/utility-list`, `/utility-tune`, `/utility-bridge`) all in one plugin.
 
 <Steps>
 
@@ -17,19 +21,20 @@ Both plugins are distributed through the Claude Code plugin marketplace under th
    /plugin marketplace add shawn-sandy/agentic-acss-plugins
    ```
 
-2. **Install acss-kit** (components + themes):
+2. **Install acss-kit** (components + themes + utility classes):
 
    ```text
    /plugin install acss-kit@shawn-sandy-agentic-acss-plugins
    ```
 
-3. **Install acss-utilities** (atomic CSS + token bridge):
+3. **Bootstrap your project** — run `/setup` once to initialize the foundation:
 
    ```text
-   /plugin install acss-utilities@shawn-sandy-agentic-acss-plugins
+   /setup
    ```
 
-4. **Verify the install** — list available components to confirm acss-kit is active:
+4. **Verify the install** — list available components to confirm acss-kit is
+   active:
 
    ```text
    /kit-list
@@ -40,30 +45,20 @@ Both plugins are distributed through the Claude Code plugin marketplace under th
 </Steps>
 
 <Aside type="tip">
-You can install just one of the plugins if you only need components+themes (acss-kit) or just utility classes (acss-utilities). They're designed to work together but are independent.
+  `/utility-add`, `/utility-list`, `/utility-tune`, and `/utility-bridge` are
+  all part of acss-kit since v1.0.0. No separate utility plugin install is
+  needed.
 </Aside>
 
-## Install only acss-kit
+## Also install style-agent (optional)
 
-If you don't need utility classes:
-
-```text
-/plugin marketplace add shawn-sandy/agentic-acss-plugins
-/plugin install acss-kit@shawn-sandy-agentic-acss-plugins
-```
-
-## Install only acss-utilities
-
-If you have an existing component system and just want the utility classes:
+style-agent adds framework-agnostic CSS authoring commands (`/css-to-class`,
+`/inline-style-to-class`, `/create-utilities`). Install it alongside acss-kit
+if you want those workflows:
 
 ```text
-/plugin marketplace add shawn-sandy/agentic-acss-plugins
-/plugin install acss-utilities@shawn-sandy-agentic-acss-plugins
+/plugin install style-agent@shawn-sandy-agentic-acss-plugins
 ```
-
-<Aside type="note">
-When using acss-utilities without acss-kit, run `/utility-add --no-bridge` to skip generating the token bridge (which expects acss-kit theme files).
-</Aside>
 
 ## Verify installation
 
@@ -74,7 +69,8 @@ After installing, confirm the slash commands are available:
 /utility-list      # lists all utility families and classes
 ```
 
-Both commands are read-only and make no changes to your project — they're safe to run at any time to explore what's available.
+Both commands are read-only and make no changes to your project — they're safe
+to run at any time to explore what's available.
 
 ## Updating the plugins
 
@@ -82,16 +78,18 @@ To get the latest version of a plugin:
 
 ```text
 /plugin update acss-kit@shawn-sandy-agentic-acss-plugins
-/plugin update acss-utilities@shawn-sandy-agentic-acss-plugins
+/plugin update style-agent@shawn-sandy-agentic-acss-plugins
 ```
 
 ## Local development install
 
-If you've cloned the plugin repo and want to test local changes without publishing:
+If you've cloned the plugin repo and want to test local changes without
+publishing:
 
 ```bash
 # From the acss-plugins repo root
 claude --plugin-dir ./plugins/acss-kit
 ```
 
-This loads acss-kit directly from the local directory, bypassing the marketplace.
+This loads acss-kit directly from the local directory, bypassing the
+marketplace.
