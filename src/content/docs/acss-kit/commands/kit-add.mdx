@@ -45,9 +45,9 @@ When you run `/kit-add <component>`, the command routes to the dedicated `compon
 
 <Steps>
 
-1. **Lookup** — find the component skill at `skills/component-<name>/SKILL.md`. Normalize the component name to lowercase before resolving the path.
+1. **Init check** — verify `sass` is in `devDependencies` and that `ui.tsx` exists in the target directory. If `ui.tsx` is missing, run the foundation initialization from `kit-core` (see [Foundation CSS install](#foundation-css-install) below).
 
-2. **Init check** — verify `sass` is in `devDependencies` and that `ui.tsx` exists in the target directory. If `ui.tsx` is missing, run the foundation initialization from `kit-core` (see [Foundation CSS install](#foundation-css-install) below).
+2. **Lookup** — find the component skill at `skills/component-<name>/SKILL.md`. Normalize the component name to lowercase before resolving the path.
 
 3. **Resolve dependency tree** — read the Generation Contract in the component's `reference.md` to identify all dependencies. For example, `dialog` depends on `button`; `checkbox` depends on `input`.
 
