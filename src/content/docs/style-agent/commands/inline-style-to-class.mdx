@@ -7,6 +7,13 @@ import { Aside, Steps } from "@astrojs/starlight/components";
 
 Migrate inline styles to a reusable, maintainable CSS class. Accepts an HTML `style` attribute, a JSX `style={{ ... }}` object, or a `<style>` block — detects the project stylesheet automatically, replaces every hard-coded value with a CSS variable (reusing an existing one when it matches, creating a new one otherwise), and appends the tokenized class to the stylesheet.
 
+<Aside type="tip">
+  **IDE selection supported:** select an element or style block in your editor
+  (VS Code, JetBrains), then run `/inline-style-to-class [name]`. The skill
+  reads the selection, generates the class, and edits the source file in-place —
+  replacing the inline style with the new class reference automatically.
+</Aside>
+
 <Aside type="note">
   As of style-agent v0.4.0, hard-coded colors, units, and values are tokenized
   to CSS variables automatically. The original literal is kept as the `var()`
@@ -28,11 +35,25 @@ Migrate inline styles to a reusable, maintainable CSS class. Accepts an HTML `st
 
 ## Input forms
 
-| Form                  | Example                                                           |
-| --------------------- | ----------------------------------------------------------------- |
-| HTML inline attribute | `<div style="background: var(--surface-1); padding: 1rem">`       |
-| JSX style object      | `<Button style={{ backgroundColor: theme.primary, padding: 8 }}>` |
-| `<style>` block       | `<style>.hero { color: red; padding: 2rem; }</style>`             |
+| Form                  | Example                                                                            |
+| --------------------- | ---------------------------------------------------------------------------------- |
+| IDE selection         | Select an element or style block in your editor, then run `/inline-style-to-class` |
+| HTML inline attribute | `<div style="background: var(--surface-1); padding: 1rem">`                        |
+| JSX style object      | `<Button style={{ backgroundColor: theme.primary, padding: 8 }}>`                  |
+| `<style>` block       | `<style>.hero { color: red; padding: 2rem; }</style>`                              |
+
+### IDE selection detection
+
+When invoked from an IDE (VS Code, JetBrains), Claude Code includes the selected text along with the source file path and line range. The skill detects this by checking for file-context metadata attached to the user's prompt.
+
+When IDE selection context is present:
+
+1. The **source file** and **line range** are captured for in-place editing in step 7.
+2. The selected text is used as the input — no pasting or prompt content needed.
+3. If the selection is a full element (e.g. `<div style="..." class="existing">`), the element tag and existing classes are preserved during refactoring and in-place editing is enabled.
+4. If the selection covers only a `style` attribute value without the enclosing element tag, the skill reads surrounding lines to expand context to the full containing element. If the element boundary cannot be determined, in-place editing is disabled and the refactored source is emitted to chat instead (the summary notes which file and line to update manually).
+
+When no IDE selection context is detected, the skill falls back to parsing input from the user's prompt text.
 
 ## Examples
 
@@ -63,7 +84,8 @@ Convert a `<style>` block:
 
 <Steps>
 
-1. **Parse input.** Detect the form of the input:
+1. **Parse input.** Check for IDE selection context first, then fall back to prompt text:
+   - **IDE selection** — if the user's prompt includes file-context metadata (source path + line range + selected text), use the selected text as input and record the source file path and line range for in-place editing in step 7. Determine the form (HTML attribute, JSX object, or `<style>` block) from the selected content using the same detection rules below.
    - **HTML inline attribute** — match `style="..."` or `style='...'`; split on `;`; parse `property: value` pairs. Extract the surrounding element tag if present.
    - **JSX style object** — match `style={{...}}`; extract the object literal body; convert camelCase keys to kebab-case. Numeric literal values get a "verify unit" warning. JS expression values that cannot be resolved emit `<property>: /* unresolved — was JS expression */` in the output class.
    - **`<style>` block** — extract content between `<style>` and `</style>`; parse rules. If multiple rules are present, ask via `AskUserQuestion` whether to merge all declarations or pick a specific rule.
@@ -82,8 +104,9 @@ Convert a `<style>` block:
    - **HTML** — remove `style="..."` entirely if all declarations migrated; add the new class to the existing `class` attribute (or create one). All other attributes are preserved unchanged.
    - **JSX** — same logic using `className`. Partially-migrated objects preserve remaining key/value pairs in the style prop.
    - **`<style>` block** — emit a comment noting the rule was extracted; the `<style>` block is not rewritten automatically.
+   - **In-place editing (IDE selection)** — when the source file path and line range were captured in step 1, use `Edit` to replace the original selected text in the source file with the refactored version. If the selected text appears more than once in the file, fall back to emitting the refactored source to chat and note which file and line to update.
 
-8. **Print a summary.** Reports the class name (provided or auto-generated), any coercion warnings, the target stylesheet path, declaration count migrated, variables reused (each `value → --name`), variables created (each `--name: value` and the file it was declared in), unresolved JS expression count, and numeric unit warnings.
+8. **Print a summary.** Reports the class name (provided or auto-generated), any coercion warnings, the target stylesheet path, declaration count migrated, variables reused (each `value → --name`), variables created (each `--name: value` and the file it was declared in), source file edited in-place (if IDE selection was used — shows the file path and confirmation, or notes that the refactored source was emitted to chat instead), unresolved JS expression count, and numeric unit warnings.
 
 </Steps>
 
