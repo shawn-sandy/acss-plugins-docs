@@ -23,7 +23,7 @@ Works with plain CSS, compiled SCSS output, Tailwind, or any utility-first workf
     Extract a list of CSS utility classes from an HTML element or class string into a single, semantically named CSS class. Resolves declarations by grepping your project's own CSS files.
   </Card>
   <Card title="/inline-style-to-class" icon="pencil">
-    Convert an inline `style` attribute, JSX `style` object, or `<style>` block into a single named CSS class and append it to the project stylesheet.
+    Convert an inline `style` attribute, JSX `style` object, or `<style>` block into a single named CSS class and append it to the project stylesheet. IDE selection supported — select an element in VS Code or JetBrains and the skill edits the source file in-place.
   </Card>
   <Card title="/create-utilities" icon="add-document">
     Generate a utility class string from a plain-language visual description. Detects acss-kit, Tailwind, Bootstrap, or falls back to Tailwind-compatible naming.
@@ -58,9 +58,10 @@ Each command delegates all its behavior to a corresponding skill file. The skill
 
 ## Version history
 
-| Version | Changes                                                                       |
-| ------- | ----------------------------------------------------------------------------- |
-| 0.4.0   | `/inline-style-to-class` now tokenizes all hard-coded values to CSS variables |
-| 0.3.0   | Added `/create-utilities`                                                     |
-| 0.2.0   | Added `/inline-style-to-class`                                                |
-| 0.1.0   | Initial release with `/css-to-class`                                          |
+| Version    | Changes                                                                                                   |
+| ---------- | --------------------------------------------------------------------------------------------------------- |
+| Unreleased | `/inline-style-to-class` adds IDE selection support — in-place editing from VS Code / JetBrains selection |
+| 0.4.0      | `/inline-style-to-class` now tokenizes all hard-coded values to CSS variables                             |
+| 0.3.0      | Added `/create-utilities`                                                                                 |
+| 0.2.0      | Added `/inline-style-to-class`                                                                            |
+| 0.1.0      | Initial release with `/css-to-class`                                                                      |
