@@ -5,8 +5,8 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 # Upstream layout cache
 
-- **verified-at-sha:** `9a1da00`
-- **verified-at:** `2026-06-02T10:09:00Z`
+- **verified-at-sha:** `39ad27d`
+- **verified-at:** `2026-06-09T10:08:26Z`
 
 ## Plugin roots
 
@@ -25,5 +25,4 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 - `acss-utilities` was removed from upstream in commit `c6049e5` (chore: remove deprecated acss-utilities plugin). The `plugins/acss-utilities/` directory no longer exists. Docs in `src/content/docs/acss-utilities/` are preserved for reference and flagged with removal notices.
 - `style-agent` is present upstream at `plugins/style-agent/` and has a corresponding docs section in this repo at `src/content/docs/style-agent/`.
-- As of `9a1da00` (style-agent v0.4.0), `/inline-style-to-class` tokenizes all hard-coded values to CSS variables automatically.
-- As of `9a1da00` (acss-kit v1.2.1), all 15 per-component skills set `disable-model-invocation: true` to stay out of auto-context.
+- Full discovery run performed at `39ad27d`: found `plugins/acss-kit` and `plugins/style-agent`; `plugins/acss-utilities` absent (removed upstream).
