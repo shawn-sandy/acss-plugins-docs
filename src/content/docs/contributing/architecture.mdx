@@ -4,6 +4,13 @@ description: How Claude Code plugins are structured, how commands delegate to sk
 ---
 
 import ComponentPreview from "~/components/ComponentPreview.astro";
+import { Aside } from "@astrojs/starlight/components";
+
+<Aside type="note">
+  This page covers contributor/maintainer details for the upstream plugin
+  repository. For end-user documentation, start with the [acss-kit
+  overview](/acss-plugins-docs/acss-kit/overview).
+</Aside>
 
 ## Plugin manifest
 
@@ -23,17 +30,45 @@ The version here is authoritative. Do not add a `version` field to `marketplace.
 
 ```
 plugins/acss-kit/
-├── .claude-plugin/plugin.json   # manifest
-├── commands/*.md                # slash commands (thin shells → skill delegation)
-├── skills/<name>/SKILL.md       # skill definitions
-├── scripts/                     # Python 3 stdlib scripts
-├── assets/                      # foundation components, schemas, templates
-└── docs/                        # user-facing developer guides
+  .claude-plugin/
+    plugin.json                # Authoritative version source; read by Claude Code + /plugin update
+  assets/
+    foundation/
+      ui.tsx                   # Polymorphic UI base — copied verbatim into user projects
+  commands/
+    kit-add.md                 # /kit-add; delegates to skills/kit-core/SKILL.md
+    kit-list.md                # /kit-list; delegates to skills/kit-core/SKILL.md
+    theme-create.md            # /theme-create; delegates to skills/styles/SKILL.md
+    theme-brand.md             # /theme-brand; delegates to skills/styles/SKILL.md
+    theme-update.md            # /theme-update; delegates to skills/styles/SKILL.md
+    theme-extract.md           # /theme-extract; delegates to skills/styles/SKILL.md
+  skills/
+    kit-core/
+      SKILL.md                 # Orchestrator for /kit-create, /kit-list, /kit-sync, /kit-update, Form/HTML/Style-Tune modes
+      references/
+        architecture.md        # UI polymorphic chain, compound pattern, data-attr selectors
+        accessibility.md       # WCAG rationale, useDisabledState source, WCAG checklist
+        composition.md         # Component categories, decision tree, inline-types pattern
+        css-variables.md       # Naming convention, fallbacks, rem conversion
+        inline-components.md   # Badge, Tag, Heading, Text/Paragraph, Details, Progress
+        form.md                # Form composition (legacy; superseded by kit-core Form Mode)
+        foundation.md          # UI polymorphic base documentation
+    component-<name>/          # 15 per-component skills (alert, button, card, …)
+      SKILL.md                 # Component skill (description, 5-step workflow)
+      reference.md             # Nine-section reference doc (canonical example: component-button/)
+    styles/
+      SKILL.md                 # Theme generation workflow (4 flows)
+      references/
+        role-catalogue.md      # 15 required + 3 optional --color-* roles, contrast pairings
+        palette-algorithm.md   # OKLCH lightness targets, state hue offsets
+        theme-schema.md        # Internal JSON schema for the round-trip scripts
+  scripts/                     # Python 3 stdlib helpers
+  docs/                        # User-facing developer guides (architecture, prompt-book, etc.)
 ```
 
 ## Commands → Skills
 
-Commands are thin shells. A command `.md` file defines the YAML front-matter (name, description, flags) and then delegates execution to a skill:
+Commands are thin shells. Each command `.md` file defines the YAML front-matter (name, description, flags) and then delegates execution to a skill:
 
 ```markdown
 ---
@@ -47,6 +82,76 @@ Delegate to the `kit-core` skill (orchestrator). `kit-core` resolves the compone
 The skill does all the heavy lifting: file resolution, generation, validation, output. For example, `/kit-add button` produces:
 
 <ComponentPreview code={`<button class="btn btn--primary">Click me</button>`} />
+
+## How to add a new component reference
+
+1. **Run `/acss-kit-component-author <name>`** to scaffold `skills/component-<name>/SKILL.md` + `skills/component-<name>/reference.md`. Or create them manually following the shape of `skills/component-button/`.
+
+2. **Add a Generation Contract block:**
+
+   ```markdown
+   ## Generation Contract
+
+   export_name: ComponentName
+   file: component-name/component-name.tsx
+   scss: component-name/component-name.scss
+   imports: [../ui]
+   dependencies: [other-component-name]
+   ```
+
+   Every field is required. `dependencies` is an array of component names (lowercase, matching their reference doc names). An empty array `[]` means a leaf component.
+
+3. **Add the props interface, CSS variables, and a usage snippet** following the pattern in existing reference docs (see `skills/component-button/reference.md` for the most complete example).
+
+4. **Cross-link the relevant shared references** within the doc body:
+   - Polymorphic `UI` type chain → `references/architecture.md`
+   - `useDisabledState` hook → `references/accessibility.md`
+   - Compound component pattern → `references/composition.md`
+   - CSS variable naming / fallback strategy → `references/css-variables.md`
+
+5. **All fpkit source references must use full GitHub URLs pinned to a tag or commit SHA** — never repo-relative paths and never `blob/main`. See `.claude/rules/fpkit-references.md` for the full policy.
+
+## `.acss-target.json` — target directory contract
+
+`.acss-target.json` at the project root tells the plugin where to write generated components and records the detected build stack. The full shape:
+
+```json
+{
+  "componentsDir": "src/components/fpkit",
+  "utilitiesDir": "src/styles",
+  "stack": {
+    "framework": "vite",
+    "frameworkVersion": "5.4.0",
+    "bundler": "vite",
+    "cssPipeline": ["sass"],
+    "tsconfig": true,
+    "entrypointFile": "src/main.tsx",
+    "cssEntryFile": "src/styles/index.scss",
+    "detectedAt": "2026-05-01T00:00:00Z"
+  }
+}
+```
+
+`componentsDir` and `utilitiesDir` are optional — the detectors fall back to `src/components/fpkit` and `src/styles`. The `stack` block is added by `/setup` step 7.5 (`scripts/detect_css_entry.py`) and is also optional; `verify_integration.py` emits a reason pointing back to `detect_stack.py` when it is absent.
+
+`stack.cssEntryFile` is the stylesheet root (e.g. `src/styles/index.scss`); `entrypointFile` is the TSX root (typically `src/main.tsx`). They are independent: `verify_integration.py` accepts theme imports living in either file.
+
+Commit `.acss-target.json` to git so subsequent `/kit-add` and `/theme-create` runs reuse the same configuration.
+
+## Version bump checklist
+
+Before committing any plugin change:
+
+1. Bump the version in `.claude-plugin/plugin.json` using `/release-plugin acss-kit` (or manually).
+2. Confirm that all new `references/` file links to fpkit source use full GitHub URLs.
+3. Update `marketplace.json` description if the change is user-facing. Do not add a `version` key to the `marketplace.json` entry — `plugin.json` is the authoritative version source.
+4. Update `README.md` if commands or behavior changed.
+
+Docs-only additions (new `docs/*.md` files) do not require a version bump, as they do not change command behavior or generated output.
+
+## `assets/foundation/ui.tsx`
+
+This file is copied verbatim into user projects. Changes to it are rare and high-impact — every project that has already run `/kit-add` keeps the old copy (skip-existing rule). Treat changes to `ui.tsx` like a breaking change: note them prominently in the CHANGELOG and consider bumping the minor version.
 
 ## Hooks
 
@@ -66,4 +171,4 @@ A PreToolUse hook blocks commits and pushes to `main`.
 - `scss-conventions.md` — fires on `**/*.scss`, `**/*.css`
 - `python-scripts.md` — fires on `plugins/*/scripts/**`
 - `command-authoring.md` — fires on `plugins/*/commands/*.md`
-- `fpkit-references.md` — fires on reference docs
+- `fpkit-references.md` — fires on `plugins/*/skills/*/references/**` and `plugins/*/skills/component-*/reference.md`

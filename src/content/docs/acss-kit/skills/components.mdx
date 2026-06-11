@@ -26,7 +26,7 @@ In v1.2.0, `/kit-add <component>` now routes to `skills/component-<name>/SKILL.m
 
 1. **Step 0 — Exit plan mode.** If the session is in plan mode, exit it before any other work. Step B reads `package.json` and copies `ui.tsx`, and Step D writes the generated component files — plan mode would block both. The skill only stays in plan mode when the user asked for a description without running anything.
 
-2. **Step A — Resolve component name.** The skill looks up the requested name in the component reference catalogue (`skills/components/references/catalog.md`). Names are normalized (case-insensitive, hyphenated or camelCase both accepted). If a name doesn't match, the skill lists the closest alternatives and stops.
+2. **Step A — Resolve component name.** The skill looks up the requested name in the component reference catalogue (previously `skills/components/references/catalog.md`; removed in v1.2.0 when each component moved to its own `skills/component-<name>/` directory). Names are normalized (case-insensitive, hyphenated or camelCase both accepted). If a name doesn't match, the skill lists the closest alternatives and stops.
 
 3. **Step B — Verify sass and copy `ui.tsx` and `foundation.css`.** Checks `devDependencies` in `package.json` for `sass`. If missing, halts with an install command. Then applies the three-case foundation install matrix (see [Foundation CSS install](/acss-plugins-docs/acss-kit/skills/components#foundation-css-install) below).
 
@@ -79,7 +79,7 @@ The skill uses this contract to verify output before writing. If the generated f
 
 ## Component reference docs
 
-Each component has a spec doc in `skills/components/references/components/<name>.md`. The spec includes:
+In v1.0.0–v1.1.x, each component had a spec doc at `skills/components/references/components/<name>.md`. In v1.2.0, these moved to per-component skill directories: `skills/component-<name>/reference.md` (one directory per component). The spec sections are the same:
 
 - **Category** — simple / interactive / form / layout / complex
 - **Generation contract** — exact file names and import paths
