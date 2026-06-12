@@ -5,19 +5,21 @@ description: Generate one or more accessible React components into your project 
 
 import { Aside, Steps } from "@astrojs/starlight/components";
 
-Generate fpkit-style React components (`.tsx` + `.scss`) directly into your project. Dependency trees are resolved automatically — requesting `dialog` also generates `button` and `overlay` if they don't exist yet.
+Generate fpkit-style React components (`.tsx` + `.scss`) directly into your project. Dependency trees are resolved automatically — requesting `dialog` also generates `button` and `overlay` if they don't exist yet. Pass `--target=html` for static HTML + vanilla JS output instead.
 
 ## Syntax
 
 ```text
 /kit-add <component> [component2 component3 ...]
+/kit-add --target=html <component> [component2 ...]
 ```
 
 ## Arguments
 
-| Argument    | Required | Description                                                      |
-| ----------- | -------- | ---------------------------------------------------------------- |
-| `component` | Yes      | One or more component names (space-separated). Case-insensitive. |
+| Argument        | Required | Description                                                                                          |
+| --------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| `component`     | Yes      | One or more component names (space-separated). Case-insensitive.                                     |
+| `--target=html` | No       | Generate static HTML + SCSS + vanilla JS instead of React TSX. Defaults to React (`--target=react`). |
 
 ## Examples
 
@@ -37,6 +39,12 @@ Generate a complex component (dependencies resolved automatically):
 
 ```text
 /kit-add table
+```
+
+Generate static HTML output (for non-React projects):
+
+```text
+/kit-add --target=html button card alert
 ```
 
 ## Workflow
@@ -174,6 +182,33 @@ Every generated component includes:
 - `aria-label`, `aria-labelledby`, or `aria-describedby` where applicable
 - `:focus-visible` styles using `--color-focus-ring`
 - WCAG-appropriate color contrast via theme `--color-*` tokens
+
+## HTML Target (`--target=html`)
+
+Pass `--target=html` to generate static HTML + SCSS + vanilla JS output instead of React TSX — useful for non-React projects, server-rendered apps, static sites, and prototypes.
+
+```text
+/kit-add --target=html button card alert
+```
+
+### HTML output files
+
+Each component produces up to three files, written to `components/html/` by default (configurable via `.acss-html-target.json`):
+
+| File          | Contents                                                          |
+| ------------- | ----------------------------------------------------------------- |
+| `<name>.html` | Markup fragment (no `<html>`/`<head>`/`<body>` wrapper)           |
+| `<name>.scss` | SCSS — byte-identical to the React generator output               |
+| `<name>.js`   | Plain ES module with `init()` function — stateful components only |
+
+On first run, `_stateful.js` is also copied into the target directory. This vanilla-JS helper (`wireDisabled`, `wireDisabledAll`) is required by stateful components (Button, Alert, Dialog, Popover, Checkbox, Input, IconButton).
+
+### HTML Target notes
+
+- Only components whose `reference.md` includes an `## HTML Template` section are supported. Run `/kit-list <component>` and look for `HTML output: Verified` to check before generating.
+- The SCSS output is framework-agnostic — identical to the React version.
+- The `.js` module is a plain ES module; no bundler is required. Import it via a `<script type="module">` tag.
+- Class names, `data-*` attributes, and ARIA attributes are identical to the React output.
 
 <Aside type="tip">
 Run `/kit-list <component>` before `/kit-add` to preview the generation contract, props, CSS tokens, and dependencies for a specific component without generating it.
