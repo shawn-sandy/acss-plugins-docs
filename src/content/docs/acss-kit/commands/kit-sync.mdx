@@ -3,12 +3,17 @@ title: /kit-sync
 description: Bulk-install every acss-kit component, foundation, and starter theme into a project, tracked by .acss-kit/manifest.json for safe future updates.
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 Vendor every component listed in the catalogue, the `ui.tsx` foundation, and a starter OKLCH theme into your project in a single command. `/kit-sync` records each generated file's normalized SHA256 in `.acss-kit/manifest.json` so [`/kit-update`](/acss-plugins-docs/acss-kit/commands/kit-update) can later re-copy unmodified files without clobbering your edits.
 
 <Aside type="note">
-`Form` is **not** vendored by `/kit-sync` — it lives behind the `component-form` skill and is generated on-demand from a natural-language prompt. Run [`/setup`](/acss-plugins-docs/acss-kit/commands/setup) plus a form-shaped prompt (e.g. *"create a signup form with email and password"*) to bootstrap it.
+  `Form` is **not** vendored by `/kit-sync` — it lives behind the
+  `component-form` skill and is generated on-demand from a natural-language
+  prompt. Run [`/setup`](/acss-plugins-docs/acss-kit/commands/setup) plus a
+  form-shaped prompt (e.g. *"create a signup form with email and password"*) to
+  bootstrap it.
 </Aside>
 
 ## Syntax
@@ -19,13 +24,13 @@ Vendor every component listed in the catalogue, the `ui.tsx` foundation, and a s
 
 ## Arguments
 
-| Flag | Description |
-|---|---|
-| `--target=<dir>` | Override the components directory. Defaults to `componentsDir` from `.acss-target.json`, falling back to `src/components/fpkit`. |
-| `--styles-dir=<dir>` | Override the styles directory. Defaults to `stylesDir` from `.acss-target.json`, falling back to `src/styles`. |
-| `--seed=<hex>` | Seed colour for theme generation. If omitted, the command prompts. |
-| `--skip-styles` | Components-only sync; do not seed a theme. |
-| `--dry-run` | Print the plan tree without writing any files or the manifest. |
+| Flag                 | Description                                                                                                                      |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `--target=<dir>`     | Override the components directory. Defaults to `componentsDir` from `.acss-target.json`, falling back to `src/components/fpkit`. |
+| `--styles-dir=<dir>` | Override the styles directory. Defaults to `stylesDir` from `.acss-target.json`, falling back to `src/styles`.                   |
+| `--seed=<hex>`       | Seed colour for theme generation. If omitted, the command prompts.                                                               |
+| `--skip-styles`      | Components-only sync; do not seed a theme.                                                                                       |
+| `--dry-run`          | Print the plan tree without writing any files or the manifest.                                                                   |
 
 ## Examples
 
@@ -45,7 +50,7 @@ The command delegates to the [`kit-sync` skill](/acss-plugins-docs/acss-kit/skil
 
 1. **Preflight** — detect the project root, confirm Sass is installed, and read any existing manifest (an existing manifest routes every file through drift-detection before writing).
 
-2. **Enumerate the catalog** — read every component named in the verification table plus the inline catalogue entries (Badge, Tag, Heading, Text/Paragraph, Details, Progress). Excludes `Form` and the `ui.tsx` foundation.
+2. **Enumerate the catalog** — glob `skills/component-*/SKILL.md` to discover every per-component skill, then read `kit-core/references/inline-components.md` to include the inline-only entries (Badge, Tag, Heading, Text/Paragraph, Details, Progress). Excludes `Form` and the `ui.tsx` foundation.
 
 3. **Resolve dependencies** — walk each component's `Generation Contract` recursively and union into one ordered list, leaves first.
 
@@ -65,20 +70,33 @@ The command delegates to the [`kit-sync` skill](/acss-plugins-docs/acss-kit/skil
 
 </Steps>
 
+The inline-only components vendored in step 2 (Badge, Tag, Heading, Text/Paragraph, Details, Progress) are lightweight HTML primitives that render without a dedicated TSX file:
+
+<ComponentPreview
+  code={`<span class="badge">Badge</span>
+<span class="tag">Tag</span>
+<h4>Heading</h4>
+<p>Text / Paragraph</p>
+<details><summary>Details</summary><p>Content</p></details>
+<progress value="60" max="100">60%</progress>`}
+/>
+
 ## Output
 
-| File | Purpose |
-|---|---|
-| `<targetDir>/<Component>.tsx` + `.scss` | Every component vendored from the catalogue. |
-| `<targetDir>/ui.tsx` | The polymorphic `UI` foundation (copied once). |
-| `<stylesDir>/theme/light.css`, `dark.css` | OKLCH theme CSS generated from the seed colour. |
-| `acss-kit.theme.json` | Seed-colour record so re-runs reuse the same palette. |
-| `.acss-kit/manifest.json` | SHA256 manifest used by `/kit-update` for drift detection. |
+| File                                      | Purpose                                                    |
+| ----------------------------------------- | ---------------------------------------------------------- |
+| `<targetDir>/<Component>.tsx` + `.scss`   | Every component vendored from the catalogue.               |
+| `<targetDir>/ui.tsx`                      | The polymorphic `UI` foundation (copied once).             |
+| `<stylesDir>/theme/light.css`, `dark.css` | OKLCH theme CSS generated from the seed colour.            |
+| `acss-kit.theme.json`                     | Seed-colour record so re-runs reuse the same palette.      |
+| `.acss-kit/manifest.json`                 | SHA256 manifest used by `/kit-update` for drift detection. |
 
 ## Re-syncing
 
 Re-running `/kit-sync` after edits is safe — files marked `modified` in the manifest are skipped and listed in the summary. For routine "pick up upstream improvements" work, use [`/kit-update`](/acss-plugins-docs/acss-kit/commands/kit-update), which is the dedicated drift-aware refresh path.
 
 <Aside type="tip">
-For step-by-step semantics (manifest schema, hash normalization rules, `--dry-run` behaviour, the interplay between `/kit-sync` and `/kit-update`), see the [`kit-sync` skill](/acss-plugins-docs/acss-kit/skills/kit-sync).
+  For step-by-step semantics (manifest schema, hash normalization rules,
+  `--dry-run` behaviour, the interplay between `/kit-sync` and `/kit-update`),
+  see the [`kit-sync` skill](/acss-plugins-docs/acss-kit/skills/kit-sync).
 </Aside>

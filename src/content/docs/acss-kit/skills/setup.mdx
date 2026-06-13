@@ -3,34 +3,35 @@ title: setup skill
 description: Bootstrap workflow for a new acss-kit project — verifies React/TypeScript/Sass, configures the components target, and seeds the foundation.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 The `setup` skill is the workflow behind the [`/setup`](/acss-plugins-docs/acss-kit/commands/setup) command. It runs a single-pass bootstrap that prepares a React + TypeScript project for everything else acss-kit does.
 
-| | |
-|---|---|
-| **Triggered by** | `/setup` (and natural-language phrases like "bootstrap acss-kit", "set up the kit") |
-| **Pre-conditions** | React + TypeScript in `package.json`; `sass` or `sass-embedded` available |
-| **Idempotent** | Yes — every step checks for existing artefacts before writing |
-| **Plan mode** | Exits plan mode immediately so file writes can run |
+|                    |                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| **Triggered by**   | `/setup` (and natural-language phrases like "bootstrap acss-kit", "set up the kit") |
+| **Pre-conditions** | React + TypeScript in `package.json`; `sass` or `sass-embedded` available           |
+| **Idempotent**     | Yes — every step checks for existing artefacts before writing                       |
+| **Plan mode**      | Exits plan mode immediately so file writes can run                                  |
 
 ## Steps
 
-The skill executes nine sequential checks, each guarded by an existence check so re-runs are safe. Step 0 unblocks the rest — every subsequent step shells out to a Python detector or writes a file, both of which plan mode would block.
+The skill executes ten steps (0–8, with an interstitial step 7.5), each guarded by an existence check so re-runs are safe. Step 0 unblocks the rest — every subsequent step shells out to a Python detector or writes a file, both of which plan mode would block.
 
-| Step | Action | Script / Asset |
-|---|---|---|
-| 0 | Exit plan mode if the session is in plan mode | — |
-| 1 | Verify React + TypeScript present | `detect_stack.py` |
-| 2 | Detect React major version, warn on 19+ | `detect_stack.py` |
-| 3 | Detect package manager (npm, pnpm, yarn, bun) | `detect_package_manager.py` |
-| 4 | Verify Sass installed; halt with install instructions if missing | `detect_stack.py` |
-| 5 | Set components target via prompt or `.acss-target.json` | `detect_target.py` |
-| 6 | Copy `ui.tsx` from plugin assets | `assets/ui.tsx` |
-| 7 | Seed `light.css` and `dark.css` from a hex seed (skipped with `--no-theme`) | `generate_palette.py` + `tokens_to_css.py` |
-| 8 | Wire theme imports into the project's CSS/SCSS entry point | — |
+| Step | Action                                                                      | Script / Asset                             |
+| ---- | --------------------------------------------------------------------------- | ------------------------------------------ |
+| 0    | Exit plan mode if the session is in plan mode                               | —                                          |
+| 1    | Verify React project and locate `projectRoot`                               | `detect_target.py`                         |
+| 2    | Detect React major version, warn on 19+                                     | reads `package.json`                       |
+| 3    | Detect package manager (npm, pnpm, yarn, bun)                               | `detect_package_manager.py`                |
+| 4    | Print Sass install command if missing (does not execute)                    | reads `package.json`                       |
+| 5    | Set components target via prompt or `.acss-target.json`                     | `detect_target.py`                         |
+| 6    | Copy `ui.tsx` from plugin assets                                            | `assets/foundation/ui.tsx`                 |
+| 7    | Seed `light.css` and `dark.css` from a hex seed (skipped with `--no-theme`) | `generate_palette.py` + `tokens_to_css.py` |
+| 7.5  | Wire theme imports into the project's CSS/SCSS entry point                  | `detect_css_entry.py`                      |
+| 8    | Print summary (`created[]` vs `kept[]`)                                     | —                                          |
 
-After the nine checks complete, the skill prints a summary listing `created[]` vs `kept[]` so you can see exactly which files were written and which were left untouched.
+After the ten checks complete, the skill prints a summary listing `created[]` vs `kept[]` so you can see exactly which files were written and which were left untouched.
 
 ## Output contract
 
@@ -46,15 +47,16 @@ src/styles/theme/dark.css        # if --no-theme not set
 
 ## Failure handling
 
-| Failure | Behaviour |
-|---|---|
-| React or TypeScript missing | Halt with copy-paste install command |
-| Sass missing | Halt with `pnpm add -D sass` (or pkg-manager equivalent) |
-| Theme generation fails WCAG | Roll back theme files; bootstrap continues without seed theme |
-| Target dir already populated | Keep existing files; record in `kept[]` |
+| Failure                      | Behaviour                                                     |
+| ---------------------------- | ------------------------------------------------------------- |
+| React or TypeScript missing  | Halt with copy-paste install command                          |
+| Sass missing                 | Halt with `pnpm add -D sass` (or pkg-manager equivalent)      |
+| Theme generation fails WCAG  | Roll back theme files; bootstrap continues without seed theme |
+| Target dir already populated | Keep existing files; record in `kept[]`                       |
 
 <Aside type="note">
-The skill never deletes files. If a previous bootstrap left partial state, a re-run will fill in only what's missing.
+  The skill never deletes files. If a previous bootstrap left partial state, a
+  re-run will fill in only what's missing.
 </Aside>
 
 ## Related

@@ -9,13 +9,18 @@ Run `/kit-list` in a Claude Code session to see the live catalogue with the full
 
 ## Quick reference
 
-| Category    | Components                                 |
-| ----------- | ------------------------------------------ |
-| Simple      | badge, icon, link, divider                 |
-| Interactive | button, checkbox, toggle, tabs             |
-| Form        | field, input, select, textarea, form-group |
-| Layout      | card, alert, banner                        |
-| Complex     | dialog, nav, popover, table, toast         |
+As of acss-kit v1.2.0, the catalogue has 15 per-component skills plus a set of inline-only components that can be generated via `/kit-create`.
+
+| Category        | Components                                                                      |
+| --------------- | ------------------------------------------------------------------------------- |
+| **Simple**      | icon, img, link, list                                                           |
+| **Interactive** | button, icon-button, checkbox                                                   |
+| **Form**        | field, input                                                                    |
+| **Layout**      | card, nav                                                                       |
+| **Complex**     | alert, dialog, popover, table                                                   |
+| **Inline-only** | badge, tag, heading, text/paragraph, details, progress (no dedicated skill yet) |
+
+Each per-component skill generates a `.tsx` + `.scss` pair directly into your project. Use `/kit-list` in a Claude Code session to see props, CSS tokens, dependencies, and generation contracts for each component.
 
 Each component entry shows: props interface, CSS tokens (`--comp-*`), dependencies, ARIA behavior, and a usage example.
 
