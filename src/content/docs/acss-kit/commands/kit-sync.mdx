@@ -4,6 +4,7 @@ description: Bulk-install every acss-kit component, foundation, and starter them
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 Vendor every component listed in the catalogue, the `ui.tsx` foundation, and a starter OKLCH theme into your project in a single command. `/kit-sync` records each generated file's normalized SHA256 in `.acss-kit/manifest.json` so [`/kit-update`](/acss-plugins-docs/acss-kit/commands/kit-update) can later re-copy unmodified files without clobbering your edits.
 
@@ -68,6 +69,17 @@ The command delegates to the [`kit-sync` skill](/acss-plugins-docs/acss-kit/skil
 10. **Summary** — print created / skipped counts plus next-step hints (`/kit-update`, `/kit-update --check`).
 
 </Steps>
+
+The inline-only components vendored in step 2 (Badge, Tag, Heading, Text/Paragraph, Details, Progress) are lightweight HTML primitives that render without a dedicated TSX file:
+
+<ComponentPreview
+  code={`<span class="badge">Badge</span>
+<span class="tag">Tag</span>
+<h4>Heading</h4>
+<p>Text / Paragraph</p>
+<details><summary>Details</summary><p>Content</p></details>
+<progress value="60" max="100">60%</progress>`}
+/>
 
 ## Output
 
