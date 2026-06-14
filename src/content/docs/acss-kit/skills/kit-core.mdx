@@ -89,6 +89,16 @@ When `/kit-create` is invoked, `kit-core` runs Creator Mode:
 
 Form-shaped requests ("create a signup form with email and password") route to Form Mode inside `kit-core`. Form Mode generates a form component by composing Input, Field, Checkbox, and Button components bottom-up.
 
+## HTML Target Mode
+
+`kit-core` also handles the HTML Target workflow, triggered by `/kit-add --target=html` or natural-language phrases like "static HTML components", "HTML version of `<component>`", or mentions of a non-React project.
+
+The HTML Target reads the same per-component `reference.md` files as the React workflow but extracts `## HTML Template` (markup fragment) and `## Vanilla JS` (ES module) sections instead of `## TSX Template`. The `## SCSS Template` output is identical for both targets.
+
+On first use, `kit-core` writes `.acss-html-target.json` at the project root to record the target directory (default `components/html/`), and copies `_stateful.js` into that directory — a vanilla-JS helper required by stateful components.
+
+See [`/kit-add --target=html`](/acss-plugins-docs/acss-kit/commands/kit-add#html-target---targethtml) for usage and the list of HTML-capable components.
+
 ## References
 
 The `kit-core/references/` directory holds shared reference documents:
