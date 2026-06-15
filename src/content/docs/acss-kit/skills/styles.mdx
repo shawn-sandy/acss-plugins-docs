@@ -6,11 +6,11 @@ description: The OKLCH palette algorithm, 18 semantic color roles, WCAG validati
 import { Aside } from "@astrojs/starlight/components";
 import ColorSwatch from "~/components/ColorSwatch.astro";
 
-The `styles` skill drives all four `/theme-*` commands. It defines the OKLCH palette math, the 18 semantic color role catalogue, the WCAG contrast pair validation contract, and the file format for theme output.
+The `styles` skill drives all theme-related commands. It defines the OKLCH palette math, the 18 semantic color role catalogue, the WCAG contrast pair validation contract, the file format for theme output, and the DESIGN.md / Figma variable adapter pipelines.
 
 ## Trigger
 
-Triggered by `/theme-create`, `/theme-brand`, `/theme-extract`, and `/theme-update`. Also invoked by the `style-tune` pilot skill when adjusting theme-layer tokens.
+Triggered by `/theme-create`, `/theme-brand`, `/theme-extract`, `/theme-update`, `/theme-from-design`, `/theme-from-figma`, and `/design-export`. Also invoked by the `style-tune` pilot skill when adjusting theme-layer tokens.
 
 ## OKLCH color space
 

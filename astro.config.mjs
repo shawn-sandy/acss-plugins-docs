@@ -92,6 +92,18 @@ export default defineConfig({
                   label: "/theme-update",
                   slug: "acss-kit/commands/theme-update",
                 },
+                {
+                  label: "/theme-from-design",
+                  slug: "acss-kit/commands/theme-from-design",
+                },
+                {
+                  label: "/theme-from-figma",
+                  slug: "acss-kit/commands/theme-from-figma",
+                },
+                {
+                  label: "/design-export",
+                  slug: "acss-kit/commands/design-export",
+                },
                 { label: "/style-tune", slug: "acss-kit/commands/style-tune" },
                 {
                   label: "/prompt-book",

@@ -1,0 +1,116 @@
+---
+title: /theme-from-design
+description: Generate a full acss-kit theme (colors, spacing, rounded, typography) from a DESIGN.md file.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
+import TypeScale from "~/components/TypeScale.astro";
+
+Consume a [DESIGN.md](https://github.com/google-labs-code/design.md) file and generate the project's complete theme token files — `light.css`, `dark.css`, `space-radius.css`, and `typography.css` — all WCAG contrast-validated.
+
+## Syntax
+
+```text
+/theme-from-design <DESIGN.md> [--out-dir=<dir>]
+```
+
+## Arguments
+
+| Argument    | Required | Default                                                                   | Description                                         |
+| ----------- | -------- | ------------------------------------------------------------------------- | --------------------------------------------------- |
+| `DESIGN.md` | Yes      | —                                                                         | Path to a DESIGN.md file                            |
+| `--out-dir` | No       | Auto-detected from `.acss-target.json`, falls back to `src/styles/theme/` | Directory where the generated CSS files are written |
+
+## Examples
+
+Generate a theme from a DESIGN.md in the project root:
+
+```text
+/theme-from-design DESIGN.md
+```
+
+Generate a theme from a DESIGN.md at a custom path:
+
+```text
+/theme-from-design design/brand.design.md
+```
+
+Generate to a custom output directory:
+
+```text
+/theme-from-design DESIGN.md --out-dir=src/styles/
+```
+
+## Requirements
+
+This command **requires Node/`npx`**. The flow shells `npx @google/design.md export --format css-tailwind` (and `lint`) to read the DESIGN.md. All mapping, OKLCH gap synthesis, and validation logic is defined in `skills/styles/SKILL.md`.
+
+<Aside type="caution">
+  If `npx` or `@google/design.md` is not available, the command will halt with
+  an error. Run `npm install -g @google/design.md` or use `/theme-create` with a
+  hex seed instead.
+</Aside>
+
+## Workflow
+
+<Steps>
+
+1. **Exit plan mode** — the command writes theme CSS files and runs `npx` processes; plan mode blocks both.
+
+2. **Validate DESIGN.md** — runs `validate_design_md.py <DESIGN.md>` (via `npx @google/design.md lint`). A missing primary color is a hard error; other warnings are surfaced but do not block.
+
+3. **Export to css-tailwind** — shells `npx @google/design.md export --format css-tailwind <DESIGN.md>` to extract a `@theme { }` block of Tailwind v4-style custom properties.
+
+4. **Map tokens** — runs `design_md_to_tokens.py --stdin` to translate the Material-3/Tailwind names to acss-kit's 18 color roles plus spacing, rounded, and typography scales. Color roles not present in the DESIGN.md are synthesized via OKLCH gap-fill from the primary seed.
+
+5. **Generate theme CSS** — pipes the tokens JSON to `tokens_to_css.py` to produce `light.css`, `dark.css`, `space-radius.css`, and `typography.css`.
+
+6. **WCAG validate** — runs `validate_theme.py` on each output file. If any contrast pair fails after 8 adjustment iterations, the command reports the failure and discards all written files (atomic write contract).
+
+7. **Write files** — all four CSS files are written atomically to the output directory.
+
+8. **Report** — prints the output paths and a summary of which DESIGN.md token groups were mapped.
+
+</Steps>
+
+## Token mapping
+
+The adapter maps Material-3 / Tailwind v4 `@theme` token names to acss-kit roles. Color roles that DESIGN.md does not provide are synthesized from the primary seed using the same OKLCH algorithm as `/theme-create`.
+
+| DESIGN.md group       | acss-kit output                               |
+| --------------------- | --------------------------------------------- |
+| `colors.*` (M3 names) | `--color-*` roles in `light.css` / `dark.css` |
+| `spacing.*`           | `--space-*` scale in `space-radius.css`       |
+| `rounded.*`           | `--radius-*` scale in `space-radius.css`      |
+| `typography.*`        | `--font-*` tokens in `typography.css`         |
+
+<ColorSwatch
+  roles={["primary", "secondary", "accent", "danger", "warning", "success"]}
+  table={false}
+/>
+
+<TypeScale />
+
+<Aside type="note">
+  The mapping tables live in `scripts/design_md_to_tokens.py`. See the [Python
+  Scripts
+  reference](/acss-plugins-docs/reference/python-scripts#design_md_to_tokenspy)
+  for details.
+</Aside>
+
+## Output files
+
+| File               | Contents                                                                                              |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| `light.css`        | `:root` block with all 18 `--color-*` roles (light mode)                                              |
+| `dark.css`         | `[data-theme="dark"]` block (dark mode)                                                               |
+| `space-radius.css` | `--space-*` and `--radius-*` scale tokens                                                             |
+| `typography.css`   | `--font-family-*`, `--font-size-*`, `--font-weight-*`, `--line-height-*`, `--letter-spacing-*` tokens |
+
+## Related commands
+
+- [`/design-export`](/acss-plugins-docs/acss-kit/commands/design-export) — reverse direction: export your theme to DESIGN.md
+- [`/theme-from-figma`](/acss-plugins-docs/acss-kit/commands/theme-from-figma) — generate a theme directly from a Figma file's variables (no DESIGN.md intermediate)
+- [`/theme-create`](/acss-plugins-docs/acss-kit/commands/theme-create) — generate a theme from a hex seed color (no external file needed)
+- [`/theme-update`](/acss-plugins-docs/acss-kit/commands/theme-update) — fine-tune individual roles after generation
