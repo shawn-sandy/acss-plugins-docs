@@ -5,8 +5,8 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 # Upstream layout cache
 
-- **verified-at-sha:** `39ad27d`
-- **verified-at:** `2026-06-11T00:00:00Z`
+- **verified-at-sha:** `1e7b96e`
+- **verified-at:** `2026-06-15T10:12:00Z`
 
 ## Plugin roots
 
@@ -25,4 +25,5 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 - `acss-utilities` was removed from upstream in commit `c6049e5` (chore: remove deprecated acss-utilities plugin). The `plugins/acss-utilities/` directory no longer exists. Docs in `src/content/docs/acss-utilities/` are preserved for reference and flagged with removal notices.
 - `style-agent` is present upstream at `plugins/style-agent/` and has a corresponding docs section in this repo at `src/content/docs/style-agent/`.
-- Full discovery run performed at `39ad27d`: found `plugins/acss-kit` and `plugins/style-agent`; `plugins/acss-utilities` absent (removed upstream).
+- Full discovery run performed at `1e7b96e`: found `plugins/acss-kit` and `plugins/style-agent`; `plugins/acss-utilities` absent (removed upstream).
+- New commands added in this sync: `/design-export`, `/theme-from-design`, `/theme-from-figma` (acss-kit Workstream A/C, v1.3.1).

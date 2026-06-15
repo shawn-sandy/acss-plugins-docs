@@ -1,0 +1,93 @@
+---
+title: /design-export
+description: Export the project's acss-kit theme tokens to a DESIGN.md file (or DTCG/Tailwind format via the upstream CLI).
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+Publish the project's theme tokens — `light.css`, `space-radius.css`, and `typography.css` — as a [DESIGN.md](https://github.com/google-labs-code/design.md) file. This is the import-_into_-DESIGN.md direction the upstream CLI lacks. With `--format=dtcg|tailwind`, the command delegates to `npx @google/design.md export` instead.
+
+## Syntax
+
+```text
+/design-export [--format=design-md|dtcg|tailwind] [--dir=<dir>] [--name=<Brand>]
+```
+
+## Arguments
+
+| Argument   | Required | Default                                | Description                                                                                        |
+| ---------- | -------- | -------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `--format` | No       | `design-md`                            | Output format: `design-md` (pure Python, no Node), `dtcg`, or `tailwind` (both require Node/`npx`) |
+| `--dir`    | No       | Auto-detected from `.acss-target.json` | Directory containing `light.css`, `space-radius.css`, and `typography.css`                         |
+| `--name`   | No       | Project name from `package.json`       | Brand name written into the DESIGN.md front-matter                                                 |
+
+## Examples
+
+Export as DESIGN.md (default, no Node required):
+
+```text
+/design-export
+```
+
+Export with a custom brand name:
+
+```text
+/design-export --name=Acme
+```
+
+Export to DTCG format (requires Node/`npx`):
+
+```text
+/design-export --format=dtcg
+```
+
+Export to Tailwind format from a custom token directory:
+
+```text
+/design-export --format=tailwind --dir=src/styles/theme/
+```
+
+## Workflow
+
+<Steps>
+
+1. **Exit plan mode** — the command writes files and may run `npx`; plan mode blocks both.
+
+2. **Locate token files** — reads `.acss-target.json` to find the theme directory; falls back to `src/styles/theme/`. Halts if `light.css` is not found.
+
+3. **Convert tokens to JSON** — runs `css_to_tokens.py <dir>` to produce a `theme.tokens.json` intermediate.
+
+4. **Emit output:**
+   - `--format=design-md` (default): runs `tokens_to_design_md.py` (pure Python — no Node required) to produce DESIGN.md text and writes `DESIGN.md` in the project root.
+   - `--format=dtcg|tailwind`: shells `npx @google/design.md export --format <dtcg|tailwind>` on the generated DESIGN.md and writes the result.
+
+5. **Report** — prints the output path and a summary of which token groups were emitted.
+
+</Steps>
+
+## Format notes
+
+`--format=design-md` (default) is **pure Python — no Node required**. The round-trip is **semantic, not lossless**: the 18 `--color-*` roles are emitted under DESIGN.md token names; Material-3 ladder tokens that acss-kit does not model are not reproduced.
+
+`--format=dtcg|tailwind` shells the upstream CLI and **requires Node/`npx`**. All mapping and emission logic lives in `skills/styles/SKILL.md`.
+
+<Aside type="note">
+  The mapping from acss-kit roles to DESIGN.md token names lives in
+  `scripts/tokens_to_design_md.py`. See the [Python Scripts
+  reference](/acss-plugins-docs/reference/python-scripts#tokens_to_design_mdpy)
+  for the full contract.
+</Aside>
+
+## Output
+
+| Format      | Output file                | Requirement   |
+| ----------- | -------------------------- | ------------- |
+| `design-md` | `DESIGN.md` (project root) | Python 3 only |
+| `dtcg`      | `design.dtcg.json`         | Node/`npx`    |
+| `tailwind`  | `design.tailwind.css`      | Node/`npx`    |
+
+## Related commands
+
+- [`/theme-from-design`](/acss-plugins-docs/acss-kit/commands/theme-from-design) — reverse direction: consume a DESIGN.md to generate theme files
+- [`/theme-from-figma`](/acss-plugins-docs/acss-kit/commands/theme-from-figma) — generate a theme directly from a Figma file's variables
+- [`/theme-create`](/acss-plugins-docs/acss-kit/commands/theme-create) — generate a theme from a hex seed color

@@ -1,0 +1,118 @@
+---
+title: /theme-from-figma
+description: Generate an acss-kit theme from a Figma file's variables via the Figma MCP server.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+Pull design tokens directly from a Figma file's **variables** (via the Figma MCP server's `get_variable_defs` call) and generate the project's complete theme — `light.css`, `dark.css`, `space-radius.css`, and `typography.css` — all WCAG contrast-validated. This is the standards-based evolution of the `/theme-extract` Figma path.
+
+## Syntax
+
+```text
+/theme-from-figma <figma-url|fileKey> [--node=<nodeId>] [--out-dir=<dir>]
+```
+
+## Arguments
+
+| Argument                 | Required | Default                                                                   | Description                                                            |
+| ------------------------ | -------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `figma-url` or `fileKey` | Yes      | —                                                                         | A `figma.com/design/...` URL or a bare Figma file key                  |
+| `--node`                 | No       | File root                                                                 | Figma node ID to scope variable extraction to a specific frame or page |
+| `--out-dir`              | No       | Auto-detected from `.acss-target.json`, falls back to `src/styles/theme/` | Directory where the generated CSS files are written                    |
+
+## Examples
+
+Generate a theme from a Figma design URL:
+
+```text
+/theme-from-figma https://www.figma.com/design/abc123/Brand-Design
+```
+
+Generate from a bare file key, scoped to a specific node:
+
+```text
+/theme-from-figma abc123 --node=12:34
+```
+
+Generate to a custom output directory:
+
+```text
+/theme-from-figma https://www.figma.com/design/abc123/Brand --out-dir=src/styles/
+```
+
+## Requirements
+
+This command requires the **Figma MCP server** for the `get_variable_defs` call. Everything after that step is **pure Python — no Node/`npx` required**.
+
+<Aside type="caution">
+  You must have the Figma MCP server configured in your Claude Code settings and
+  a valid Figma access token. The file must be accessible with your token
+  (public file or member access).
+</Aside>
+
+## Workflow
+
+<Steps>
+
+1. **Exit plan mode** — the command writes theme CSS files; plan mode blocks all writes.
+
+2. **Fetch Figma variables** — calls the Figma MCP server's `get_variable_defs` tool with the provided file key and optional node ID. Returns a flat map of `category/name → value` (e.g. `"color/primary": "#855300"`).
+
+3. **Normalize variable names** — runs `figma_to_tokens.py` to translate Figma's `category/name` format into the same `@theme`-style custom-property form that `design_md_to_tokens.py` expects, then delegates to `design_md_to_tokens.build_tokens` for M3-to-roles mapping and OKLCH gap synthesis.
+
+4. **Generate theme CSS** — pipes the tokens JSON to `tokens_to_css.py` to produce `light.css`, `dark.css`, `space-radius.css`, and `typography.css`.
+
+5. **WCAG validate** — runs `validate_theme.py` on each output file. If any contrast pair fails after 8 adjustment iterations, the command reports the failure and discards all written files (atomic write contract).
+
+6. **Write files** — all four CSS files are written atomically to the output directory.
+
+7. **Report** — prints the output paths and a summary of which Figma variable groups were mapped.
+
+</Steps>
+
+## Variable mapping
+
+Figma variable names follow a `category/name` pattern (similar to Material-3). The adapter normalizes them to the same format consumed by the DESIGN.md pipeline, reusing the M3-to-roles mapping from `design_md_to_tokens.py` with no second mapping table.
+
+| Figma variable category                      | acss-kit output                               |
+| -------------------------------------------- | --------------------------------------------- |
+| `color/*`                                    | `--color-*` roles in `light.css` / `dark.css` |
+| `spacing/*`                                  | `--space-*` scale in `space-radius.css`       |
+| `radius/*`                                   | `--radius-*` scale in `space-radius.css`      |
+| `fontFamily/*`, `fontSize/*`, `fontWeight/*` | `--font-*` tokens in `typography.css`         |
+
+Color roles not present in the Figma variables are synthesized from the primary seed using the same OKLCH algorithm as `/theme-create`.
+
+<Aside type="note">
+  The only Figma-specific assumption is the `category → css-tailwind prefix`
+  table in `scripts/figma_to_tokens.py`. See the [Python Scripts
+  reference](/acss-plugins-docs/reference/python-scripts#figma_to_tokenspy) for
+  the reconciliation point.
+</Aside>
+
+## Comparison with `/theme-extract`
+
+| Feature              | `/theme-from-figma`                            | `/theme-extract` (Figma path)           |
+| -------------------- | ---------------------------------------------- | --------------------------------------- |
+| Data source          | Figma **variables** (`get_variable_defs`)      | Figma **styles and fills**              |
+| Spacing / typography | Yes (from variables)                           | No                                      |
+| Requires Node/`npx`  | No                                             | No                                      |
+| Standards basis      | DESIGN.md / Material-3 variable names          | Proprietary pixel extraction            |
+| Recommended for      | Projects using Figma variables / design tokens | Legacy projects without Figma variables |
+
+## Output files
+
+| File               | Contents                                                                                              |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| `light.css`        | `:root` block with all 18 `--color-*` roles (light mode)                                              |
+| `dark.css`         | `[data-theme="dark"]` block (dark mode)                                                               |
+| `space-radius.css` | `--space-*` and `--radius-*` scale tokens                                                             |
+| `typography.css`   | `--font-family-*`, `--font-size-*`, `--font-weight-*`, `--line-height-*`, `--letter-spacing-*` tokens |
+
+## Related commands
+
+- [`/theme-from-design`](/acss-plugins-docs/acss-kit/commands/theme-from-design) — generate from a DESIGN.md file instead of a live Figma session
+- [`/design-export`](/acss-plugins-docs/acss-kit/commands/design-export) — export your existing theme back to DESIGN.md
+- [`/theme-extract`](/acss-plugins-docs/acss-kit/commands/theme-extract) — extract colors from a Figma design or image (legacy path)
+- [`/theme-create`](/acss-plugins-docs/acss-kit/commands/theme-create) — generate a theme from a hex seed color

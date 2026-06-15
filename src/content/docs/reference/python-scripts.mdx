@@ -864,3 +864,156 @@ python3 migrate_classnames.py <path> [<path>...] [--write] [--include=<glob>,...
   set up with acss-utilities 0.1.x. If your project was set up with 0.2.0 or
   later, you do not need to run it.
 </Aside>
+
+---
+
+## DESIGN.md / Figma bridge scripts
+
+The following scripts were added in acss-kit v1.3.1 (Workstream A/C) to support the `/design-export`, `/theme-from-design`, and `/theme-from-figma` commands. All follow the **Generator/Validator contract** unless noted.
+
+### `tokens_to_design_md.py`
+
+**Contract:** Generator
+**Location:** `plugins/acss-kit/scripts/tokens_to_design_md.py`
+
+Converts the acss-kit theme tokens JSON to a [DESIGN.md](https://github.com/google-labs-code/design.md) file. This is the inverse of `design_md_to_tokens.py` and provides the import-_into_-DESIGN.md direction the upstream CLI lacks.
+
+**Inputs:**
+
+```bash
+python3 tokens_to_design_md.py <tokens.json> [--name=<Brand>]
+python3 tokens_to_design_md.py --stdin [--name=<Brand>]
+python3 tokens_to_design_md.py --dir=<dir> [--name=<Brand>]  # shells css_to_tokens
+python3 tokens_to_design_md.py --self-test
+```
+
+| Flag             | Description                                                           |
+| ---------------- | --------------------------------------------------------------------- |
+| `<tokens.json>`  | Path to a `theme.tokens.json` file                                    |
+| `--stdin`        | Read tokens JSON from stdin                                           |
+| `--dir=<dir>`    | Directory with `light.css` etc.; shells `css_to_tokens.py` internally |
+| `--name=<Brand>` | Brand name for DESIGN.md front-matter                                 |
+| `--self-test`    | Run internal round-trip fixture and exit                              |
+
+**Output (stdout):** DESIGN.md text (YAML front-matter + markdown body).
+
+**Round-trip semantics:** Semantic, not byte-identical. The 18 `--color-*` roles are emitted under DESIGN.md token names; M3 ladder tokens not modelled by acss-kit are not reproduced. An exported DESIGN.md re-imports correctly via `design_md_to_tokens.py`.
+
+**Exit codes:** 0 = success, 1 = logical failure (nothing to emit), 2 = IO/usage error
+
+---
+
+### `design_md_to_tokens.py`
+
+**Contract:** Generator
+**Location:** `plugins/acss-kit/scripts/design_md_to_tokens.py`
+
+Converts a [DESIGN.md](https://github.com/google-labs-code/design.md) to the acss-kit theme tokens JSON. Called by the `/theme-from-design` command. Shells `npx @google/design.md export --format css-tailwind` to parse the DESIGN.md, then maps Tailwind v4 / Material-3 `@theme` property names to acss-kit's 18 color roles, spacing, rounded, and typography scales. Color roles absent from the DESIGN.md are synthesized via OKLCH gap-fill.
+
+**Inputs:**
+
+```bash
+python3 design_md_to_tokens.py <DESIGN.md>
+python3 design_md_to_tokens.py --stdin      # reads a css-tailwind block from stdin
+python3 design_md_to_tokens.py --self-test
+```
+
+**Output (stdout):** `theme.tokens.json` consumed by `tokens_to_css.py`.
+
+**Exit codes:** 0 = success, 1 = logical failure (e.g. no resolvable primary; reasons to stderr), 2 = IO/usage error
+
+<Aside type="caution">
+  This script shells `npx @google/design.md export --format css-tailwind` and
+  requires Node/`npx`. The Tailwind v4 `@theme` prefix shape emitted by the
+  upstream CLI is `alpha` — see the `COLOR_SOURCES` / `TW_SPACE` / `TW_RADIUS` /
+  `TW_TYPO_*` tables in the script for the single reconciliation point.
+</Aside>
+
+---
+
+### `figma_to_tokens.py`
+
+**Contract:** Generator
+**Location:** `plugins/acss-kit/scripts/figma_to_tokens.py`
+
+Converts the Figma MCP server's `get_variable_defs` output to the acss-kit theme tokens JSON. Called by the `/theme-from-figma` command. Normalizes Figma's `category/name` variable format into the same `@theme`-style form expected by `design_md_to_tokens.build_tokens`, reusing the full M3-to-roles mapping and OKLCH synthesis with no second mapping table.
+
+**Inputs:**
+
+```bash
+python3 figma_to_tokens.py <vars.json>   # get_variable_defs JSON map
+python3 figma_to_tokens.py --stdin
+python3 figma_to_tokens.py --self-test
+```
+
+| Input         | Description                                                                           |
+| ------------- | ------------------------------------------------------------------------------------- |
+| `<vars.json>` | JSON file containing a flat `{ "category/name": value }` map from `get_variable_defs` |
+| `--stdin`     | Read the JSON map from stdin                                                          |
+| `--self-test` | Run internal fixture and exit                                                         |
+
+**Output (stdout):** `theme.tokens.json` consumed by `tokens_to_css.py`.
+
+**Exit codes:** 0 = success, 1 = logical failure (e.g. no resolvable primary; reasons to stderr), 2 = IO/usage error
+
+<Aside type="note">
+  The only Figma-specific assumption is the `FIGMA_CATEGORIES` table (Figma
+  variable category → css-tailwind prefix). This is the single reconciliation
+  point against real `get_variable_defs` output.
+</Aside>
+
+---
+
+### `validate_design_md.py`
+
+**Contract:** Detector
+**Location:** `plugins/acss-kit/scripts/validate_design_md.py`
+
+Validates a DESIGN.md before the token pipeline consumes it. Called automatically by `/theme-from-design` before conversion. Shells `npx @google/design.md lint <file> --format json` and normalizes findings to the Detector contract.
+
+**Key deviation from upstream:** A **missing primary color is a hard error** (exit 1) even though the upstream CLI treats it as a warning, because the primary is the OKLCH seed the entire pipeline depends on.
+
+**Inputs:**
+
+```bash
+python3 validate_design_md.py <DESIGN.md>
+python3 validate_design_md.py --self-test
+```
+
+**Output (stdout):** JSON
+
+```json
+{
+  "valid": true,
+  "errors": [],
+  "warnings": ["Missing optional section: spacing"],
+  "reasons": ["DESIGN.md is valid — primary color present"]
+}
+```
+
+**Exit codes:** 0 = usable, 1 = rejected (hard errors), 2 = IO/usage error
+
+---
+
+### `validate_tokens.py`
+
+**Contract:** Validator
+**Location:** `plugins/acss-kit/scripts/validate_tokens.py`
+
+Validates the non-color sections of a `theme.tokens.json` — spacing, rounded, and typography — for structural correctness. The dimension/typography equivalent of the WCAG contrast gate that `validate_theme.py` applies to colors.
+
+**Checks:**
+
+- `spacing` / `rounded`: every value is a valid dimension (`0` or `<num>px|em|rem`)
+- `spacing` / `rounded`: recommended scale steps present (`sm`, `md`, `lg` for spacing; `md` for rounded) — warning if missing
+- `typography`: `size` is a dimension; `weight` is numeric or keyword; `line` is unitless or dimension; `tracking` is a dimension; `family` is a non-empty string
+
+**Inputs:**
+
+```bash
+python3 validate_tokens.py <tokens.json>
+python3 validate_tokens.py --stdin
+python3 validate_tokens.py --self-test
+```
+
+**Exit codes:** 0 = no errors (warnings allowed), 1 = at least one structural error, 2 = IO/usage error
