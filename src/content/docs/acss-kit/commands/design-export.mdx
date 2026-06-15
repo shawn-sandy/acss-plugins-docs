@@ -4,6 +4,7 @@ description: Export the project's acss-kit theme tokens to a DESIGN.md file (or 
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
 
 Publish the project's theme tokens — `light.css`, `space-radius.css`, and `typography.css` — as a [DESIGN.md](https://github.com/google-labs-code/design.md) file. This is the import-_into_-DESIGN.md direction the upstream CLI lacks. With `--format=dtcg|tailwind`, the command delegates to `npx @google/design.md export` instead.
 
@@ -55,7 +56,7 @@ Export to Tailwind format from a custom token directory:
 
 2. **Locate token files** — reads `.acss-target.json` to find the theme directory; falls back to `src/styles/theme/`. Halts if `light.css` is not found.
 
-3. **Convert tokens to JSON** — runs `css_to_tokens.py <dir>` to produce a `theme.tokens.json` intermediate.
+3. **Convert tokens to JSON** — runs `css_to_tokens.py <light.css> [file2.css ...]` on the discovered CSS files to produce a `theme.tokens.json` intermediate.
 
 4. **Emit output:**
    - `--format=design-md` (default): runs `tokens_to_design_md.py` (pure Python — no Node required) to produce DESIGN.md text and writes `DESIGN.md` in the project root.
@@ -68,6 +69,11 @@ Export to Tailwind format from a custom token directory:
 ## Format notes
 
 `--format=design-md` (default) is **pure Python — no Node required**. The round-trip is **semantic, not lossless**: the 18 `--color-*` roles are emitted under DESIGN.md token names; Material-3 ladder tokens that acss-kit does not model are not reproduced.
+
+<ColorSwatch
+  roles={["primary", "secondary", "accent", "danger", "warning", "success"]}
+  table={false}
+/>
 
 `--format=dtcg|tailwind` shells the upstream CLI and **requires Node/`npx`**. All mapping and emission logic lives in `skills/styles/SKILL.md`.
 

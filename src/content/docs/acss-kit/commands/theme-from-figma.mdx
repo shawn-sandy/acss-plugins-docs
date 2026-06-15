@@ -4,6 +4,8 @@ description: Generate an acss-kit theme from a Figma file's variables via the Fi
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
+import TypeScale from "~/components/TypeScale.astro";
 
 Pull design tokens directly from a Figma file's **variables** (via the Figma MCP server's `get_variable_defs` call) and generate the project's complete theme — `light.css`, `dark.css`, `space-radius.css`, and `typography.css` — all WCAG contrast-validated. This is the standards-based evolution of the `/theme-extract` Figma path.
 
@@ -83,6 +85,13 @@ Figma variable names follow a `category/name` pattern (similar to Material-3). T
 | `fontFamily/*`, `fontSize/*`, `fontWeight/*` | `--font-*` tokens in `typography.css`         |
 
 Color roles not present in the Figma variables are synthesized from the primary seed using the same OKLCH algorithm as `/theme-create`.
+
+<ColorSwatch
+  roles={["primary", "secondary", "accent", "danger", "warning", "success"]}
+  table={false}
+/>
+
+<TypeScale />
 
 <Aside type="note">
   The only Figma-specific assumption is the `category → css-tailwind prefix`
