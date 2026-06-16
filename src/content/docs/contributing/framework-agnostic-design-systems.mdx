@@ -1,0 +1,118 @@
+---
+title: Framework-Agnostic Design Systems Review
+description: Analysis of framework-agnostic design system principles versus acss-kit's spec-and-generation model, with ranked improvement recommendations.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+<Aside type="note">
+  This is an architectural review document sourced from
+  `docs/framework-agnostic-design-systems-review.md` in the upstream plugin
+  repository. It captures analysis and recommendations from a design session
+  comparing the [Piccalilli framework-agnostic design systems
+  article](https://piccalil.li/blog/framework-agnostic-design-systems-part-1/)
+  against acss-kit's approach.
+</Aside>
+
+## Verdict
+
+The article and acss-plugins fight the same enemy — framework lock-in — and agree on almost every principle. They differ on exactly one thing: **where the portability boundary sits.**
+
+- **The article bets on a runtime artifact.** Compile primitives to Web Components once; every framework consumes the same bundle. "Agnostic" = one thing runs everywhere.
+- **acss-plugins bets on a spec + generation.** DESIGN.md / COMPONENT.md are the portable source of truth; an agent projects them into owned, idiomatic per-framework code. "Agnostic" = one spec, N generated outputs, you own each.
+
+Most of the article is validation that the current direction is sound. The genuine gaps are narrow, and on the article's own stated "next hard problem" (tokens) acss-kit is already ahead.
+
+### The core conceptual difference
+
+The deep difference is **runtime portability vs. source portability**. The article moves the agnostic boundary to the browser (a custom element is the lingua franca). acss-kit moves it one layer earlier, to a markdown contract (the spec is the lingua franca; code is generated).
+
+The article's model yields a true drop-in bundle but couples consumers to that bundle plus its runtime. acss-kit's yields zero runtime coupling and idiomatic native code, at the cost of N artifacts to keep coherent. Neither is "more agnostic" — they relocate the same seam.
+
+## Where the article validates the current direction
+
+Each of these article principles is already implemented in acss-kit:
+
+| Article principle                                                                      | acss-kit equivalent                                                                               | Match             |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | ----------------- |
+| Framework lock-in is "baffling to bake in at day one"                                  | "Installing `@fpkit/acss` creates coupling… generate self-contained implementations that you own" | Identical thesis  |
+| Component custom properties "reference system-level tokens with fallbacks"             | Every generated prop is `var(--x, <fallback>)`; renders with or without a design system           | Near-identical    |
+| Naming `--{prefix}-{component}-{property}`                                             | `--{component}-{element?}-{variant?}-{property}`                                                  | Near-identical    |
+| "Components should be as primitive as possible… told explicitly what state to reflect" | COMPONENT.md = structure + styles + a11y + optional minimal `init(root)`; state is not baked in   | Match             |
+| "Design tools are terrible places to codify systemic decisions"                        | DESIGN.md is a token source you ingest, then codify in CSS                                        | Match             |
+| Token math: "logarithmic scales… programmatic hue and lightness shifts"                | OKLCH palette algorithm: lightness targets + hue offsets (success 145°, warning 75°, danger 25°)  | acss-kit is ahead |
+| Tokens/components separation                                                           | "DESIGN.md owns tokens, COMPONENT.md owns components"                                             | Match             |
+
+## The one real divergence
+
+|                     | Article (Web Components)                                               | acss-kit (spec + generation)                              |
+| ------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------- |
+| Portable artifact   | Compiled custom-element bundle                                         | DESIGN.md / COMPONENT.md markdown                         |
+| Consumer gets       | A package to `npm` install                                             | Generated source they own                                 |
+| Runtime coupling    | Depends on the bundle + its WC runtime                                 | None — plain TSX/SCSS/HTML                                |
+| Theming             | Through the Shadow DOM boundary (`::part`, piercing custom props)      | Direct — it is your own CSS, no shadow boundary           |
+| Per-framework idiom | Thin wrapper around a generic element                                  | Fully idiomatic React/Astro/etc.                          |
+| Cost                | One artifact, but you don't own it; WC ergonomics in React are awkward | N generated artifacts to keep coherent; no single drop-in |
+| Updates             | `npm update`                                                           | Re-generate / `/kit-update` (sha-drift detection)         |
+
+The article's model is better for "one library, many consuming apps you don't control." acss-kit's is better for "I want to own and freely modify the code, with no runtime dependency." That is a real, defensible difference in target audience — not a flaw to fix.
+
+## Where acss-kit is ahead (do not change these)
+
+1. **Tokens.** The article defers tokens to a future Part 2 ("the next technical challenge feels naturally like figuring out a token workflow"). acss-kit already has OKLCH perceptually-uniform palettes, WCAG 2.2 AA contrast validation by construction, an 18-role catalogue, spacing/rounded/typography scales, and DESIGN.md round-trip scripts.
+2. **Accessibility as a contract.** The `a11y:` front-matter plus the theme contrast validator make WCAG a first-class, checkable artifact.
+3. **Future-proofing.** Generated source you own is arguably more future-proof than a WC bundle + toolchain runtime: nothing is left to break.
+
+## Recommendations
+
+Ranked by leverage. Each links to an implementation plan in `docs/plans/` in the upstream repo.
+
+| #   | Recommendation                                           | Gap it closes                                                          | Leverage | Effort     |
+| --- | -------------------------------------------------------- | ---------------------------------------------------------------------- | -------- | ---------- |
+| 1   | Realize the `web-component` projection target            | No runtime-portable artifact exists (spec lists it; nothing builds it) | High     | Medium     |
+| 2   | Generate a component catalog from COMPONENT.md           | Machine-readable contract has no docs consumer                         | High     | Medium     |
+| 3   | Emit a Custom Elements Manifest (`custom-elements.json`) | No interop with standard WC tooling                                    | Medium   | Low–Medium |
+| 4   | Document the primitive/composite boundary                | Spec implies but never states the scope ceiling                        | Medium   | Low        |
+| 5   | Evaluate CSS `@scope` encapsulation (spike)              | Encapsulation approach unexamined vs. the article's                    | Low      | Low        |
+
+### 1. Realize the `web-component` projection target
+
+The COMPONENT.md spec already declares `web-component` "the universal runtime output every framework can consume", but no generator path or adapter realizes it. Building it is the synthesis of both philosophies: it produces exactly the article's artifact (a drop-in custom element) without abandoning the ownership/spec-first model. This also unlocks the "agnostic primitive that React/Vue/Svelte apps all consume" use case acss-kit currently can't serve.
+
+**Solution:** a `## Target: web-component` adapter contract + a projection reference (light-DOM default so DESIGN.md tokens keep cascading; Shadow DOM opt-in) + `/kit-add --target=web-component` + a structural validator wired into `tests/run.sh`.
+
+### 2. Render COMPONENT.md into a docs/catalog site
+
+The article's strongest tooling idea is **docs-as-a-byproduct**: JSDoc → custom-elements manifest → auto-built props tables. acss-kit's front-matter (`props`, `variants`, `tokens`, `a11y`) is that manifest — it has the data and no consumer for it.
+
+**Solution:** a stdlib-only generator that turns a directory of `*.component.md` into a self-contained, token-themed static catalog (props tables, variant gallery, a11y criteria, live previews), reusing the existing preview machinery.
+
+### 3. Emit a Custom Elements Manifest
+
+The article rides the standardized [CEM](https://github.com/webcomponents/custom-elements-manifest) JSON, which editors, Storybook, and analyzers already consume. acss-kit's front-matter is a bespoke superset.
+
+**Solution:** serialize COMPONENT.md front-matter to `custom-elements.json`. Cheap once recommendation #1 exists; lets components appear in standard WC tooling. Pairs with #2 as a shared intermediate representation.
+
+### 4. Name the primitive/composite boundary explicitly
+
+The article draws a sharp line: primitives in the agnostic layer, stateful/composite logic in the app. acss-kit's spec implies this (presentational vs. `behavior`-bearing) but never states the ceiling.
+
+**Solution:** a "Scope — primitives, not composites" paragraph in spec.md §1 and a one-line reminder in the `component-md` rule, plus an audit confirming no existing component.md violates it.
+
+### 5. Consider `@scope` — lowest priority
+
+The article uses CSS `@scope` for encapsulation. acss-kit uses `data-*` + component-prefixed custom properties, and because consumers own the CSS, leakage is far less acute than for a shipped bundle. Only relevant if recommendation #1 ships with light DOM.
+
+**Solution:** a time-boxed spike producing a decision record (Adopt / Don't-adopt / Revisit-after-#1) — no production CSS change.
+
+## Suggested sequencing
+
+- **#3 → #2** share `plugins/acss-kit/scripts/lib/component_md.py` (a COMPONENT.md parser); whichever lands first creates it, the other reuses.
+- **#1** is independent and the highest-leverage item — the clearest "improvement" the article surfaces.
+- **#4 / #5** are low-risk and can land anytime; #5 is best deferred until after #1's light-DOM decision.
+
+## Sources
+
+- [Piccalilli — Framework-agnostic design systems (Part 1)](https://piccalil.li/blog/framework-agnostic-design-systems-part-1/)
+- COMPONENT.md spec: `plugins/style-agent/docs/component-md/spec.md` in the upstream repository
+- Implementation plans: `docs/plans/` in the upstream repository
