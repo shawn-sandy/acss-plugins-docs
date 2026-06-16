@@ -24,6 +24,7 @@ Display the acss-kit prompt book — a catalogue of copy-paste prompts mapped to
 ```text
 /prompt-book        # full book
 /prompt-book 5      # only section 5
+/prompt-book 6a     # section 6a — theme from Figma variables
 ```
 
 ## Behaviour
@@ -32,6 +33,34 @@ Display the acss-kit prompt book — a catalogue of copy-paste prompts mapped to
 - **Valid section number** — prints from the matching `## <n>.` heading through the next `---` separator (or end of file).
 - **Invalid section number** — prints the table of contents (every `## <n>. <title>` heading) and prompts to re-run with a valid number.
 - **Read-only** — never edits files, never paraphrases, never reformats.
+
+## Sections (v1.10.2)
+
+The prompt book ships with 15 numbered sections plus lettered sub-sections added as the command surface grew. As of v1.10.2:
+
+| Section          | Title                                                                       |
+| ---------------- | --------------------------------------------------------------------------- |
+| When to use what | Quick-pick table for all commands                                           |
+| 1                | Bootstrap a new project (`/setup`)                                          |
+| 2                | Generate a known component (`/kit-add`)                                     |
+| 2a               | Generate static HTML versions of components                                 |
+| 3                | Generate a component from a description (`/kit-create`)                     |
+| 4                | Browse what's available (`/kit-list`)                                       |
+| 5                | Generate a theme from a brand color (`/theme-create`)                       |
+| 5a               | Build a color scale from one color (`/color-scale`)                         |
+| 6                | Extract a theme from an image or design (`/theme-extract`)                  |
+| 6a               | Generate a theme from a Figma file's variables (`/theme-from-figma`)        |
+| 6b               | Generate a theme from a Google DESIGN.md (`/theme-from-design`)             |
+| 6c               | Export your theme as a DESIGN.md (`/design-export`)                         |
+| 7                | Layer a brand preset over an existing theme (`/theme-brand`)                |
+| 8                | Update specific role values (`/theme-update`)                               |
+| 9                | Tune the visual feel (`/style-tune`)                                        |
+| 10               | Add Tailwind-style utilities (`/utility-add`)                               |
+| 11               | Bridge utilities to your acss-kit theme (`/utility-bridge`)                 |
+| 12               | Tune utility tokens (`/utility-tune`)                                       |
+| 13               | Inspect a utility family (`/utility-list`)                                  |
+| 14               | Bulk-install every component plus a starter theme (`/kit-sync`)             |
+| 15               | Safely re-copy unmodified components after a plugin upgrade (`/kit-update`) |
 
 ## Source
 
