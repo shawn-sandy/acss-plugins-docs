@@ -388,6 +388,10 @@ export default defineConfig({
               label: "Local Plugin Testing",
               slug: "contributing/local-testing",
             },
+            {
+              label: "Framework-Agnostic Design Systems",
+              slug: "contributing/framework-agnostic-design-systems",
+            },
           ],
         },
       ],
