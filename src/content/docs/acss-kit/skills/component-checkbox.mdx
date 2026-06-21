@@ -39,6 +39,23 @@ The `component-checkbox` skill generates a self-contained accessible Checkbox co
 
 </Steps>
 
+## Design tokens (v1.11.0)
+
+Token references in `checkbox.component.md` now use the DESIGN.md/Material-3 vocabulary so they resolve against a `DESIGN.md` produced by `/design-export`.
+
+| Token path                 | Role                                                            |
+| -------------------------- | --------------------------------------------------------------- |
+| `{colors.surface}`         | Checkbox background                                             |
+| `{colors.outline-variant}` | Border color (was `{colors.border}` before v1.11.0)             |
+| `{colors.primary}`         | Checked background and border                                   |
+| `{colors.on-surface}`      | Label color (was `{colors.text}` before v1.11.0)                |
+| `{colors.error}`           | Required indicator color (was `{colors.danger}` before v1.11.0) |
+| `{rounded.sm}`             | Border radius                                                   |
+| `{spacing.sm}`             | Gap between checkbox and label                                  |
+| `{typography.body-md}`     | Label typography                                                |
+
+The emitted CSS still uses `var(--color-*)` custom properties — `/kit-add` output is byte-identical. Only the COMPONENT.md front-matter `tokens:` references changed.
+
 ## Accessibility
 
 - `aria-checked` supports `true`, `false`, and `"mixed"` for the indeterminate state.

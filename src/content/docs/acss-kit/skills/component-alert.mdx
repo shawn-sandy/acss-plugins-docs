@@ -38,6 +38,24 @@ The `component-alert` skill generates a self-contained accessible Alert componen
 
 </Steps>
 
+## Design tokens (v1.11.0)
+
+Token references in `alert.component.md` now use the DESIGN.md/Material-3 vocabulary so they resolve against a `DESIGN.md` produced by `/design-export`.
+
+| Token path              | Role                                                          |
+| ----------------------- | ------------------------------------------------------------- |
+| `{colors.surface}`      | Alert background (default)                                    |
+| `{colors.tertiary}`     | Info severity background (was `{colors.info}` before v1.11.0) |
+| `{colors.success}`      | Success severity background                                   |
+| `{colors.warning}`      | Warning severity background                                   |
+| `{colors.error}`        | Error severity background                                     |
+| `{rounded.md}`          | Border radius                                                 |
+| `{spacing.md}`          | Padding and gap                                               |
+| `{typography.body-sm}`  | Body font size                                                |
+| `{typography.label-md}` | Title font size                                               |
+
+The emitted CSS still uses `var(--color-*)` custom properties — `/kit-add` output is byte-identical. Only the COMPONENT.md front-matter `tokens:` references changed.
+
 ## Severity variants
 
 Alert supports four severity levels via a `severity` prop:

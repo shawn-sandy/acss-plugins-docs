@@ -38,6 +38,21 @@ The `component-card` skill generates a self-contained accessible Card component 
 
 </Steps>
 
+## Design tokens (v1.11.0)
+
+Token references in `card.component.md` now use the DESIGN.md/Material-3 vocabulary so they resolve against a `DESIGN.md` produced by `/design-export`.
+
+| Token path                 | Role                                                |
+| -------------------------- | --------------------------------------------------- |
+| `{colors.surface}`         | Card background                                     |
+| `{colors.on-surface}`      | Text color (was `{colors.text}` before v1.11.0)     |
+| `{colors.outline-variant}` | Border color (was `{colors.border}` before v1.11.0) |
+| `{rounded.md}`             | Border radius                                       |
+| `{spacing.lg}`             | Content padding                                     |
+| `{spacing.md}`             | Footer gap                                          |
+
+The emitted CSS still uses `var(--color-*)` custom properties — `/kit-add` output is byte-identical. Only the COMPONENT.md front-matter `tokens:` references changed.
+
 ## Slots
 
 Card is a compound component with optional named slots:
