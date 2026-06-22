@@ -19,7 +19,7 @@ Each plugin has a `.claude-plugin/plugin.json` manifest:
 ```json
 {
   "name": "acss-kit",
-  "version": "1.2.1",
+  "version": "1.11.0",
   "description": "Accessible React components, static HTML snippets, CSS themes, and Tailwind-style utility classes for fpkit/acss projects. OKLCH themes with WCAG 2.2 AA validation. Includes all /utility-* commands."
 }
 ```
@@ -55,7 +55,8 @@ plugins/acss-kit/
         foundation.md          # UI polymorphic base documentation
     component-<name>/          # 15 per-component skills (alert, button, card, …)
       SKILL.md                 # Component skill (description, 5-step workflow)
-      reference.md             # Nine-section reference doc (canonical example: component-button/)
+      <name>.component.md      # Framework-neutral spec (source of truth as of v1.9+); preferred over reference.md
+      reference.md             # Legacy canonical template (byte-identical fallback; kept for backwards compat)
     styles/
       SKILL.md                 # Theme generation workflow (4 flows)
       references/
