@@ -56,12 +56,17 @@ Each command delegates all its behavior to a corresponding skill file. The skill
 
 **The commands complement each other.** `/css-to-class` collapses many classes into one. `/inline-style-to-class` lifts inline declarations out into a class. `/create-utilities` generates a class string from intent. Together they cover the most common style-authoring and migration tasks.
 
+## Getting started
+
+New to style-agent? The [Getting Started tutorial](/acss-plugins-docs/style-agent/getting-started) walks through all three commands in composition order — generate a class string from intent, consolidate it into a named class, and migrate existing inline styles — using a single real example.
+
 ## Version history
 
-| Version    | Changes                                                                                                   |
-| ---------- | --------------------------------------------------------------------------------------------------------- |
-| Unreleased | `/inline-style-to-class` adds IDE selection support — in-place editing from VS Code / JetBrains selection |
-| 0.4.0      | `/inline-style-to-class` now tokenizes all hard-coded values to CSS variables                             |
-| 0.3.0      | Added `/create-utilities`                                                                                 |
-| 0.2.0      | Added `/inline-style-to-class`                                                                            |
-| 0.1.0      | Initial release with `/css-to-class`                                                                      |
+| Version | Changes                                                                                           |
+| ------- | ------------------------------------------------------------------------------------------------- |
+| 0.5.1   | Added getting-started tutorial (`docs/tutorial.md`) — guides chaining all three commands in order |
+| 0.5.0   | Added COMPONENT.md spec — framework-neutral component format paired with DESIGN.md tokens         |
+| 0.4.0   | `/inline-style-to-class` now tokenizes all hard-coded values to CSS variables                     |
+| 0.3.0   | Added `/create-utilities`                                                                         |
+| 0.2.0   | Added `/inline-style-to-class`                                                                    |
+| 0.1.0   | Initial release with `/css-to-class`                                                              |
