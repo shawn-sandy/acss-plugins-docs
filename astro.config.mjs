@@ -291,6 +291,7 @@ export default defineConfig({
           label: "style-agent",
           items: [
             { label: "Overview", slug: "style-agent/overview" },
+            { label: "Tutorial", slug: "style-agent/tutorial" },
             {
               label: "Commands",
               items: [
