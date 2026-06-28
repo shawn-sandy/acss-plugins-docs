@@ -292,6 +292,10 @@ export default defineConfig({
           items: [
             { label: "Overview", slug: "style-agent/overview" },
             {
+              label: "Getting Started",
+              slug: "style-agent/getting-started",
+            },
+            {
               label: "Commands",
               items: [
                 {

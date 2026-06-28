@@ -5,8 +5,8 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 # Upstream layout cache
 
-- **verified-at-sha:** `5ef5592`
-- **verified-at:** `2026-06-18T00:00:00Z`
+- **verified-at-sha:** `4dbad67`
+- **verified-at:** `2026-06-28T00:00:00Z`
 
 ## Plugin roots
 
@@ -28,3 +28,4 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 - Full discovery run performed at `1e7b96e`: found `plugins/acss-kit` and `plugins/style-agent`; `plugins/acss-utilities` absent (removed upstream).
 - Layout verified at `5ef5592`: same two plugin roots (`plugins/acss-kit`, `plugins/style-agent`); layout unchanged.
 - New in `5ef5592` sync: `plugins/acss-kit/docs/prompt-book.md` refreshed for v1.10.2 (added §5a, §6a, §6b, §6c; kit-core replaces `components` skill references); `docs/framework-agnostic-design-systems-review.md` added upstream. `src/content/docs/acss-kit/overview.mdx` updated to list `/theme-from-figma`, `/theme-from-design`, `/design-export` in the Commands table.
+- New in `4dbad67` sync: acss-kit bumped to v1.11.0 — component token vocabulary unified to DESIGN.md/M3 names (`colors.text` → `colors.on-surface`, `colors.border` → `colors.outline-variant`, `colors.danger` → `colors.error`, `colors.info` → `colors.tertiary`, `colors.surface-subtle` → `colors.surface-container-low`, `typography.title-md` → `typography.headline-md`). Fixed `warning` severity ARIA role in `component-alert.mdx` (`role="alert"` → `role="status"`). Added `plugins/style-agent/docs/tutorial.md` (v0.5.1); corresponding doc at `src/content/docs/style-agent/getting-started.mdx` created.
