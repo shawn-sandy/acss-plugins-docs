@@ -292,6 +292,10 @@ export default defineConfig({
           items: [
             { label: "Overview", slug: "style-agent/overview" },
             {
+              label: "Tutorial: Your First Class",
+              slug: "style-agent/tutorial",
+            },
+            {
               label: "Commands",
               items: [
                 {
