@@ -4,6 +4,7 @@ description: Turn a plain-language description into utility classes, collapse ut
 ---
 
 import { Steps, Aside } from "@astrojs/starlight/components";
+import UtilityExample from "~/components/UtilityExample.astro";
 
 Turn a plain-language description into utility classes, collapse utility soup into one named class, and migrate hard-coded inline styles into variable-driven CSS — in any web project, in a few minutes. No framework lock-in, no install step beyond the plugin itself.
 
@@ -93,6 +94,17 @@ Use `/css-to-class` to consolidate the class string from Step 1 into a single na
 5. **At-rule context is preserved.** If a token resolves inside an `@media`, `@supports`, or `@layer` block in your source CSS, the generated class keeps that wrapper as a nested block — the declaration will not silently stop working at its breakpoint.
 
 </Steps>
+
+The `bg-primary` token used above resolves to your project's primary color variable. Here is what it looks like live:
+
+<UtilityExample class="bg-primary" property="--color-primary">
+  <div
+    class="bg-primary"
+    style="padding: 1rem; border-radius: 0.5rem; color: #fff;"
+  >
+    bg-primary
+  </div>
+</UtilityExample>
 
 <Aside type="note">
   `/css-to-class` is **read-only**. It prints the class block and the refactored
