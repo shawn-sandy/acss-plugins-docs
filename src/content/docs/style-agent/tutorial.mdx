@@ -1,0 +1,180 @@
+---
+title: "Tutorial: Your First Class"
+description: Turn a plain-language description into utility classes, collapse utility soup into a named class, and migrate inline styles — all with style-agent in any web project.
+---
+
+import { Steps, Aside } from "@astrojs/starlight/components";
+
+Turn a plain-language description into utility classes, collapse utility soup into one named class, and migrate hard-coded inline styles into variable-driven CSS — in any web project, in a few minutes. No framework lock-in, no install step beyond the plugin itself.
+
+## Before you start
+
+Prerequisites:
+
+- Any web project with CSS — plain CSS, SCSS, Tailwind, or Bootstrap. The skills are framework-agnostic.
+- `style-agent` installed via `/plugin install style-agent@shawn-sandy-agentic-acss-plugins`
+- Claude Code open in your project directory
+
+Unlike `acss-kit`, there is no `/setup`, no config file, and no React/Sass requirement. The skills read your existing files at call time — they grep your `.css` files to resolve classes and detect your stylesheet conventions on the fly.
+
+This walkthrough chains all three commands in the order they naturally compose: describe, consolidate, migrate.
+
+---
+
+## Step 1 — Generate utilities from a description
+
+Use `/create-utilities` to turn a plain-language intent description into a ready-to-use class string:
+
+```text
+/create-utilities "a centered flex row with 1rem padding, primary background, and rounded corners"
+```
+
+<Steps>
+
+1. **Detect your utility vocabulary.** The skill greps your project files for framework signatures — acss-kit `utilities.css`, a Tailwind config, or Bootstrap patterns. When none is found, it falls back to Tailwind-compatible names.
+
+2. **Map the description to classes.** Visual properties are extracted (layout, spacing, color, typography, border, shadow, state) and mapped to specific class names from the detected vocabulary. Class order is always: layout → spacing → color → typography → border → shadow → state.
+
+3. **Apply accessibility defaults.** If the element is interactive (button, link, input), a framework-appropriate focus class is added and the choice is explained in an `# a11y` note.
+
+4. **Emit output.** Prints a class string and a one-line HTML example:
+
+   ```text
+   flex items-center p-4 bg-primary rounded
+   ```
+
+   ```html
+   <div class="flex items-center p-4 bg-primary rounded">...</div>
+   ```
+
+</Steps>
+
+<Aside type="note">
+  `/create-utilities` **writes nothing**. It hands you a string to use. When the
+  description is too vague, the skill asks specific follow-up questions before
+  proceeding.
+</Aside>
+
+---
+
+## Step 2 — Collapse the utility soup into one named class
+
+Use `/css-to-class` to consolidate the class string from Step 1 into a single named CSS class. The `[name]` argument is optional:
+
+```text
+/css-to-class card-row "flex items-center p-4 bg-primary rounded"
+```
+
+<Steps>
+
+1. **Find CSS files.** The skill searches every `.css` file in your project (excluding `node_modules`, `dist`, `build`, `.git`).
+
+2. **Resolve each utility token.** Declarations are looked up by grepping those files. Any token that cannot be resolved becomes a `/* token: add declarations manually */` placeholder, kept in position.
+
+3. **Emit a named class.** The generated class uses resolved declarations:
+
+   ```css
+   /* extracted: flex items-center p-4 bg-primary rounded */
+   .card-row {
+     display: flex;
+     align-items: center;
+     padding: 1rem;
+     background: var(--color-primary);
+     border-radius: 0.5rem;
+   }
+   ```
+
+   ```html
+   <div class="card-row">...</div>
+   ```
+
+4. **Name sanitisation.** The supplied name is converted to kebab-case with a 20-character maximum. If you omit the name, the skill auto-generates one from semantic tokens and asks you to confirm when the guess is ambiguous.
+
+5. **At-rule context is preserved.** If a token resolves inside an `@media`, `@supports`, or `@layer` block in your source CSS, the generated class keeps that wrapper as a nested block — the declaration will not silently stop working at its breakpoint.
+
+</Steps>
+
+<Aside type="note">
+  `/css-to-class` is **read-only**. It prints the class block and the refactored
+  HTML; you decide where they land.
+</Aside>
+
+---
+
+## Step 3 — Migrate inline styles instead
+
+Use `/inline-style-to-class` as the inverse direction — for styles already hard-coded on an element. This is the one command that **writes to your stylesheet**.
+
+Select an element in your editor (VS Code or JetBrains) or paste it, then run:
+
+```text
+/inline-style-to-class hero-bg
+```
+
+Given an element like:
+
+```html
+<div style="background: #4f46e5; padding: 1.5rem; border-radius: 8px"></div>
+```
+
+<Steps>
+
+1. **Detect your project stylesheet.** The skill prefers an entry file named `globals`, `main`, `index`, `styles`, `app`, or `base`. It asks via a prompt only when the choice is ambiguous.
+
+2. **Tokenize every concrete value.** Each literal value is replaced with a CSS variable — reusing an existing variable when one already holds that value, creating a new one when none does. The original literal is kept as the `var()` fallback.
+
+3. **Append the class and strip the inline style.** The class is appended to the stylesheet and the inline `style` attribute is removed from your source — in place when run from an IDE selection.
+
+   Appended to your stylesheet:
+
+   ```css
+   .hero-bg {
+     background: var(--color-1, #4f46e5);
+     padding: var(--space-1, 1.5rem);
+     border-radius: var(--radius-1, 8px);
+   }
+   ```
+
+   The element becomes:
+
+   ```html
+   <div class="hero-bg"></div>
+   ```
+
+</Steps>
+
+<Aside type="tip">
+  The `var()` fallback means the migrated class is never more fragile than the
+  inline style it replaced — even if the variable is undefined, the element
+  renders identically. Reuse-or-create prevents duplicate variables for the same
+  value.
+</Aside>
+
+---
+
+## Verify
+
+The decisive check is what each command touches on disk:
+
+```bash
+git status   # after Steps 1 and 2: clean. They hand you code; they don't write it.
+git diff     # after Step 3: shows the real changes.
+```
+
+After `/inline-style-to-class`, `git diff` should show three things:
+
+- The new `.hero-bg` class appended to your detected stylesheet.
+- Any new variables declared in your tokens file or a `:root` block (reused variables are not re-declared).
+- The inline `style` attribute removed from the source element, replaced by `class="hero-bg"`.
+
+Open the page: the element renders identically to before.
+
+---
+
+## Where to next
+
+- [style-agent Overview](/acss-plugins-docs/style-agent/overview) — install and the full command table.
+- [`/create-utilities`](/acss-plugins-docs/style-agent/commands/create-utilities) — full command reference.
+- [`/css-to-class`](/acss-plugins-docs/style-agent/commands/css-to-class) — full command reference.
+- [`/inline-style-to-class`](/acss-plugins-docs/style-agent/commands/inline-style-to-class) — full command reference.
+- **Pair with acss-kit** — in a React + fpkit project, acss-kit's `/utility-add` ships the `utilities.css` bundle that `/create-utilities` and `/css-to-class` detect and resolve against.
