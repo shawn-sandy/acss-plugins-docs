@@ -34,7 +34,27 @@ Evidence from a real session (`git branch -vv` output):
 
 ## The hook script
 
-Store the following in `~/.claude/settings.json` under `hooks.SessionStart[0].command` (as a single line with `"timeout": 15`):
+Add the following to `~/.claude/settings.json`. The Claude Code hook schema requires a nested `hooks` array inside each event entry — the `command`, `type`, and `timeout` fields belong on the inner object, not the outer one:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 15,
+            "command": "git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0; DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'); test -n \"$DEFAULT_BRANCH\" || exit 0; CURRENT=$(git branch --show-current 2>/dev/null); if [ \"$CURRENT\" = \"$DEFAULT_BRANCH\" ]; then git pull --ff-only origin \"$DEFAULT_BRANCH\" 2>/dev/null && echo \"OK: $DEFAULT_BRANCH is up to date with origin\"; else case \"$CURRENT\" in claude/*) ;; *) echo \"OK: $CURRENT is not a session branch — skipped\"; exit 0 ;; esac; git fetch origin \"$DEFAULT_BRANCH\" 2>/dev/null; BEHIND=$(git rev-list --count \"HEAD..origin/$DEFAULT_BRANCH\" 2>/dev/null); if [ -z \"$(git status --porcelain)\" ] && [ \"$(git rev-list --count \"origin/$DEFAULT_BRANCH..HEAD\" 2>/dev/null)\" = \"0\" ]; then git reset --hard \"origin/$DEFAULT_BRANCH\" >/dev/null 2>&1; if [ -n \"$BEHIND\" ] && [ \"$BEHIND\" != \"0\" ]; then echo \"OK: reset $CURRENT to origin/$DEFAULT_BRANCH (was $BEHIND behind)\"; else echo \"OK: $CURRENT already at origin/$DEFAULT_BRANCH\"; fi; else echo \"OK: origin/$DEFAULT_BRANCH fetched; $CURRENT kept (local commits or dirty tree)\"; fi; fi || true"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The same script, expanded for readability:
 
 ```bash
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
@@ -47,7 +67,12 @@ if [ "$CURRENT" = "$DEFAULT_BRANCH" ]; then
   git pull --ff-only origin "$DEFAULT_BRANCH" 2>/dev/null \
     && echo "OK: $DEFAULT_BRANCH is up to date with origin"
 else
-  # On a worktree / session branch — update the remote-tracking ref first.
+  # Only refresh claude/* session branches — skip all other branches.
+  case "$CURRENT" in
+    claude/*) ;;
+    *) echo "OK: $CURRENT is not a session branch — skipped"; exit 0 ;;
+  esac
+  # On a session branch — update the remote-tracking ref first.
   git fetch origin "$DEFAULT_BRANCH" 2>/dev/null
   BEHIND=$(git rev-list --count "HEAD..origin/$DEFAULT_BRANCH" 2>/dev/null)
   if [ -z "$(git status --porcelain)" ] \
@@ -84,16 +109,19 @@ SessionStart fires
   ├─ not inside a git work tree? ................ exit 0 (no-op)
   ├─ origin/HEAD unset (no DEFAULT_BRANCH)? ..... exit 0 (no-op)
   │
-  ├─ CURRENT == DEFAULT_BRANCH (on main)
-  │     └─ git pull --ff-only origin main → "OK: main is up to date"
+  ├─ CURRENT == DEFAULT_BRANCH (on <default>)
+  │     └─ git pull --ff-only origin <default> → "OK: <default> is up to date"
   │
-  └─ CURRENT != DEFAULT_BRANCH (on claude/<slug>)
-        └─ git fetch origin main
-             └─ clean tree AND 0 commits ahead of origin/main?
-                  ├─ YES → git reset --hard origin/main
-                  │   ├─ was behind   → "reset <branch> (was N behind)"
-                  │   └─ already there → "<branch> already at origin/main"
-                  └─ NO → "origin/main fetched; <branch> kept"
+  └─ CURRENT != DEFAULT_BRANCH
+        ├─ NOT claude/* branch? ................ exit 0 (skipped — not a session branch)
+        │
+        └─ claude/<slug> branch
+              └─ git fetch origin <default>
+                   └─ clean tree AND 0 commits ahead of origin/<default>?
+                        ├─ YES → git reset --hard origin/<default>
+                        │   ├─ was behind   → "reset <branch> (was N behind)"
+                        │   └─ already there → "<branch> already at origin/<default>"
+                        └─ NO → "origin/<default> fetched; <branch> kept"
 ```
 
 What the two guards protect:
@@ -107,13 +135,14 @@ What the two guards protect:
 
 ## When the reset fires (and when it does not)
 
-| Situation                     | Hook output                                    | Branch mutated?        |
-| ----------------------------- | ---------------------------------------------- | ---------------------- |
-| Clean branch, behind origin   | `reset <branch> to origin/main (was N behind)` | Yes — moved forward    |
-| Clean branch, already current | `<branch> already at origin/main`              | No — pointer identical |
-| Branch has its own commits    | `<branch> kept (local commits or dirty tree)`  | No — skip              |
-| Dirty tree or untracked files | `<branch> kept (local commits or dirty tree)`  | No — skip              |
-| On the default branch         | `main is up to date with origin`               | Fast-forward pull only |
+| Situation                     | Hook output                                         | Branch mutated?        |
+| ----------------------------- | --------------------------------------------------- | ---------------------- |
+| Clean branch, behind origin   | `reset <branch> to origin/<default> (was N behind)` | Yes — moved forward    |
+| Clean branch, already current | `<branch> already at origin/<default>`              | No — pointer identical |
+| Branch has its own commits    | `<branch> kept (local commits or dirty tree)`       | No — skip              |
+| Dirty tree or untracked files | `<branch> kept (local commits or dirty tree)`       | No — skip              |
+| Non-`claude/*` branch         | `<branch> is not a session branch — skipped`        | No — skip              |
+| On the default branch         | `<default> is up to date with origin`               | Fast-forward pull only |
 
 ---
 
@@ -168,7 +197,7 @@ git remote set-head origin -a
 
    ```bash
    for b in <branch-with-commits> <stale-branch>; do
-     ahead=$(git rev-list --count "origin/main..$b" 2>/dev/null)
+     ahead=$(git rev-list --count "origin/<default>..$b" 2>/dev/null)
      [ "$ahead" = "0" ] \
        && echo "$b: RESET (no unique commits)" \
        || echo "$b: SKIP ($ahead unique commit(s))"
