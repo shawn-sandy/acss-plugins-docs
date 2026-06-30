@@ -1,0 +1,240 @@
+---
+title: Worktree Freshness Hook
+description: How the per-user SessionStart hook keeps every worktree branch current with origin's default branch — what it does, how it fires, and how to configure it.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+<Aside type="note">
+  The SessionStart hook described here lives in `~/.claude/settings.json` — a
+  per-user, machine-local file. It is **not** committed to this repository.
+  Every path prefixed with `~/` or `~/.claude/` is per-user. The repo's own
+  `.claude/settings.json` contains no `SessionStart` hook.
+</Aside>
+
+This guide documents the SessionStart hook that resets a fresh worktree branch onto `origin/<default>` so every session begins from the latest default branch — never a stale checkout.
+
+**The rule in one sentence:** at session start, a clean worktree branch with no commits of its own is reset onto `origin/<default>`.
+
+---
+
+## Why it exists
+
+`git worktree add <path>`, with no commit-ish, bases the new branch on `HEAD` — not on origin. Nothing fetches first. So whatever commit the repository happens to be sitting on at creation time becomes the new worktree's base. If that local checkout is stale, the worktree is born stale.
+
+Evidence from a real session (`git branch -vv` output):
+
+| Worktree branch                     | State vs. `origin/main` |
+| ----------------------------------- | ----------------------- |
+| `claude/beautiful-chebyshev-9c03a4` | `behind 15`             |
+| `claude/suspicious-mccarthy-ca7865` | `behind 22`             |
+| `claude/zen-tesla-7650ba`           | `behind 80`             |
+
+---
+
+## The hook script
+
+Add the following to `~/.claude/settings.json`. The Claude Code hook schema requires a nested `hooks` array inside each event entry — the `command`, `type`, and `timeout` fields belong on the inner object, not the outer one:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 15,
+            "command": "git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0; DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||'); test -n \"$DEFAULT_BRANCH\" || exit 0; CURRENT=$(git branch --show-current 2>/dev/null); if [ \"$CURRENT\" = \"$DEFAULT_BRANCH\" ]; then git pull --ff-only origin \"$DEFAULT_BRANCH\" 2>/dev/null && echo \"OK: $DEFAULT_BRANCH is up to date with origin\"; else case \"$CURRENT\" in claude/*) ;; *) echo \"OK: $CURRENT is not a session branch — skipped\"; exit 0 ;; esac; git fetch origin \"$DEFAULT_BRANCH\" 2>/dev/null; BEHIND=$(git rev-list --count \"HEAD..origin/$DEFAULT_BRANCH\" 2>/dev/null); if [ -z \"$(git status --porcelain)\" ] && [ \"$(git rev-list --count \"origin/$DEFAULT_BRANCH..HEAD\" 2>/dev/null)\" = \"0\" ]; then git reset --hard \"origin/$DEFAULT_BRANCH\" >/dev/null 2>&1; if [ -n \"$BEHIND\" ] && [ \"$BEHIND\" != \"0\" ]; then echo \"OK: reset $CURRENT to origin/$DEFAULT_BRANCH (was $BEHIND behind)\"; else echo \"OK: $CURRENT already at origin/$DEFAULT_BRANCH\"; fi; else echo \"OK: origin/$DEFAULT_BRANCH fetched; $CURRENT kept (local commits or dirty tree)\"; fi; fi || true"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The same script, expanded for readability:
+
+```bash
+git rev-parse --is-inside-work-tree >/dev/null 2>&1 || exit 0
+DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
+test -n "$DEFAULT_BRANCH" || exit 0
+CURRENT=$(git branch --show-current 2>/dev/null)
+
+if [ "$CURRENT" = "$DEFAULT_BRANCH" ]; then
+  # On the default branch itself — just fast-forward it.
+  git pull --ff-only origin "$DEFAULT_BRANCH" 2>/dev/null \
+    && echo "OK: $DEFAULT_BRANCH is up to date with origin"
+else
+  # Only refresh claude/* session branches — skip all other branches.
+  case "$CURRENT" in
+    claude/*) ;;
+    *) echo "OK: $CURRENT is not a session branch — skipped"; exit 0 ;;
+  esac
+  # On a session branch — update the remote-tracking ref first.
+  git fetch origin "$DEFAULT_BRANCH" 2>/dev/null
+  BEHIND=$(git rev-list --count "HEAD..origin/$DEFAULT_BRANCH" 2>/dev/null)
+  if [ -z "$(git status --porcelain)" ] \
+     && [ "$(git rev-list --count "origin/$DEFAULT_BRANCH..HEAD" 2>/dev/null)" = "0" ]; then
+    # Clean tree AND no commits of its own → safe to snap onto origin's default.
+    git reset --hard "origin/$DEFAULT_BRANCH" >/dev/null 2>&1
+    if [ -n "$BEHIND" ] && [ "$BEHIND" != "0" ]; then
+      echo "OK: reset $CURRENT to origin/$DEFAULT_BRANCH (was $BEHIND behind)"
+    else
+      echo "OK: $CURRENT already at origin/$DEFAULT_BRANCH"
+    fi
+  else
+    # Has local commits or a dirty tree → leave it alone.
+    echo "OK: origin/$DEFAULT_BRANCH fetched; $CURRENT kept (local commits or dirty tree)"
+  fi
+fi || true
+```
+
+<Aside type="caution">
+  The hook uses `git fetch origin <branch>` — not `git fetch origin
+  <branch>:<branch>` — to update the **remote-tracking ref**
+  (`origin/<default>`). The refspec form (`branch:branch`) is refused when the
+  target branch is checked out in another worktree. Using only the remote-tracking
+  ref avoids this error entirely.
+</Aside>
+
+---
+
+## Decision logic
+
+```text
+SessionStart fires
+  │
+  ├─ not inside a git work tree? ................ exit 0 (no-op)
+  ├─ origin/HEAD unset (no DEFAULT_BRANCH)? ..... exit 0 (no-op)
+  │
+  ├─ CURRENT == DEFAULT_BRANCH (on <default>)
+  │     └─ git pull --ff-only origin <default> → "OK: <default> is up to date"
+  │
+  └─ CURRENT != DEFAULT_BRANCH
+        ├─ NOT claude/* branch? ................ exit 0 (skipped — not a session branch)
+        │
+        └─ claude/<slug> branch
+              └─ git fetch origin <default>
+                   └─ clean tree AND 0 commits ahead of origin/<default>?
+                        ├─ YES → git reset --hard origin/<default>
+                        │   ├─ was behind   → "reset <branch> (was N behind)"
+                        │   └─ already there → "<branch> already at origin/<default>"
+                        └─ NO → "origin/<default> fetched; <branch> kept"
+```
+
+What the two guards protect:
+
+| Expression                                          | Reads as                                       | Used for                             |
+| --------------------------------------------------- | ---------------------------------------------- | ------------------------------------ |
+| `git rev-list --count origin/$DEFAULT_BRANCH..HEAD` | commits on this branch not in origin's default | the **guard** (must be `0` to reset) |
+| `git rev-list --count HEAD..origin/$DEFAULT_BRANCH` | commits in origin's default not on this branch | the **BEHIND** message count         |
+
+---
+
+## When the reset fires (and when it does not)
+
+| Situation                     | Hook output                                         | Branch mutated?        |
+| ----------------------------- | --------------------------------------------------- | ---------------------- |
+| Clean branch, behind origin   | `reset <branch> to origin/<default> (was N behind)` | Yes — moved forward    |
+| Clean branch, already current | `<branch> already at origin/<default>`              | No — pointer identical |
+| Branch has its own commits    | `<branch> kept (local commits or dirty tree)`       | No — skip              |
+| Dirty tree or untracked files | `<branch> kept (local commits or dirty tree)`       | No — skip              |
+| Non-`claude/*` branch         | `<branch> is not a session branch — skipped`        | No — skip              |
+| On the default branch         | `<default> is up to date with origin`               | Fast-forward pull only |
+
+---
+
+## Boundaries
+
+What the hook does **not** do:
+
+- Does not control `git worktree add`. Base commit at creation is still `HEAD`; the hook corrects freshness at the next session start.
+- Does not touch a branch that has its own commits (`origin/default..HEAD > 0`).
+- Does not touch a dirty or untracked tree (`git status --porcelain` non-empty).
+- Does not rebase. A branch that is both ahead and behind is skipped.
+- Does not push or modify `origin`.
+- Does not travel with any repository — it is user-level config.
+
+---
+
+## Preconditions
+
+```bash
+# Verify origin/HEAD is set (required for DEFAULT_BRANCH detection):
+git symbolic-ref refs/remotes/origin/HEAD
+# Should print: refs/remotes/origin/main
+
+# If missing, set it:
+git remote set-head origin -a
+```
+
+---
+
+## Verification
+
+<Steps>
+
+1. **Confirm the hook JSON parses** — a broken `~/.claude/settings.json` silently disables all hooks:
+
+   ```bash
+   python3 -c "import json; json.load(open('$HOME/.claude/settings.json')); print('valid JSON')"
+   ```
+
+2. **Dry-run on a branch already at origin** — confirm no mutation:
+
+   ```bash
+   git rev-parse --short HEAD   # note the SHA
+   # run the hook body manually
+   git rev-parse --short HEAD   # must be identical
+   git status --porcelain       # must be empty
+   ```
+
+   Expected output: `OK: <branch> already at origin/main`.
+
+3. **Audit reset-vs-skip across real branches** without mutating:
+
+   ```bash
+   for b in <branch-with-commits> <stale-branch>; do
+     ahead=$(git rev-list --count "origin/<default>..$b" 2>/dev/null)
+     [ "$ahead" = "0" ] \
+       && echo "$b: RESET (no unique commits)" \
+       || echo "$b: SKIP ($ahead unique commit(s))"
+   done
+   ```
+
+</Steps>
+
+---
+
+## Relation to the main-guard hook
+
+The `.claude/settings.json` committed in this repository contains a `PreToolUse` hook that blocks direct `git commit`/`git push` to `main`. These two hooks are complementary:
+
+- **main-guard** — stops you writing _to_ the default branch.
+- **SessionStart freshness hook** — keeps your worktree branch current _from_ the default branch.
+
+The freshness hook is per-user and supplements the repo-level main-guard; neither replaces the other.
+
+---
+
+## Quick reference
+
+```text
+RULE: fresh worktree branch → starts from origin/<default> at session start
+
+           ┌─ not a git tree / no origin/HEAD ........ exit 0 (no-op)
+           │
+SessionStart┤  CURRENT == default ... pull --ff-only ... "up to date"
+           │
+           └─ CURRENT != default
+                fetch origin <default>          (remote-tracking ref — never refused)
+                GUARD = (clean tree) AND (0 commits ahead of origin/<default>)
+                  GUARD true  + behind  → reset --hard → "reset … (was N behind)"
+                  GUARD true  + current → reset --hard → "… already at origin/<default>"
+                  GUARD false           → skip         → "… kept (local commits or dirty tree)"
+
+PROTECTED: own commits | dirty tree | untracked files
+SCOPE:     per-user ~/.claude/settings.json — NOT committed to any repo
+```

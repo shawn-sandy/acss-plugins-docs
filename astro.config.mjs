@@ -396,6 +396,10 @@ export default defineConfig({
               label: "Framework-Agnostic Design Systems",
               slug: "contributing/framework-agnostic-design-systems",
             },
+            {
+              label: "Worktree Freshness Hook",
+              slug: "contributing/worktree-freshness",
+            },
           ],
         },
       ],

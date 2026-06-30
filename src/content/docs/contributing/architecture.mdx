@@ -138,6 +138,41 @@ The skill does all the heavy lifting: file resolution, generation, validation, o
 
 Commit `.acss-target.json` to git so subsequent `/kit-add` and `/theme-create` runs reuse the same configuration.
 
+## DESIGN.md + COMPONENT.md — the two-file design system
+
+As of acss-kit v1.8.0 and style-agent v0.5.0, the two plugins share a common format layer built on two plain-markdown files. Understanding this coupling helps when authoring or reviewing skills that produce or consume design tokens.
+
+| File             | Owns                                                                                     | Format                                                                                             |
+| ---------------- | ---------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **DESIGN.md**    | The visual identity — `colors`, `typography`, `spacing`, `rounded` tokens                | Google Labs design-token format. A `primary` color is required — it seeds the OKLCH palette.       |
+| **COMPONENT.md** | A single component — its semantic structure, props, behavior, and accessibility contract | Framework-neutral spec published by `style-agent`. One file per component (`<name>.component.md`). |
+
+The coupling is the `{token.path}` reference: a COMPONENT.md names primitives like `{colors.primary}` or `{spacing.sm}`, and an agent resolves them against whatever sibling DESIGN.md the project provides. **DESIGN.md owns tokens, COMPONENT.md owns components** — loosely coupled through the file format, never through shared code.
+
+### Token vocabulary
+
+COMPONENT.md token references use **DESIGN.md / Material-3 names**, not the acss-kit `--color-*` CSS variable names. As of acss-kit v1.11.0 all 15 shipped `*.component.md` files use the unified vocabulary. The mapping between the two naming layers lives in `scripts/design_md_to_tokens.py`.
+
+Key mappings (COMPONENT.md ref → acss-kit CSS variable):
+
+| COMPONENT.md token               | acss-kit CSS variable    |
+| -------------------------------- | ------------------------ |
+| `{colors.on-surface}`            | `--color-text`           |
+| `{colors.outline-variant}`       | `--color-border`         |
+| `{colors.error}`                 | `--color-danger`         |
+| `{colors.tertiary}`              | `--color-info`           |
+| `{colors.surface-container-low}` | `--color-surface-subtle` |
+| `{colors.primary}`               | `--color-primary`        |
+| `{colors.surface}`               | `--color-surface`        |
+
+When writing or reviewing a `*.component.md` spec, always use the DESIGN.md/M3 names in `tokens:` front-matter — not the CSS variable names. The adapter translates them; the COMPONENT.md file should be portable across any project's DESIGN.md regardless of what CSS variable names the framework uses.
+
+### How the two plugins integrate
+
+- **acss-kit is the DESIGN.md bridge — bidirectional.** `/theme-from-design` consumes a DESIGN.md and generates the full theme; `/design-export` publishes the project's theme back out as a DESIGN.md.
+- **style-agent owns the COMPONENT.md spec.** The spec (`plugins/style-agent/docs/component-md/spec.md`) and a complete `button.component.md` example are the canonical references.
+- acss-kit ships 15 `*.component.md` files (one per component skill) that reference DESIGN.md tokens — these are the dogfooded clients of the spec.
+
 ## Version bump checklist
 
 Before committing any plugin change:
