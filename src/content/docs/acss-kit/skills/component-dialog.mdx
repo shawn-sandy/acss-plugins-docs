@@ -24,15 +24,15 @@ The `component-dialog` skill generates a self-contained accessible Dialog compon
 
 <Steps>
 
-1. **Read** `reference.md` in the skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+1. **Read the source doc.** Prefer `dialog.component.md` in the skill directory — the spec-driven source of truth. Read its `## Target: react` adapter (Generation Contract, `## Props Interface`, `## TSX Template`) and its `## Styles` section, plus `## Accessibility` and `## Examples`. If `dialog.component.md` is absent, fall back to `reference.md` (canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples).
 
 2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md` to initialize it before generating this component.
 
 3. **Dependencies** — Dialog depends on `button`. Before generating Dialog, check whether `<targetDir>/button.tsx` already exists. If missing, invoke the `component-button` skill first, then continue.
 
-4. **Generate** — apply the Generation Contract from `reference.md` to produce:
-   - `<targetDir>/dialog.tsx` from the `## TSX Template` section
-   - `<targetDir>/dialog.module.scss` from the `## SCSS Template` section
+4. **Generate** — apply the Generation Contract to produce:
+   - `<targetDir>/dialog.tsx` from the `## TSX Template` (in `dialog.component.md`, or top-level in `reference.md`)
+   - `<targetDir>/dialog.module.scss` from the `## Styles` section (`dialog.component.md`) or the `## SCSS Template` section (`reference.md`)
 
 5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary.
 
