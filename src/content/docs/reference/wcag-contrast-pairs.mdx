@@ -3,22 +3,49 @@ title: WCAG Contrast Pairs
 description: The 10 contrast pairs validated by acss-kit, their required ratios, and what they mean.
 ---
 
+import ColorSwatch from "~/components/ColorSwatch.astro";
+
 acss-kit validates 10 contrast pairs against WCAG 2.2 AA requirements. All pairs must pass before theme files are written.
 
 ## The 10 pairs
 
-| Foreground | Background | Minimum | Category |
-|---|---|---|---|
-| `--color-text` | `--color-background` | 4.5:1 | Normal text |
-| `--color-primary` | `--color-background` | 4.5:1 | Interactive |
-| `--color-text-inverse` | `--color-primary` | 4.5:1 | Text on brand |
-| `--color-danger` | `--color-background` | 4.5:1 | Semantic text |
-| `--color-success` | `--color-background` | 4.5:1 | Semantic text |
-| `--color-warning` | `--color-background` | 3.0:1 | Non-text indicator |
-| `--color-info` | `--color-background` | 4.5:1 | Semantic text |
-| `--color-text-muted` | `--color-background` | 4.5:1 | Secondary text |
-| `--color-border` | `--color-background` | 3.0:1 | Non-text indicator |
-| `--color-text` | `--color-surface` | 4.5:1 | Text on card |
+### Text roles
+
+<ColorSwatch roles={["text", "text-muted", "text-inverse"]} />
+
+| Foreground             | Background           | Minimum | Category       |
+| ---------------------- | -------------------- | ------- | -------------- |
+| `--color-text`         | `--color-background` | 4.5:1   | Normal text    |
+| `--color-text-muted`   | `--color-background` | 4.5:1   | Secondary text |
+| `--color-text`         | `--color-surface`    | 4.5:1   | Text on card   |
+| `--color-text-inverse` | `--color-primary`    | 4.5:1   | Text on brand  |
+
+### Brand and interactive
+
+<ColorSwatch roles={["primary", "focus-ring"]} />
+
+| Foreground        | Background           | Minimum | Category    |
+| ----------------- | -------------------- | ------- | ----------- |
+| `--color-primary` | `--color-background` | 4.5:1   | Interactive |
+
+### Semantic states
+
+<ColorSwatch roles={["danger", "success", "warning", "info"]} />
+
+| Foreground        | Background           | Minimum | Category           |
+| ----------------- | -------------------- | ------- | ------------------ |
+| `--color-danger`  | `--color-background` | 4.5:1   | Semantic text      |
+| `--color-success` | `--color-background` | 4.5:1   | Semantic text      |
+| `--color-info`    | `--color-background` | 4.5:1   | Semantic text      |
+| `--color-warning` | `--color-background` | 3.0:1   | Non-text indicator |
+
+### Layout
+
+<ColorSwatch roles={["border", "surface", "background"]} />
+
+| Foreground       | Background           | Minimum | Category           |
+| ---------------- | -------------------- | ------- | ------------------ |
+| `--color-border` | `--color-background` | 3.0:1   | Non-text indicator |
 
 ## WCAG thresholds
 

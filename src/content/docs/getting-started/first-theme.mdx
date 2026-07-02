@@ -3,7 +3,8 @@ title: Your First Theme
 description: Generate a WCAG-compliant light/dark theme from a single hex color using /theme-create.
 ---
 
-import { Steps, Aside } from '@astrojs/starlight/components';
+import { Steps, Aside } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
 
 This tutorial shows you how to go from a single brand color to a complete, WCAG AA–validated theme in two commands.
 
@@ -11,7 +12,34 @@ This tutorial shows you how to go from a single brand color to a complete, WCAG 
 
 `/theme-create` takes one hex color — your "seed" — and derives a full 18-role semantic palette using OKLCH color math. Every light and dark value is tested against WCAG 2.2 AA contrast requirements before being written to disk.
 
+The generated palette covers all 18 semantic roles:
+
+<ColorSwatch
+  roles={[
+    "background",
+    "surface",
+    "surface-raised",
+    "border",
+    "border-strong",
+    "text",
+    "text-muted",
+    "text-inverse",
+    "text-disabled",
+    "primary",
+    "primary-hover",
+    "focus-ring",
+    "danger",
+    "warning",
+    "info",
+    "success",
+    "accent",
+    "brand-accent",
+  ]}
+  table={false}
+/>
+
 The output is two plain CSS files:
+
 - `src/styles/theme/light.css` — `:root` block with all `--color-*` custom properties
 - `src/styles/theme/dark.css` — `[data-theme="dark"]` block with dark-mode values
 
@@ -35,7 +63,7 @@ The output is two plain CSS files:
 
    ```
    Generating palette from #4f46e5 (oklch 55% 0.22 270°)...
-   
+
    Light mode — contrast checks:
      ✓ text / background          14.2 : 1  (AA ✓)
      ✓ primary / background        5.8 : 1  (AA ✓)
@@ -43,11 +71,11 @@ The output is two plain CSS files:
      ✓ danger / background         5.1 : 1  (AA ✓)
      ✓ success / background        4.6 : 1  (AA ✓)
      ... (10 pairs total)
-   
+
    Dark mode — contrast checks:
      ✓ text / background          12.8 : 1  (AA ✓)
      ... (10 pairs total)
-   
+
    Writing src/styles/theme/light.css  ✓
    Writing src/styles/theme/dark.css   ✓
    ```
@@ -63,30 +91,35 @@ The output is two plain CSS files:
 ```css
 :root {
   /* Backgrounds */
-  --color-background:      oklch(99% 0.004 270);
-  --color-surface:         oklch(97% 0.006 270);
-  --color-surface-raised:  oklch(95% 0.008 270);
+  --color-background: oklch(99% 0.004 270);
+  --color-surface: oklch(97% 0.006 270);
+  --color-surface-raised: oklch(95% 0.008 270);
 
   /* Borders */
-  --color-border:          oklch(88% 0.014 270);
-  --color-border-strong:   oklch(72% 0.018 270);
+  --color-border: oklch(88% 0.014 270);
+  --color-border-strong: oklch(72% 0.018 270);
 
   /* Text */
-  --color-text:            oklch(16% 0.012 270);
-  --color-text-inverse:    oklch(99% 0.004 270);
-  --color-text-muted:      oklch(48% 0.014 270);
-  --color-text-disabled:   oklch(68% 0.010 270);
+  --color-text: oklch(16% 0.012 270);
+  --color-text-inverse: oklch(99% 0.004 270);
+  --color-text-muted: oklch(48% 0.014 270);
+  --color-text-disabled: oklch(68% 0.01 270);
 
   /* Brand */
-  --color-primary:         oklch(55% 0.22 270);
-  --color-primary-hover:   oklch(48% 0.22 270);
-  --color-focus-ring:      oklch(63% 0.20 270);
+  --color-primary: oklch(55% 0.22 270);
+  --color-primary-hover: oklch(48% 0.22 270);
+  --color-focus-ring: oklch(63% 0.2 270);
 
   /* Semantic */
-  --color-danger:          oklch(50% 0.22 27);
-  --color-warning:         oklch(56% 0.18 80);
-  --color-info:            oklch(55% 0.18 240);
-  --color-success:         oklch(48% 0.18 155);
+  --color-danger: oklch(50% 0.22 27);
+  --color-warning: oklch(56% 0.18 80);
+  --color-info: oklch(55% 0.18 240);
+  --color-success: oklch(48% 0.18 155);
+
+  /* Optional — generated when the seed hue has sufficient chroma range */
+  --color-accent: oklch(58% 0.2 300);
+  --color-accent-hover: oklch(51% 0.2 300);
+  --color-brand-accent: oklch(62% 0.18 210);
 }
 ```
 
@@ -94,10 +127,10 @@ The output is two plain CSS files:
 
 ```css
 [data-theme="dark"] {
-  --color-background:      oklch(12% 0.008 270);
-  --color-surface:         oklch(16% 0.010 270);
-  --color-surface-raised:  oklch(20% 0.012 270);
-  --color-primary:         oklch(72% 0.18 270);
+  --color-background: oklch(12% 0.008 270);
+  --color-surface: oklch(16% 0.01 270);
+  --color-surface-raised: oklch(20% 0.012 270);
+  --color-primary: oklch(72% 0.18 270);
   /* ... all 18 roles ... */
 }
 ```
@@ -108,11 +141,11 @@ Add both theme files to your app's entry point, in order:
 
 ```tsx
 // src/main.tsx
-import './styles/theme/light.css';
-import './styles/theme/dark.css';
-import './styles/utilities.css';   // if using acss-utilities
-import './App.css';
-import App from './App';
+import "./styles/theme/light.css";
+import "./styles/theme/dark.css";
+import "./styles/utilities.css"; // if using acss-utilities
+import "./App.css";
+import App from "./App";
 ```
 
 ## Enable dark mode
@@ -123,12 +156,14 @@ Dark mode activates when `data-theme="dark"` is set on the `<html>` element:
 // Simple dark mode toggle
 function toggleTheme() {
   const html = document.documentElement;
-  html.dataset.theme = html.dataset.theme === 'dark' ? '' : 'dark';
+  html.dataset.theme = html.dataset.theme === "dark" ? "" : "dark";
 }
 ```
 
 <Aside type="tip">
-To respect the OS-level preference on first load, check `window.matchMedia('(prefers-color-scheme: dark)').matches` before setting `data-theme`.
+  To respect the OS-level preference on first load, check
+  `window.matchMedia('(prefers-color-scheme: dark)').matches` before setting
+  `data-theme`.
 </Aside>
 
 ## Create a brand override
