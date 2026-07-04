@@ -5,8 +5,8 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 # Upstream layout cache
 
-- **verified-at-sha:** `5ef5592`
-- **verified-at:** `2026-06-18T00:00:00Z`
+- **verified-at-sha:** `4dbad67`
+- **verified-at:** `2026-07-04T00:00:00Z`
 
 ## Plugin roots
 
@@ -28,3 +28,5 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 - Full discovery run performed at `1e7b96e`: found `plugins/acss-kit` and `plugins/style-agent`; `plugins/acss-utilities` absent (removed upstream).
 - Layout verified at `5ef5592`: same two plugin roots (`plugins/acss-kit`, `plugins/style-agent`); layout unchanged.
 - New in `5ef5592` sync: `plugins/acss-kit/docs/prompt-book.md` refreshed for v1.10.2 (added §5a, §6a, §6b, §6c; kit-core replaces `components` skill references); `docs/framework-agnostic-design-systems-review.md` added upstream. `src/content/docs/acss-kit/overview.mdx` updated to list `/theme-from-figma`, `/theme-from-design`, `/design-export` in the Commands table.
+- Layout verified at `4dbad67`: same two plugin roots (`plugins/acss-kit`, `plugins/style-agent`); layout unchanged.
+- New in `4dbad67` sync: acss-kit v1.11.0 — component token vocabulary unified to DESIGN.md/M3 names (internal to component.md front-matter; generated CSS unchanged); 14 component skill docs updated to reflect COMPONENT.md-first workflow (prefer `<name>.component.md`, fall back to `reference.md`). style-agent v0.5.1 — getting-started tutorial added upstream; docs already had `tutorial.mdx`.

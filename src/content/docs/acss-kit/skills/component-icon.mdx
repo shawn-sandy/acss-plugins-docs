@@ -24,14 +24,14 @@ The `component-icon` skill generates a self-contained accessible Icon component 
 
 <Steps>
 
-1. **Read** `reference.md` in the skill directory for the canonical TSX template, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+1. **Read the source doc.** Prefer `icon.component.md` in the skill directory (the spec-driven source of truth for the Generation Contract, Props Interface, and TSX). Icon is presentational — it has no `## Styles`/SCSS section. Fall back to `reference.md` if the component file is absent. Both sources yield byte-identical output (golden-guarded).
 
 2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md` to initialize it before generating this component.
 
 3. **Dependencies** — Icon has no upstream dependencies. Skip dep resolution.
 
-4. **Generate** — apply the Generation Contract from `reference.md` to produce:
-   - `<targetDir>/icon.tsx` from the `## TSX Template` section
+4. **Generate** — apply the Generation Contract to produce:
+   - `<targetDir>/icon.tsx` from the `## Target: react` adapter in `icon.component.md` (or the top-level `## TSX Template` section in `reference.md`)
    - Icon has no SCSS template — it renders via CSS custom properties on the host element.
 
 5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary.

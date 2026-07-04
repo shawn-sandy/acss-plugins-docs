@@ -24,15 +24,15 @@ The `component-nav` skill generates a self-contained accessible Nav component di
 
 <Steps>
 
-1. **Read** `reference.md` in the skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+1. **Read the source doc.** Prefer `nav.component.md` in the skill directory (the spec-driven source of truth for the Generation Contract, Props Interface, SCSS, and TSX). Fall back to `reference.md` if the component file is absent. Both sources yield byte-identical output. Note: Nav is legacy-shape — `nav.component.md` has no `## TSX Template` block; the generated `nav.tsx` is assembled from `## Props Interface` and `## Key Pattern: Compound Component Assembly`.
 
 2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md` to initialize it before generating this component.
 
 3. **Dependencies** — Nav has no upstream dependencies. Skip dep resolution.
 
-4. **Generate** — apply the Generation Contract from `reference.md` to produce:
-   - `<targetDir>/nav.tsx` from the `## TSX Template` section
-   - `<targetDir>/nav.module.scss` from the `## SCSS Template` section
+4. **Generate** — apply the Generation Contract to produce:
+   - `<targetDir>/nav.tsx` assembled from `## Props Interface` and `## Key Pattern: Compound Component Assembly` in `nav.component.md` (or the `## TSX Template` section in `reference.md`)
+   - `<targetDir>/nav.module.scss` from the `## Styles` section in `nav.component.md` (or `## SCSS Template` in `reference.md`)
 
 5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary.
 
