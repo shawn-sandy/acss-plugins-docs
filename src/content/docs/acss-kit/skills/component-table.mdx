@@ -24,15 +24,15 @@ The `component-table` skill generates a self-contained accessible Table componen
 
 <Steps>
 
-1. **Read** `reference.md` in the skill directory for the canonical TSX/SCSS templates, Generation Contract, Props Interface, CSS Variables, Accessibility requirements, and Usage Examples.
+1. **Read the source doc.** Prefer `table.component.md` in the skill directory (the spec-driven source of truth for the Generation Contract, Props Interface, SCSS, and TSX). Fall back to `reference.md` if the component file is absent. Both sources yield byte-identical output (golden-guarded).
 
 2. **Init check** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/detect_target.py <cwd>`. If the foundation (`ui.tsx`) is missing, run Step A of `${CLAUDE_PLUGIN_ROOT}/skills/kit-core/SKILL.md` to initialize it before generating this component.
 
 3. **Dependencies** — Table has no upstream dependencies. Skip dep resolution.
 
-4. **Generate** — apply the Generation Contract from `reference.md` to produce:
-   - `<targetDir>/table.tsx` from the `## TSX Template` section
-   - `<targetDir>/table.module.scss` from the `## SCSS Template` section
+4. **Generate** — apply the Generation Contract to produce:
+   - `<targetDir>/table.tsx` from the `## Target: react` adapter in `table.component.md` (or the top-level `## TSX Template` section in `reference.md`)
+   - `<targetDir>/table.module.scss` from the `## Styles` section in `table.component.md` (or `## SCSS Template` in `reference.md`)
 
 5. **Verify** — run `python3 ${CLAUDE_PLUGIN_ROOT}/scripts/verify_integration.py <projectRoot>` and print the summary.
 
