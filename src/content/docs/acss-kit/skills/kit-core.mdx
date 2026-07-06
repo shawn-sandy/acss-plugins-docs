@@ -89,6 +89,46 @@ When `/kit-create` is invoked, `kit-core` runs Creator Mode:
 
 Form-shaped requests ("create a signup form with email and password") route to Form Mode inside `kit-core`. Form Mode generates a form component by composing Input, Field, Checkbox, and Button components bottom-up.
 
+## HTML Target Mode
+
+`kit-core` contains the full HTML Target workflow (steps HT-A through HT-F). It triggers when the user invokes `/kit-add --target=html`, asks for "static HTML components", or mentions a non-React project.
+
+Both the React workflow and the HTML Target workflow read the same `component-<name>/reference.md`. The React path extracts `## TSX Template`; the HTML path extracts `## HTML Template` and (for stateful components) `## Vanilla JS`. The `## SCSS Template` block is byte-identical for both.
+
+### Initialization (HT-A)
+
+1. Run `detect_target.py --target=html` to read or create `.acss-html-target.json` at the project root (default: `componentsHtmlDir: components/html`).
+2. Copy `_stateful.js` from `assets/html-foundation/` into the HTML output directory if it is absent. This helper is required by all stateful components.
+
+### Generation (HT-B)
+
+Files generated per component:
+
+| File          | Contents                                                                                                                                                    |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<name>.html` | Fragment — no `<html>`/`<body>` wrapper; slot placeholders use HTML comments                                                                                |
+| `<name>.scss` | Byte-identical to the React SCSS output                                                                                                                     |
+| `<name>.js`   | Plain ES module with idempotent `init()`. Emitted for stateful components only (alert, button, card, dialog). Imports `wireDisabled` from `./_stateful.js`. |
+
+Dependency resolution, show-plan, and skip-existing rules are identical to the React workflow.
+
+### Verify (HT-E)
+
+`verify_integration.py --target=html` checks every `.scss`/`.js` artifact is referenced by at least one page. Missing references are surfaced as a numbered fix-up list. The script never auto-edits user pages.
+
+### Key rules
+
+- **Fragments only** — no `<html>`/`<body>` wrappers.
+- **Same classes, `data-*` attributes, and ARIA** as the TSX output — SCSS is reused unchanged.
+- **No bundler required** — the `.js` files are plain ES modules.
+- **`_stateful.js` copied once** — subsequent runs skip it (skip-existing rule applies).
+
+<Aside type="note">
+  See [`/kit-add
+  --target=html`](/acss-plugins-docs/acss-kit/commands/kit-add#html-target) for
+  the user-facing command reference and the list of HTML-capable components.
+</Aside>
+
 ## References
 
 The `kit-core/references/` directory holds shared reference documents:

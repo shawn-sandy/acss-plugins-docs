@@ -10,14 +10,16 @@ Generate fpkit-style React components (`.tsx` + `.scss`) directly into your proj
 ## Syntax
 
 ```text
-/kit-add <component> [component2 component3 ...]
+/kit-add [--target=<react|html>] <component> [component2 component3 ...]
 ```
 
 ## Arguments
 
-| Argument    | Required | Description                                                      |
-| ----------- | -------- | ---------------------------------------------------------------- |
-| `component` | Yes      | One or more component names (space-separated). Case-insensitive. |
+| Argument         | Required | Description                                                                                                       |
+| ---------------- | -------- | ----------------------------------------------------------------------------------------------------------------- |
+| `component`      | Yes      | One or more component names (space-separated). Case-insensitive.                                                  |
+| `--target=react` | No       | Generate React TSX + SCSS (default when `--target` is omitted).                                                   |
+| `--target=html`  | No       | Generate static HTML fragments + SCSS + vanilla JS for non-React projects. See [HTML Target](#html-target) below. |
 
 ## Examples
 
@@ -176,5 +178,67 @@ Every generated component includes:
 - WCAG-appropriate color contrast via theme `--color-*` tokens
 
 <Aside type="tip">
-Run `/kit-list <component>` before `/kit-add` to preview the generation contract, props, CSS tokens, and dependencies for a specific component without generating it.
+  Run `/kit-list <component>` before `/kit-add` to preview the generation
+  contract, props, CSS tokens, and dependencies for a specific component without
+  generating it.
+</Aside>
+
+## HTML Target
+
+Pass `--target=html` to generate static HTML fragments + SCSS + vanilla JS for non-React projects (server-rendered apps, static sites, email templates, prototypes).
+
+```text
+/kit-add --target=html button
+/kit-add --target=html alert card dialog
+```
+
+### How it works
+
+The HTML Target workflow reads the same `component-<name>/reference.md` as the React workflow. It extracts `## HTML Template` instead of `## TSX Template`; the `## SCSS Template` block is byte-identical for both outputs.
+
+<Steps>
+
+1. **Initialization** — `detect_target.py --target=html` reads or creates `.acss-html-target.json` at the project root (default output dir: `components/html/`). `_stateful.js` is copied into that directory on first run — it is the disabled-state helper required by stateful components.
+
+2. **Dependency resolution** — same bottom-up algorithm as the React workflow. Leaf dependencies are generated first.
+
+3. **Show plan** — displays every file that will be created or skipped before writing anything.
+
+4. **Generate files** — for each component:
+   - `<name>.html` — fragment (no `<html>`/`<body>` wrapper); slot placeholders use HTML comments
+   - `<name>.scss` — byte-identical to the React SCSS output
+   - `<name>.js` — plain ES module with an idempotent `init()` (stateful components only: alert, button, card, dialog)
+
+5. **Verify** — `verify_integration.py --target=html` checks that each `.scss`/`.js` artifact is referenced by at least one page. Unreferenced artifacts are reported as a numbered fix-up list; no auto-edits to your pages.
+
+</Steps>
+
+### HTML-capable components
+
+Only components whose `reference.md` contains a `## HTML Template` section support `--target=html`. As of v1.11.0:
+
+| Component | HTML support | Vanilla JS emitted |
+| --------- | ------------ | ------------------ |
+| `alert`   | Yes          | Yes                |
+| `button`  | Yes          | Yes                |
+| `card`    | Yes          | Yes                |
+| `dialog`  | Yes          | Yes                |
+
+All other components are React-only. Passing `--target=html` for an unsupported component emits a "not yet — React only" warning.
+
+### Configuration file
+
+`.acss-html-target.json` at the project root stores the HTML output directory:
+
+```json
+{ "componentsHtmlDir": "components/html" }
+```
+
+Commit this file so subsequent `--target=html` runs reuse the same path without prompting.
+
+<Aside type="note">
+  The `--target=html` workflow lives in the `## HTML Target` section (steps HT-A
+  through HT-F) of the [`kit-core`
+  skill](/acss-plugins-docs/acss-kit/skills/kit-core). The default
+  `--target=react` mode is unchanged.
 </Aside>
