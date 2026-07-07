@@ -1,33 +1,35 @@
 ---
 title: /kit-add
-description: Generate one or more accessible React components into your project with automatic dependency resolution.
+description: Generate accessible React components or static HTML components into your project with automatic dependency resolution.
 ---
 
-import { Aside, Steps } from "@astrojs/starlight/components";
+import { Aside, Steps, Tabs, TabItem } from "@astrojs/starlight/components";
 
-Generate fpkit-style React components (`.tsx` + `.scss`) directly into your project. Dependency trees are resolved automatically — requesting `dialog` also generates `button` and `overlay` if they don't exist yet.
+Generate fpkit-style components directly into your project. Dependency trees are resolved automatically — requesting `dialog` also generates `button` and `overlay` if they don't exist yet. Use `--target=html` for non-React projects.
 
 ## Syntax
 
 ```text
 /kit-add <component> [component2 component3 ...]
+/kit-add --target=html <component> [component2 ...]
 ```
 
 ## Arguments
 
-| Argument    | Required | Description                                                      |
-| ----------- | -------- | ---------------------------------------------------------------- |
-| `component` | Yes      | One or more component names (space-separated). Case-insensitive. |
+| Argument        | Required | Description                                                                                           |
+| --------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| `component`     | Yes      | One or more component names (space-separated). Case-insensitive.                                      |
+| `--target=html` | No       | Generate static HTML + SCSS + vanilla JS instead of React TSX. See [HTML Target](#html-target) below. |
 
 ## Examples
 
-Generate a single component:
+Generate a single React component:
 
 ```text
 /kit-add button
 ```
 
-Generate multiple components at once:
+Generate multiple React components at once:
 
 ```text
 /kit-add card badge dialog
@@ -37,6 +39,13 @@ Generate a complex component (dependencies resolved automatically):
 
 ```text
 /kit-add table
+```
+
+Generate static HTML components for a non-React project:
+
+```text
+/kit-add --target=html button
+/kit-add --target=html alert dialog
 ```
 
 ## Workflow
@@ -62,6 +71,63 @@ When you run `/kit-add <component>`, the command routes to the dedicated `compon
 8. **Verify integration** — runs `verify_integration.py` against the recorded entry point. Missing imports are surfaced as a numbered fix-up list. The plugin never auto-edits your entry file.
 
 </Steps>
+
+## HTML Target
+
+Use `--target=html` to generate static HTML components for non-React projects — server-rendered apps, static sites, email templates, or prototypes. Both the React workflow and the HTML workflow read the same `reference.md` per component; HTML mode extracts `## HTML Template` and `## Vanilla JS` instead of `## TSX Template`.
+
+Components that support HTML output are marked `[HTML]` in `/kit-list`. As of v1.2.0, the HTML-capable components are: `alert`, `button`, `card`, and `dialog`. Requesting `--target=html` for any other component triggers a warning.
+
+### Configuration
+
+On first run, `/kit-add --target=html` asks where to write HTML components (default: `components/html/`) and writes `.acss-html-target.json` at the project root:
+
+```json
+{ "componentsHtmlDir": "components/html" }
+```
+
+Subsequent runs read this file automatically — no prompt repeated.
+
+### Foundation helper
+
+`_stateful.js` is copied to the HTML components directory on first run. Stateful components (Button, Card interactive variant, Alert, Dialog, Popover, Checkbox, Input, IconButton) import `wireDisabled` from this file. It is a plain ES module — no bundler required.
+
+### Output files
+
+Each HTML-capable component produces:
+
+| File           | Contents                                                                             |
+| -------------- | ------------------------------------------------------------------------------------ |
+| `<name>.html`  | HTML fragment — no `<html>`/`<body>` wrapper. Slot placeholders are HTML comments.   |
+| `<name>.scss`  | Byte-identical to the React SCSS output — same CSS variables and `data-*` selectors. |
+| `<name>.js`    | Vanilla JS module (stateful components only). Exports an idempotent `init()`.        |
+| `_stateful.js` | Disabled-state helper copied once per project.                                       |
+
+### Wiring up generated HTML components
+
+After generation, integrate the components into your project:
+
+1. Compile SCSS and add a stylesheet link:
+
+   ```bash
+   npx sass components/html/button.scss components/html/button.css
+   ```
+
+   ```html
+   <link rel="stylesheet" href="components/html/button.css" />
+   ```
+
+   Or `@import` the `.scss` from your existing Sass entrypoint.
+
+2. For stateful components, add a module script:
+
+   ```html
+   <script type="module" src="components/html/button.js"></script>
+   ```
+
+3. Paste the HTML fragment from `<name>.html` into your page or template.
+
+---
 
 ## Foundation CSS install
 

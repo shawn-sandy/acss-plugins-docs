@@ -49,9 +49,9 @@ Without a component name, `/kit-list` prints every available component organized
 Available Components (acss-kit v1.2)
 
 Leaf components (no dependencies):
-  alert       — Accessible status/error/info/warning notification with ARIA live regions
-  button      — Accessible button with primary/secondary/destructive/ghost variants
-  card        — Content container with header/body/footer slots
+  alert       — Accessible status/error/info/warning notification with ARIA live regions  [HTML]
+  button      — Accessible button with primary/secondary/destructive/ghost variants        [HTML]
+  card        — Content container with header/body/footer slots                            [HTML]
   field       — Form field wrapper with label, hint, and error association
   icon        — SVG icon wrapper with decorative/semantic modes
   img         — Accessible image with required alt and aspect-ratio containment
@@ -64,14 +64,15 @@ Leaf components (no dependencies):
 
 Components with dependencies:
   checkbox    — Checkbox with indeterminate state (depends on: input)
-  dialog      — Modal dialog with focus trap (depends on: button)
+  dialog      — Modal dialog with focus trap (depends on: button)                          [HTML]
   icon-button — Icon-only button with required aria-label (depends on: button)
 
 Inline-only (no dedicated skill):
   badge, tag, heading, text/paragraph, details, progress
   → Use /kit-create to generate these from a natural-language description.
 
-Run /kit-add <component> to generate React components.
+Run /kit-add <component> to generate React components,
+or /kit-add --target=html <component> for static HTML versions of [HTML]-marked entries.
 ```
 
 ## Output: component inspect

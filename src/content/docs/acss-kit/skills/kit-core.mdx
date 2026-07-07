@@ -89,6 +89,53 @@ When `/kit-create` is invoked, `kit-core` runs Creator Mode:
 
 Form-shaped requests ("create a signup form with email and password") route to Form Mode inside `kit-core`. Form Mode generates a form component by composing Input, Field, Checkbox, and Button components bottom-up.
 
+## HTML Target Mode
+
+HTML Target Mode generates static HTML + SCSS + vanilla JS components for non-React projects. It is triggered by `/kit-add --target=html`, phrases like "static HTML components" or "HTML version of `<component>`", or when the developer mentions a non-React project.
+
+Both the React and HTML workflows read the same `reference.md` per component. The React workflow extracts `## TSX Template`; HTML Target Mode extracts `## HTML Template` and, for stateful components, `## Vanilla JS`. The `## SCSS Template` block is identical for both.
+
+### Initialization (HT-A)
+
+1. **Target directory** — runs `detect_target.py --target=html` to read `.acss-html-target.json`. On first run, asks where to write HTML components (default: `components/html/`) and writes the config file.
+2. **Foundation helper** — copies `assets/html-foundation/_stateful.js` to the HTML components directory if it does not already exist. This file is the disabled-state helper required by stateful components.
+
+### Component generation (HT-B)
+
+1. Looks up `../../component-<name>/reference.md` — same lookup as the React workflow.
+2. Reads `## Generation Contract`, `## HTML Template`, `## SCSS Template`, and (for stateful components) `## Vanilla JS`.
+3. If `## HTML Template` is missing, warns the developer and offers to hand-author markup from the TSX template. Never silently skips.
+4. Resolves dependencies using the same bottom-up algorithm as the React workflow.
+5. Shows the dependency tree and waits for confirmation before writing.
+6. Generates files bottom-up; skips existing files (the developer owns generated code).
+
+### Output characteristics (HT-C)
+
+| File           | Contents                                                                             |
+| -------------- | ------------------------------------------------------------------------------------ |
+| `<name>.html`  | HTML fragment — no `<html>`/`<body>` wrapper. Slot placeholders as HTML comments.    |
+| `<name>.scss`  | Byte-identical to the React SCSS output — same CSS variables and `data-*` selectors. |
+| `<name>.js`    | Vanilla ES module (stateful components only). Exports an idempotent `init()`.        |
+| `_stateful.js` | Disabled-state helper — copied once per project.                                     |
+
+Stateful components that emit a `.js` file: Button, Card (interactive variant), Alert, Dialog, Popover, Checkbox, Input, IconButton.
+
+### Verify integration (HT-E)
+
+Runs `verify_integration.py --target=html` after generation. Exit 0 means every `.scss`/`.js` artifact is referenced by at least one page. Exit 1 prints a numbered fix-up list — the skill never auto-edits user pages.
+
+### Key rules (HT-F)
+
+1. HTML fragments only — no `<html>`/`<body>` wrappers.
+2. Same class names, `data-*` attributes, and ARIA as the TSX output — SCSS is reused unchanged.
+3. Vanilla JS for stateful components — no React, no bundler required.
+4. `_stateful.js` is copied once per project and never overwritten.
+5. Skip existing files — the developer owns all generated code.
+6. Generate in bottom-up dependency order — leaf components first.
+7. Never auto-edit user pages — HT-E reports missing references only.
+
+See [`/kit-add --target=html`](/acss-plugins-docs/acss-kit/commands/kit-add#html-target) for the full user-facing command reference.
+
 ## References
 
 The `kit-core/references/` directory holds shared reference documents:
