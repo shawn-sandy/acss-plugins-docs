@@ -1,0 +1,107 @@
+---
+title: Icon Button — Usage Guide
+description: Consumer guide for the acss-kit Icon Button component — accessible icon-only button with a compile-time TypeScript XOR type ensuring aria-label or aria-labelledby is always provided.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+An accessible icon-only (or icon + label) button built on top of [Button](/acss-plugins-docs/acss-kit/components/button). A TypeScript XOR type requires exactly one of `aria-label` or `aria-labelledby` at compile time, so the icon always has a programmatic accessible name (WCAG 1.1.1 / 4.1.2).
+
+<Aside type="tip">
+  The XOR type makes the accessible name a **build-time guarantee** — you cannot
+  ship an icon button without `aria-label` or `aria-labelledby`. Passing both or
+  neither is a TypeScript compile-time error.
+</Aside>
+
+## Add it to your project
+
+<Steps>
+
+1. **One-time setup** (run once per project): `/setup` — installs `sass`, writes `.acss-target.json`, and creates the `ui.tsx` foundation every component imports.
+
+2. **Add this component:** `/kit-add IconButton` — copies `icon-button.tsx` + `icon-button.scss` into your components directory (default `src/components/fpkit/`). It depends on `Button` — `/kit-add IconButton` pulls in `button.tsx` + `button.scss` too. Or run `/kit-sync` to install all components at once.
+
+</Steps>
+
+No `@fpkit/acss` install required.
+
+## Import
+
+```tsx
+import IconButton from "./fpkit/icon-button/icon-button";
+import "./fpkit/button/button.scss"; // base .btn styles + focus-visible ring
+import "./fpkit/icon-button/icon-button.scss";
+```
+
+Adjust the path to match the `componentsDir` in your `.acss-target.json`. IconButton renders `Button` from `../button/button`, so both the `.tsx` and `button.scss` must be present — the icon button inherits variant styling, disabled appearance, and focus ring from `button.scss`.
+
+## Props
+
+| Prop              | Type                                      | Default      | Description                                                                     |
+| ----------------- | ----------------------------------------- | ------------ | ------------------------------------------------------------------------------- |
+| `icon`            | `React.ReactNode`                         | — (required) | The icon element rendered inside the button.                                    |
+| `type`            | `'button' \| 'submit' \| 'reset'`         | `button`     | Prevents implicit form submit.                                                  |
+| `aria-label`      | `string`                                  | —            | Accessible name. Required unless `aria-labelledby` is passed.                   |
+| `aria-labelledby` | `string`                                  | —            | Accessible name by reference. Required unless `aria-label` is passed.           |
+| `label`           | `string`                                  | —            | Optional text shown beside the icon at desktop widths; always in the a11y tree. |
+| `variant`         | `'text' \| 'pill' \| 'icon' \| 'outline'` | `icon`       | Inherited from Button; `outline` restores padding for label layout.             |
+
+The XOR type means passing **both** `aria-label` and `aria-labelledby` — or **neither** — is a TypeScript compile-time error. Plus any other `ButtonProps` (`size`, `color`, `disabled`, `onClick`, etc.) except `children`.
+
+## Examples
+
+```tsx
+// Icon-only — compile-time accessible-name requirement enforced
+<IconButton type="button" aria-label="Close menu" icon={<CloseIcon />} />
+
+// Icon + responsive label (label hidden below 48rem; always in a11y tree)
+<IconButton
+  type="button"
+  aria-label="Settings"
+  icon={<SettingsIcon />}
+  label="Settings"
+  variant="outline"   // restores padding for label layout
+/>
+
+// Labelled by external element
+<>
+  <span id="del-label">Delete item</span>
+  <IconButton type="button" aria-labelledby="del-label" icon={<TrashIcon />} />
+</>
+```
+
+## Theming
+
+Override these CSS custom properties in your theme. Each has a fallback, so overriding is optional. IconButton also inherits color and focus tokens from [Button](/acss-plugins-docs/acss-kit/components/button).
+
+| Variable             | Purpose                                                     |
+| -------------------- | ----------------------------------------------------------- |
+| `--icon-btn-size`    | Tap-target size (default `3rem` / 48 px).                   |
+| `--icon-btn-padding` | Inner padding (default `0`).                                |
+| `--icon-btn-radius`  | Corner radius (default `50%` — circular).                   |
+| `--icon-btn-gap`     | Gap between icon and label.                                 |
+| `--icon-label-bp`    | Breakpoint above which the label appears (default `48rem`). |
+| `--icon-label-fs`    | Label font size.                                            |
+
+```css
+:root {
+  --icon-btn-radius: 0.5rem;
+  --icon-btn-size: 2.75rem;
+}
+```
+
+Generate a full matching theme with [`/theme-create`](/acss-plugins-docs/acss-kit/commands/theme-create).
+
+## Accessibility
+
+- The XOR type makes the accessible name a build-time guarantee — you cannot ship an icon button without `aria-label` or `aria-labelledby`.
+- Default `--icon-btn-size: 3rem` (48 px) exceeds WCAG 2.5.5 Target Size (AAA); keep it at or above 44 px if you shrink it.
+- Inherits Button's keyboard behavior (Enter/Space activation), `:focus-visible` ring, and `aria-disabled` disabled pattern that keeps the button in the tab order.
+- The optional `label` is visually hidden below the breakpoint with `clip` (not `display: none`), so screen readers announce it at every viewport.
+
+## Related
+
+- [Component Guides index](/acss-plugins-docs/acss-kit/components) — overview of all 15 components
+- [Button](/acss-plugins-docs/acss-kit/components/button) — the base component Icon Button is built on
+- [Icon](/acss-plugins-docs/acss-kit/components/icon) — supplies the glyph you pass to `icon`
+- [`component-icon-button` skill](/acss-plugins-docs/acss-kit/skills/component-icon-button) — maintainer reference (generation contract)
