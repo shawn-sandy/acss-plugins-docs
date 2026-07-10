@@ -1,0 +1,162 @@
+---
+title: Nav — Usage Guide
+description: Consumer guide for the acss-kit Nav compound component — semantic navigation landmark with horizontal and vertical layout variants.
+---
+
+import ComponentPreview from "~/components/ComponentPreview.astro";
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+A semantic navigation landmark using the compound pattern `Nav`, `Nav.List`, `Nav.Item`. It renders a `<nav>` wrapping a `<ul>` of `<li>` items, supports horizontal (default) and vertical layouts, and styles the links you place inside each item.
+
+<ComponentPreview
+  code={`<nav aria-label="Main navigation" style="display:flex;align-items:center;justify-content:space-between;padding:0.75rem 1rem;background:var(--color-surface,#f8fafc);border-bottom:1px solid var(--color-border,#e2e8f0);border-radius:0.5rem;">
+  <a href="#" aria-label="Go to homepage" style="font-weight:700;font-size:1.125rem;color:var(--color-text,#1e293b);text-decoration:none;">Brand</a>
+  <ul role="list" style="margin:0;padding:0;list-style:none;display:flex;gap:0.25rem;align-items:center;">
+    <li><a href="#" aria-current="page" style="display:block;padding:0.375rem 0.75rem;border-radius:0.375rem;color:var(--color-primary,#6d28d9);font-weight:600;text-decoration:none;background:color-mix(in oklch,var(--color-primary,#6d28d9) 8%,transparent);font-size:0.9375rem;">Home</a></li>
+    <li><a href="#" style="display:block;padding:0.375rem 0.75rem;border-radius:0.375rem;color:var(--color-text,#1e293b);text-decoration:none;font-size:0.9375rem;">Products</a></li>
+    <li><a href="#" style="display:block;padding:0.375rem 0.75rem;border-radius:0.375rem;color:var(--color-text,#1e293b);text-decoration:none;font-size:0.9375rem;">Contact</a></li>
+  </ul>
+</nav>`}
+  label="Nav component preview — horizontal navigation with current page indicator"
+/>
+
+## Add it to your project
+
+<Steps>
+
+1. Run `/setup` once per project — installs `sass`, writes `.acss-target.json`, and creates the `ui.tsx` foundation every component imports.
+
+2. Add the component: `/kit-add Nav` — copies `nav.tsx` + `nav.scss` into your components directory (default `src/components/fpkit/`). Or run `/kit-sync` to install all components at once.
+
+</Steps>
+
+No `@fpkit/acss` install required.
+
+## Import
+
+```tsx
+import Nav from "./fpkit/nav/nav";
+import "./fpkit/nav/nav.scss";
+```
+
+`Nav` is a compound component — `Nav`, `Nav.List`, and `Nav.Item` all ship in one file. Adjust the path to match the `componentsDir` in your `.acss-target.json`.
+
+## Props
+
+**`Nav`**
+
+| Prop         | Type                  | Default | Description                                                                            |
+| ------------ | --------------------- | ------- | -------------------------------------------------------------------------------------- |
+| `aria-label` | `string`              | —       | Accessible label; required when more than one `<nav>` exists on the page (WCAG 2.4.8). |
+| `classes`    | `string`              | —       | CSS class(es).                                                                         |
+| `styles`     | `React.CSSProperties` | —       | Inline styles.                                                                         |
+| `children`   | `React.ReactNode`     | —       | Typically `Nav.List` (and an optional logo/link).                                      |
+
+Plus any native `<nav>` attribute (except `className`).
+
+**`Nav.List`**
+
+| Prop         | Type              | Default | Description                                           |
+| ------------ | ----------------- | ------- | ----------------------------------------------------- |
+| `isBlock`    | `boolean`         | `false` | Vertical (block/column) layout instead of horizontal. |
+| `aria-label` | `string`          | —       | Accessible label for this list.                       |
+| `children`   | `React.ReactNode` | —       | `Nav.Item` children.                                  |
+
+**`Nav.Item`**
+
+| Prop       | Type                  | Default | Description                      |
+| ---------- | --------------------- | ------- | -------------------------------- |
+| `id`       | `string`              | —       | Element id.                      |
+| `classes`  | `string`              | —       | CSS class(es).                   |
+| `styles`   | `React.CSSProperties` | —       | Inline styles.                   |
+| `children` | `React.ReactNode`     | —       | Item content — usually an `<a>`. |
+
+## Examples
+
+```tsx
+// Basic horizontal nav
+<Nav aria-label="Main navigation">
+  <Nav.List>
+    <Nav.Item><a href="/" aria-current="page">Home</a></Nav.Item>
+    <Nav.Item><a href="/about">About</a></Nav.Item>
+    <Nav.Item><a href="/contact">Contact</a></Nav.Item>
+  </Nav.List>
+</Nav>
+
+// Multiple nav regions — aria-label required (WCAG 2.4.8)
+<Nav aria-label="Main navigation">
+  <Nav.List>
+    <Nav.Item><a href="/">Home</a></Nav.Item>
+    <Nav.Item><a href="/products">Products</a></Nav.Item>
+  </Nav.List>
+</Nav>
+
+<Nav aria-label="Footer navigation">
+  <Nav.List>
+    <Nav.Item><a href="/privacy">Privacy</a></Nav.Item>
+    <Nav.Item><a href="/terms">Terms</a></Nav.Item>
+  </Nav.List>
+</Nav>
+
+// Vertical sidebar navigation
+<Nav aria-label="Sidebar navigation">
+  <Nav.List isBlock>
+    <Nav.Item><a href="/dashboard">Dashboard</a></Nav.Item>
+    <Nav.Item><a href="/settings">Settings</a></Nav.Item>
+    <Nav.Item><a href="/profile">Profile</a></Nav.Item>
+  </Nav.List>
+</Nav>
+
+// Nav with logo and multiple lists
+<Nav aria-label="Site navigation">
+  <a href="/" aria-label="Go to homepage">
+    <img src="/logo.svg" alt="Company Logo" />
+  </a>
+  <Nav.List>
+    <Nav.Item><a href="/products">Products</a></Nav.Item>
+    <Nav.Item><a href="/pricing">Pricing</a></Nav.Item>
+  </Nav.List>
+  <Nav.List aria-label="User actions">
+    <Nav.Item><a href="/login">Sign in</a></Nav.Item>
+  </Nav.List>
+</Nav>
+```
+
+## Theming
+
+Override these CSS custom properties in your theme to restyle every nav. Each has a fallback, so overriding is optional.
+
+| Variable                                             | Purpose                                              |
+| ---------------------------------------------------- | ---------------------------------------------------- |
+| `--nav-justify`                                      | Alignment of nav contents (default `space-between`). |
+| `--nav-gap`                                          | Gap between top-level nav children.                  |
+| `--nav-list-gap`                                     | Gap between items in a horizontal list.              |
+| `--nav-list-block-gap`                               | Gap between items in a vertical (`isBlock`) list.    |
+| `--nav-link-color` / `--nav-link-hover-color`        | Link text color and hover color.                     |
+| `--nav-link-current-color` / `--nav-link-current-fw` | Color and weight of the `aria-current="page"` link.  |
+| `--nav-link-radius`                                  | Corner radius on link hit areas.                     |
+| `--nav-link-focus-outline`                           | Focus ring on links.                                 |
+
+```css
+:root {
+  --nav-link-hover-color: #6d28d9;
+  --nav-link-current-color: #6d28d9;
+}
+```
+
+Generate a full matching theme with `/theme-create` (see [Styles guide](/acss-plugins-docs/acss-kit/styles)).
+
+## Accessibility
+
+- `<nav>` is a landmark — screen reader users can jump directly to it.
+- `aria-label` is required when multiple `<nav>` elements exist on the page (WCAG 2.4.8).
+- `aria-current="page"` on the active link announces "current page" to screen readers.
+- The `<ul>` + `<li>` structure lets screen readers announce "list of N items".
+- Links carry visible `:focus-visible` outlines meeting WCAG 2.4.7.
+
+## Related
+
+- [Component index](/acss-plugins-docs/acss-kit/components)
+- [Link](/acss-plugins-docs/acss-kit/components/link) — the anchor styling used inside `Nav.Item`
+- [List](/acss-plugins-docs/acss-kit/components/list) — for inline link lists outside a nav landmark
+- [`component-nav` skill](/acss-plugins-docs/acss-kit/skills/component-nav) — AI generation workflow reference

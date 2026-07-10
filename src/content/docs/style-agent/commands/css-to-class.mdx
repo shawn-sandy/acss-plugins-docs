@@ -7,6 +7,13 @@ import { Aside, Steps } from "@astrojs/starlight/components";
 
 Collapse a multi-class HTML element or plain class string into a single, semantically named CSS class. Resolves each utility token to its actual property/value declarations by grepping all `.css` files in your project — no external processor, no framework assumption.
 
+## When to use
+
+- An element has grown a long "utility soup" `class="..."` list and you want one semantic selector instead.
+- You need a reusable named class (e.g. `.testimonial-grid`) that inlines the declarations those utilities produced.
+- You are consolidating the output of [`/create-utilities`](/acss-plugins-docs/style-agent/commands/create-utilities) into a committed class.
+- You want to see which tokens are project-defined vs. undefined (unresolved tokens are flagged for manual follow-up).
+
 ## Syntax
 
 ```text

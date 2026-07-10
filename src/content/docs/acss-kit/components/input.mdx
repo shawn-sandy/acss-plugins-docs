@@ -1,0 +1,150 @@
+---
+title: Input — Usage Guide
+description: Consumer guide for the acss-kit Input component — text form control with validation states, error/hint aria-describedby, and accessible-disabled pattern.
+---
+
+import ComponentPreview from "~/components/ComponentPreview.astro";
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+A text-based form control with first-class validation states, error/hint association, and the kit-builder accessible-disabled pattern. Emits `aria-required`, `aria-invalid`, `aria-readonly`, and a generated `aria-describedby` linking to error and hint text. Pair it with [Field](/acss-plugins-docs/acss-kit/components/field) for label association.
+
+<ComponentPreview
+  code={`<div style="display:flex;flex-direction:column;gap:1rem;max-width:22rem;">
+  <div style="display:flex;flex-direction:column;gap:0.375rem;">
+    <label for="inp-email" style="font-size:0.875rem;font-weight:600;color:var(--color-text,#1e293b);">Email address</label>
+    <input id="inp-email" type="email" placeholder="you@example.com" aria-required="true" style="padding:0.5em 0.75em;border:1px solid var(--color-border,#e2e8f0);border-radius:0.375rem;background:var(--color-background,#fff);color:var(--color-text,#1e293b);font-size:0.9375rem;width:100%;box-sizing:border-box;" />
+  </div>
+  <div style="display:flex;flex-direction:column;gap:0.375rem;">
+    <label for="inp-invalid" style="font-size:0.875rem;font-weight:600;color:var(--color-text,#1e293b);">Password</label>
+    <input id="inp-invalid" type="password" value="abc" aria-invalid="true" aria-describedby="inp-invalid-error" style="padding:0.5em 0.75em;border:1px solid var(--color-danger,#dc2626);border-radius:0.375rem;background:var(--color-background,#fff);color:var(--color-text,#1e293b);font-size:0.9375rem;width:100%;box-sizing:border-box;" />
+    <p id="inp-invalid-error" role="alert" style="margin:0;font-size:0.8125rem;color:var(--color-danger,#dc2626);">At least 8 characters required.</p>
+  </div>
+</div>`}
+  label="Input component preview"
+/>
+
+## Add it to your project
+
+<Steps>
+
+1. Run `/setup` once per project — installs `sass`, writes `.acss-target.json`, and creates the `ui.tsx` foundation every component imports.
+
+2. Add the component: `/kit-add Input` — copies `input.tsx` + `input.scss` into your components directory (default `src/components/fpkit/`). Add `Field` too (or run `/kit-sync`) for label association.
+
+</Steps>
+
+No `@fpkit/acss` install required.
+
+## Import
+
+```tsx
+import Field from "./fpkit/field/field";
+import Input from "./fpkit/input/input";
+import "./fpkit/field/field.scss";
+import "./fpkit/input/input.scss";
+```
+
+Adjust the path to match the `componentsDir` in your `.acss-target.json`.
+
+## Props
+
+| Prop              | Type                                    | Default      | Description                                                                 |
+| ----------------- | --------------------------------------- | ------------ | --------------------------------------------------------------------------- |
+| `id`              | `string`                                | — (required) | Label association and `aria-describedby` id generation.                     |
+| `type`            | `React.HTMLInputTypeAttribute`          | `'text'`     | HTML input type.                                                            |
+| `name`            | `string`                                | —            | Form field name.                                                            |
+| `value`           | `string \| number \| readonly string[]` | —            | Controlled value.                                                           |
+| `defaultValue`    | `string \| number \| readonly string[]` | —            | Uncontrolled initial value.                                                 |
+| `placeholder`     | `string`                                | —            | Placeholder text (not a substitute for a label).                            |
+| `disabled`        | `boolean`                               | `false`      | Accessible disabled — renders `aria-disabled`, keeps the element focusable. |
+| `isDisabled`      | `boolean`                               | —            | Legacy alias for `disabled`; `disabled` takes precedence.                   |
+| `readOnly`        | `boolean`                               | `false`      | Read-only state.                                                            |
+| `required`        | `boolean`                               | `false`      | Renders `aria-required` + native `required`.                                |
+| `validationState` | `'none' \| 'valid' \| 'invalid'`        | `'none'`     | Drives `aria-invalid` and the `data-validation` attribute.                  |
+| `errorMessage`    | `string`                                | —            | Links a `{id}-error` reference via `aria-describedby`.                      |
+| `hintText`        | `string`                                | —            | Links a `{id}-hint` reference via `aria-describedby`.                       |
+| `onEnter`         | `React.KeyboardEventHandler`            | —            | Convenience handler for Enter; fires after `onKeyDown`.                     |
+| `classes`         | `string`                                | —            | Custom CSS classes.                                                         |
+
+Plus `onChange`, `onBlur`, `onFocus`, `onKeyDown`, `maxLength`, `minLength`, `pattern`, `autoComplete`, `autoFocus`, `inputMode`, and other native `<input>` attributes.
+
+## Examples
+
+```tsx
+// Basic Field + Input
+<Field labelFor="email" label="Email">
+  <Input id="email" type="email" required />
+</Field>
+
+// With validation + error message
+const [email, setEmail] = useState('')
+const [emailErr, setEmailErr] = useState<string | undefined>()
+
+<Field labelFor="email" label="Email">
+  <Input
+    id="email"
+    type="email"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    validationState={emailErr ? 'invalid' : 'none'}
+    errorMessage={emailErr}
+    required
+  />
+  {emailErr && <p id="email-error" role="alert">{emailErr}</p>}
+</Field>
+
+// With hint text
+<Field labelFor="password" label="Password">
+  <Input
+    id="password"
+    type="password"
+    hintText="At least 8 characters with one number"
+    minLength={8}
+    required
+  />
+  <p id="password-hint">At least 8 characters with one number</p>
+</Field>
+
+// Submit on Enter
+<Input id="search" type="search" onEnter={(e) => runSearch(e.currentTarget.value)} />
+
+// Read-only
+<Input id="invoice" defaultValue="INV-12345" readOnly />
+```
+
+## Theming
+
+Override these CSS custom properties in your theme to restyle every input. Each has a fallback, so overriding is optional.
+
+| Variable                                           | Purpose                                       |
+| -------------------------------------------------- | --------------------------------------------- |
+| `--input-bg` / `--input-color`                     | Background and text color.                    |
+| `--input-border`                                   | Border (the primary editable-area indicator). |
+| `--input-radius`                                   | Corner radius.                                |
+| `--input-focus-border` / `--input-focus-ring`      | Focus border and ring.                        |
+| `--input-invalid-border` / `--input-invalid-ring`  | Invalid-state styling.                        |
+| `--input-valid-border`                             | Valid-state border.                           |
+| `--input-disabled-bg` / `--input-disabled-opacity` | Disabled appearance.                          |
+
+```css
+:root {
+  --input-radius: 0.5rem;
+  --input-focus-border: #6d28d9;
+}
+```
+
+Generate a full matching theme with `/theme-create` (see [Styles guide](/acss-plugins-docs/acss-kit/styles)).
+
+## Accessibility
+
+- Input does not render its own `<label>`. Wrap it with [Field](/acss-plugins-docs/acss-kit/components/field) (or a `<label htmlFor={id}>`) so the control has an accessible name; the `id` prop is required.
+- Disabled state uses `aria-disabled="true"` instead of the native `disabled` attribute, keeping the input in the tab order (WCAG 2.1.1).
+- `validationState="invalid"` sets `aria-invalid="true"` and `data-validation="invalid"`. Pass `errorMessage` and render the error yourself with id `{id}-error`.
+- `hintText` links helper text via id `{id}-hint`; both hint and error are combined into one `aria-describedby`.
+- Never rely on `placeholder` as the only label — it disappears on focus and has low contrast.
+
+## Related
+
+- [Component index](/acss-plugins-docs/acss-kit/components)
+- [Field](/acss-plugins-docs/acss-kit/components/field) — provides the label association Input needs
+- [`component-input` skill](/acss-plugins-docs/acss-kit/skills/component-input) — AI generation workflow reference
