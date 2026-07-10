@@ -1,0 +1,149 @@
+---
+title: Dialog — Usage Guide
+description: Consumer guide for the acss-kit Dialog compound component — modal dialog built on the native HTML dialog element with focus trapping and Escape-to-close.
+---
+
+import ComponentPreview from "~/components/ComponentPreview.astro";
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+A modal dialog built on the native HTML `<dialog>` element, so focus trapping, the backdrop scrim, and Escape-to-close come for free — no npm packages. It is a compound component (`Dialog`, `Dialog.Header`, `Dialog.Body`, `Dialog.Footer`) and you drive open/close through a ref.
+
+<ComponentPreview
+  code={`<div style="position:relative;display:flex;align-items:center;justify-content:center;min-height:8rem;background:color-mix(in oklch,var(--color-surface,#f8fafc) 50%,transparent);border-radius:0.5rem;border:1px dashed var(--color-border,#e2e8f0);">
+  <div role="dialog" aria-modal="true" aria-labelledby="dlg-title" style="background:var(--color-background,#fff);border-radius:0.75rem;box-shadow:0 8px 32px rgba(0,0,0,0.18);padding:1.5rem;max-width:26rem;width:100%;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+      <h2 id="dlg-title" style="margin:0;font-size:1.125rem;font-weight:600;color:var(--color-text,#1e293b);">Confirm Action</h2>
+      <button aria-label="Close dialog" style="border:none;background:none;cursor:pointer;color:var(--color-text-muted,#64748b);font-size:1.25rem;line-height:1;">&times;</button>
+    </div>
+    <p style="margin:0 0 1.25rem;color:var(--color-text-muted,#64748b);font-size:0.9375rem;">Are you sure you want to proceed? This action cannot be undone.</p>
+    <div style="display:flex;justify-content:flex-end;gap:0.5rem;">
+      <button style="padding:0.4em 1em;border-radius:0.375rem;border:1px solid var(--color-border-strong,#94a3b8);background:transparent;cursor:pointer;font-size:0.875rem;color:var(--color-text,#1e293b);">Cancel</button>
+      <button style="padding:0.4em 1em;border-radius:0.375rem;border:none;background:var(--color-primary,#6d28d9);color:#fff;font-weight:600;cursor:pointer;font-size:0.875rem;">Confirm</button>
+    </div>
+  </div>
+</div>`}
+  label="Dialog component preview"
+/>
+
+## Add it to your project
+
+<Steps>
+
+1. Run `/setup` once per project — installs `sass`, writes `.acss-target.json`, and creates the `ui.tsx` foundation every component imports.
+
+2. Add the component: `/kit-add Dialog` — copies `dialog.tsx` + `dialog.scss` into your components directory (default `src/components/fpkit/`). Dialog depends on `Button` (for the close button and footer actions) — `/kit-add Dialog` pulls in `button.tsx` + `button.scss` too. Or run `/kit-sync` to install all components at once.
+
+</Steps>
+
+No `@fpkit/acss` install required.
+
+## Import
+
+```tsx
+import { useRef } from "react";
+import Dialog from "./fpkit/dialog/dialog";
+import Button from "./fpkit/button/button";
+import "./fpkit/dialog/dialog.scss";
+import "./fpkit/button/button.scss";
+```
+
+`Dialog.Header`, `Dialog.Body`, and `Dialog.Footer` are attached to the default export. Adjust the paths to match the `componentsDir` in your `.acss-target.json`.
+
+## Props
+
+**`Dialog` (root)**
+
+| Prop              | Type                                 | Default      | Description                                         |
+| ----------------- | ------------------------------------ | ------------ | --------------------------------------------------- |
+| `dialogRef`       | `React.RefObject<HTMLDialogElement>` | — (required) | Ref used to call `showModal()` / `close()`.         |
+| `openOnMount`     | `boolean`                            | `false`      | Whether to open on mount.                           |
+| `onClose`         | `() => void`                         | —            | Callback when the dialog closes.                    |
+| `title`           | `string`                             | —            | Renders a header title, wired to `aria-labelledby`. |
+| `description`     | `string`                             | —            | Renders a description paragraph under the title.    |
+| `showCloseButton` | `boolean`                            | `true`       | Show the header close button.                       |
+| `children`        | `React.ReactNode`                    | —            | Dialog body content.                                |
+| `footer`          | `React.ReactNode`                    | —            | Footer action buttons.                              |
+| `classes`         | `string`                             | —            | CSS class name.                                     |
+| `styles`          | `React.CSSProperties`                | —            | Inline styles.                                      |
+
+Sub-components — `Dialog.Header` (`children`, `onClose`, `showCloseButton`, `classes`), `Dialog.Body` (`children`, `classes`), `Dialog.Footer` (`children`, `classes`).
+
+## Examples
+
+```tsx
+function App() {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+
+  return (
+    <>
+      <Button type="button" onClick={() => dialogRef.current?.showModal()}>
+        Open Dialog
+      </Button>
+
+      <Dialog
+        dialogRef={dialogRef}
+        title="Confirm Action"
+        description="This action cannot be undone."
+        onClose={() => console.log("closed")}
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => dialogRef.current?.close()}
+            >
+              Cancel
+            </Button>
+            <Button type="button" color="primary" onClick={() => {}}>
+              Confirm
+            </Button>
+          </>
+        }
+      >
+        <p>Are you sure you want to proceed?</p>
+      </Dialog>
+    </>
+  );
+}
+```
+
+Open with `dialogRef.current?.showModal()` and close with `dialogRef.current?.close()`. Backdrop clicks and the Escape key also close the dialog.
+
+## Theming
+
+Override these CSS custom properties in your theme to restyle every dialog. Each has a fallback, so overriding is optional.
+
+| Variable                                                        | Purpose                                 |
+| --------------------------------------------------------------- | --------------------------------------- |
+| `--dialog-bg` / `--dialog-color`                                | Dialog background/text.                 |
+| `--dialog-radius`                                               | Corner radius.                          |
+| `--dialog-width` / `--dialog-max-width` / `--dialog-max-height` | Sizing constraints.                     |
+| `--dialog-shadow`                                               | Drop shadow.                            |
+| `--dialog-header-padding` / `--dialog-body-padding`             | Header and body padding.                |
+| `--dialog-footer-bg` / `--dialog-footer-justify`                | Footer background and action alignment. |
+| `--dialog-backdrop-bg`                                          | `::backdrop` scrim color.               |
+
+```css
+:root {
+  --dialog-width: 28rem;
+  --dialog-radius: 0.75rem;
+  --dialog-backdrop-bg: rgba(0, 0, 0, 0.6);
+}
+```
+
+Generate a full matching theme with `/theme-create` (see [Styles guide](/acss-plugins-docs/acss-kit/styles)).
+
+## Accessibility
+
+- Opening with `showModal()` traps focus inside the dialog, and closing returns focus to the trigger — both native browser behaviors. Never use modeless `show()`; it does not enforce the trap.
+- `Escape` fires the native `cancel` event and closes the dialog. No keybinding code needed.
+- The native `<dialog>` supplies `role="dialog"` and `aria-modal="true"` automatically — don't add them. `aria-labelledby` references the generated title id so the dialog is announced by its title.
+- The close button carries `aria-label="Close dialog"` since the `×` glyph is not an accessible name.
+- Dialog title renders as `<h2>`; keep the surrounding heading outline in mind if the page already uses `<h2>` nearby.
+
+## Related
+
+- [Component index](/acss-plugins-docs/acss-kit/components)
+- [Button](/acss-plugins-docs/acss-kit/components/button) — used for close button and footer actions
+- [Alert](/acss-plugins-docs/acss-kit/components/alert) — for inline, non-blocking status messages
+- [`component-dialog` skill](/acss-plugins-docs/acss-kit/skills/component-dialog) — AI generation workflow reference

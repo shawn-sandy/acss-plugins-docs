@@ -1,0 +1,79 @@
+---
+title: Component Usage Guides
+description: Consumer guides for all 15 acss-kit components — add, import, props, examples, theming, and accessibility.
+---
+
+import ComponentPreview from "~/components/ComponentPreview.astro";
+import ColorSwatch from "~/components/ColorSwatch.astro";
+import { Aside } from "@astrojs/starlight/components";
+
+Consumer-facing guides for using each `acss-kit` component in your own React project. Each guide covers: how to add the component, how to import it, its props, copy-paste examples, theming variables, and accessibility notes.
+
+<Aside type="note">
+  These are **consumer** guides. For the AI workflow that generates each
+  component, see the [Skills reference](/acss-plugins-docs/acss-kit/skills/kit-core).
+  The canonical source for each component lives in
+  `skills/component-<name>/reference.md` upstream.
+</Aside>
+
+## First time here?
+
+1. Run `/setup` once — installs `sass`, creates the `ui.tsx` foundation, writes `.acss-target.json`, and seeds a starter theme.
+2. Add a component with `/kit-add <Name>`, or install everything at once with `/kit-sync`.
+3. Import the generated `.tsx` + `.scss` pair and use it.
+
+See the [Getting Started guide](/acss-plugins-docs/getting-started/first-component) for a full walkthrough.
+
+## Components
+
+| Component                                                         | What it is                                                  |
+| ----------------------------------------------------------------- | ----------------------------------------------------------- |
+| [Alert](/acss-plugins-docs/acss-kit/components/alert)             | Status/feedback message banner.                             |
+| [Button](/acss-plugins-docs/acss-kit/components/button)           | Primary interactive element with size/style/color variants. |
+| [Card](/acss-plugins-docs/acss-kit/components/card)               | Content container with header/body/footer regions.          |
+| [Checkbox](/acss-plugins-docs/acss-kit/components/checkbox)       | Accessible checkbox input.                                  |
+| [Dialog](/acss-plugins-docs/acss-kit/components/dialog)           | Modal dialog / `<dialog>` wrapper.                          |
+| [Field](/acss-plugins-docs/acss-kit/components/field)             | Label + control wrapper for forms.                          |
+| [Icon](/acss-plugins-docs/acss-kit/components/icon)               | Inline SVG icon.                                            |
+| [Icon Button](/acss-plugins-docs/acss-kit/components/icon-button) | Icon-only button.                                           |
+| [Img](/acss-plugins-docs/acss-kit/components/img)                 | Responsive image with aspect-ratio control.                 |
+| [Input](/acss-plugins-docs/acss-kit/components/input)             | Text input control.                                         |
+| [Link](/acss-plugins-docs/acss-kit/components/link)               | Styled anchor / router-agnostic link.                       |
+| [List](/acss-plugins-docs/acss-kit/components/list)               | Ordered/unordered list wrapper.                             |
+| [Nav](/acss-plugins-docs/acss-kit/components/nav)                 | Navigation landmark with links.                             |
+| [Popover](/acss-plugins-docs/acss-kit/components/popover)         | Anchored popover / tooltip.                                 |
+| [Table](/acss-plugins-docs/acss-kit/components/table)             | Data table with accessible structure.                       |
+
+<ComponentPreview
+  code={`<div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+  <button style="padding:0.5em 1.25em;border-radius:0.375rem;border:none;background:var(--color-primary);color:var(--color-text-inverse);font-weight:600;cursor:pointer;">Button</button>
+  <input type="text" placeholder="Input field" style="padding:0.5em 0.75em;border:1px solid var(--color-border);border-radius:0.375rem;background:var(--color-background);color:var(--color-text);" />
+  <span style="padding:0.25em 0.75em;border:1px solid var(--color-border);border-radius:0.25rem;background:var(--color-surface);color:var(--color-text);">Card surface</span>
+</div>`}
+  label="acss-kit component preview sampler"
+/>
+
+## Styles and utilities
+
+| Guide                                                           | What it covers                                                              |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| [Styles (theming)](/acss-plugins-docs/acss-kit/styles)          | OKLCH light/dark themes, brand presets, theme-role edits, token extraction. |
+| [Utilities (atomic CSS)](/acss-plugins-docs/acss-kit/utilities) | Tailwind-style utility classes, breakpoints, the token bridge.              |
+
+## Color roles used by all components
+
+Every component reads the same set of semantic color roles from your theme. Override any role in your theme file and every component that reads it restyles immediately.
+
+<ColorSwatch
+  roles={[
+    "primary",
+    "text",
+    "background",
+    "surface",
+    "border",
+    "danger",
+    "success",
+    "warning",
+    "info",
+  ]}
+/>

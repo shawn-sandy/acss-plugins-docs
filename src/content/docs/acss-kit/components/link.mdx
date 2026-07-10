@@ -1,0 +1,125 @@
+---
+title: Link — Usage Guide
+description: Consumer guide for the acss-kit Link component — semantic anchor with automatic noopener noreferrer for external links and button-style rendering.
+---
+
+import ComponentPreview from "~/components/ComponentPreview.astro";
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+A semantic anchor wrapper with automatic security defaults for external links. When `target="_blank"` is set, the component merges `rel="noopener noreferrer"` with any user-provided rel tokens, blocking `window.opener` exploitation and referrer leakage. Supports an optional `prefetch` hint and button-style rendering.
+
+<ComponentPreview
+  code={`<div style="display:flex;flex-direction:column;gap:0.75rem;">
+  <a href="#" style="color:var(--color-primary,#6d28d9);text-decoration:underline;text-underline-offset:2px;font-size:0.9375rem;">Internal link</a>
+  <a href="https://example.com" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary,#6d28d9);text-decoration:underline;text-underline-offset:2px;font-size:0.9375rem;display:inline-flex;align-items:center;gap:0.25rem;">
+    External link
+    <svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 3h7v7M17 3l-9 9M8 5H5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3"/></svg>
+  </a>
+  <a href="#signup" style="display:inline-block;padding:0.5em 1.25em;border-radius:0.375rem;border:none;background:var(--color-primary,#6d28d9);color:#fff;font-weight:600;text-decoration:none;font-size:0.9375rem;">Button-style link</a>
+</div>`}
+  label="Link component preview"
+/>
+
+## Add it to your project
+
+<Steps>
+
+1. Run `/setup` once per project — installs `sass`, writes `.acss-target.json`, and creates the `ui.tsx` foundation every component imports.
+
+2. Add the component: `/kit-add Link` — copies `link.tsx` + `link.scss` into your components directory (default `src/components/fpkit/`). Or run `/kit-sync` to install all components at once.
+
+</Steps>
+
+No `@fpkit/acss` install required.
+
+## Import
+
+```tsx
+import Link from "./fpkit/link/link";
+import "./fpkit/link/link.scss";
+```
+
+Adjust the path to match the `componentsDir` in your `.acss-target.json`.
+
+## Props
+
+| Prop       | Type                  | Default      | Description                                                       |
+| ---------- | --------------------- | ------------ | ----------------------------------------------------------------- |
+| `href`     | `string`              | — (required) | Link destination.                                                 |
+| `target`   | `string`              | —            | Link target (e.g. `"_blank"`).                                    |
+| `rel`      | `string`              | —            | rel tokens; merged with security defaults when `target="_blank"`. |
+| `prefetch` | `boolean`             | `false`      | Adds a prefetch hint.                                             |
+| `btnStyle` | `string`              | —            | Maps to `data-btn` for button-style links.                        |
+| `styles`   | `React.CSSProperties` | —            | Inline styles.                                                    |
+| `children` | `React.ReactNode`     | —            | Link content.                                                     |
+
+Plus any native `<a>` attribute except the overridden `href`, `target`, `rel`.
+
+## Examples
+
+```tsx
+// Internal
+<Link href="/about">About us</Link>
+
+// External — automatic security defaults
+<Link href="https://example.com" target="_blank">
+  Visit example.com
+</Link>
+
+// External + user-provided rel (merged with security defaults)
+<Link href="https://partner.com" target="_blank" rel="sponsored">
+  Sponsored: partner site
+</Link>
+
+// Icon-only link (accessible name required)
+<Link href="/settings" aria-label="Settings">
+  <Icon name="info" aria-hidden size={20} />
+</Link>
+
+// Skip-link pattern
+<Link href="#main" className="skip-link">Skip to main content</Link>
+
+// Button-style link — requires button.scss imported for .btn appearance
+// (link.scss only removes underline; .btn styling comes from button.scss)
+// Semantically still an anchor: activates with Enter, not Space.
+<Link href="/signup" btnStyle="block">
+  Get started
+</Link>
+```
+
+## Theming
+
+Override these CSS custom properties in your theme to restyle every link. Each has a fallback, so overriding is optional.
+
+| Variable                                                  | Purpose                            |
+| --------------------------------------------------------- | ---------------------------------- |
+| `--link-color`                                            | Default link color.                |
+| `--link-hover-color`                                      | Hover color.                       |
+| `--link-visited-color`                                    | Visited color (default `#551a8b`). |
+| `--link-text-decoration` / `--link-hover-text-decoration` | Underline default and on hover.    |
+| `--link-focus-outline` / `--link-focus-outline-offset`    | Focus ring.                        |
+| `--link-subtle-color`                                     | Subtle-link variant color.         |
+
+```css
+:root {
+  --link-color: #6d28d9;
+  --link-hover-color: #5b21b6;
+}
+```
+
+Generate a full matching theme with `/theme-create` (see [Styles guide](/acss-plugins-docs/acss-kit/styles)).
+
+## Accessibility
+
+- Use descriptive link text ("Read installation guide", not "Click here"); for icon-only links pass `aria-label` (WCAG 2.4.4).
+- `target="_blank"` automatically adds `rel="noopener noreferrer"` — `noopener` blocks tabnabbing, `noreferrer` strips the `Referer` header. User rel tokens are merged and deduplicated.
+- Native `<a>` gives full keyboard support (Tab + Enter); don't intercept clicks unless a SPA router handles the route, and still allow Cmd/Ctrl-click.
+- `:focus-visible` renders a 2 px outline at `currentColor`; verify 3:1 contrast in dark themes.
+- The default underline is the non-color link indicator (WCAG 1.4.1). Button-style links (`btnStyle`) are still anchors — Enter activates, not Space; use [Button](/acss-plugins-docs/acss-kit/components/button) if you need true button behavior.
+
+## Related
+
+- [Component index](/acss-plugins-docs/acss-kit/components)
+- [Icon](/acss-plugins-docs/acss-kit/components/icon) — pair with an external-link glyph to mark links that leave the site
+- [Button](/acss-plugins-docs/acss-kit/components/button) — use instead of `btnStyle` when you need real button semantics
+- [`component-link` skill](/acss-plugins-docs/acss-kit/skills/component-link) — AI generation workflow reference

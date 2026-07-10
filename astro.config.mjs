@@ -233,9 +233,44 @@ export default defineConfig({
               ],
             },
             {
+              label: "Component Usage Guides",
+              items: [
+                {
+                  label: "Component index",
+                  slug: "acss-kit/components",
+                },
+                { label: "Alert", slug: "acss-kit/components/alert" },
+                { label: "Button", slug: "acss-kit/components/button" },
+                { label: "Card", slug: "acss-kit/components/card" },
+                {
+                  label: "Checkbox",
+                  slug: "acss-kit/components/checkbox",
+                },
+                { label: "Dialog", slug: "acss-kit/components/dialog" },
+                { label: "Field", slug: "acss-kit/components/field" },
+                { label: "Icon", slug: "acss-kit/components/icon" },
+                {
+                  label: "Icon Button",
+                  slug: "acss-kit/components/icon-button",
+                },
+                { label: "Img", slug: "acss-kit/components/img" },
+                { label: "Input", slug: "acss-kit/components/input" },
+                { label: "Link", slug: "acss-kit/components/link" },
+                { label: "List", slug: "acss-kit/components/list" },
+                { label: "Nav", slug: "acss-kit/components/nav" },
+                {
+                  label: "Popover",
+                  slug: "acss-kit/components/popover",
+                },
+                { label: "Table", slug: "acss-kit/components/table" },
+              ],
+            },
+            {
               label: "Component Catalogue",
               slug: "acss-kit/component-catalogue",
             },
+            { label: "Styles Guide", slug: "acss-kit/styles" },
+            { label: "Utilities Guide", slug: "acss-kit/utilities" },
             {
               label: "CSS Variables Reference",
               slug: "acss-kit/css-variables",

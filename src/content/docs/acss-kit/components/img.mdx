@@ -1,0 +1,143 @@
+---
+title: Img — Usage Guide
+description: Consumer guide for the acss-kit Img component — responsive image with lazy loading, error placeholder, srcSet support, and required alt text.
+---
+
+import ComponentPreview from "~/components/ComponentPreview.astro";
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+A semantic image component with accessibility and performance defaults. Wraps the native `<img>` with lazy loading, an automatic SVG-gradient placeholder on load error, `srcSet` / `sizes` responsive support, and `fetchpriority` / `decoding` performance hints. The `alt` prop is required by the type.
+
+<ComponentPreview
+  code={`<div style="display:flex;gap:1rem;align-items:flex-start;flex-wrap:wrap;">
+  <img
+    src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=320&h=180&fit=crop&auto=format"
+    alt="Mountain range at sunset with orange sky"
+    width="320" height="180"
+    loading="lazy"
+    style="border-radius:0.5rem;max-width:100%;height:auto;display:block;background:var(--color-surface,#f1f5f9);"
+  />
+  <div style="width:140px;height:90px;border-radius:0.5rem;background:linear-gradient(135deg,var(--color-surface,#e2e8f0) 0%,var(--color-border,#cbd5e1) 100%);display:flex;align-items:center;justify-content:center;">
+    <span style="font-size:0.75rem;color:var(--color-text-muted,#94a3b8);">Error placeholder</span>
+  </div>
+</div>`}
+  label="Img component preview"
+/>
+
+## Add it to your project
+
+<Steps>
+
+1. Run `/setup` once per project — installs `sass`, writes `.acss-target.json`, and creates the `ui.tsx` foundation every component imports.
+
+2. Add the component: `/kit-add Img` — copies `img.tsx` + `img.scss` into your components directory (default `src/components/fpkit/`). Or run `/kit-sync` to install all components at once.
+
+</Steps>
+
+The generated component is self-contained — no `@fpkit/acss` install required.
+
+## Import
+
+```tsx
+import Img from "./fpkit/img/img";
+import "./fpkit/img/img.scss";
+```
+
+Adjust the path to match the `componentsDir` in your `.acss-target.json`.
+
+## Props
+
+| Prop            | Type                          | Default       | Description                                                             |
+| --------------- | ----------------------------- | ------------- | ----------------------------------------------------------------------- |
+| `alt`           | `string`                      | — (required)  | Alt text; empty string for decorative images.                           |
+| `src`           | `string`                      | `'//'`        | Image source URL.                                                       |
+| `width`         | `number \| string`            | `480`         | Image width (number = px).                                              |
+| `height`        | `number \| string`            | `'auto'`      | Image height (number = px).                                             |
+| `loading`       | `'lazy' \| 'eager'`           | `lazy`        | Loading strategy for below/above-the-fold images.                       |
+| `placeholder`   | `string`                      | generated SVG | Custom fallback URL when `src` fails to load.                           |
+| `fetchpriority` | `'high' \| 'low' \| 'auto'`   | `low`         | Fetch priority hint.                                                    |
+| `decoding`      | `'sync' \| 'async' \| 'auto'` | `auto`        | Decoding strategy.                                                      |
+| `srcSet`        | `string`                      | —             | Responsive image candidates.                                            |
+| `sizes`         | `string`                      | —             | Responsive sizes hint.                                                  |
+| `styles`        | `React.CSSProperties`         | —             | Inline styles.                                                          |
+| `onError`       | `(e) => void`                 | —             | Runs before the placeholder swap; call `e.preventDefault()` to skip it. |
+| `onLoad`        | `(e) => void`                 | —             | Native load handler.                                                    |
+
+Plus any native `<img>` attribute except the overridden `src`, `alt`, `onError`, `onLoad`.
+
+## Examples
+
+```tsx
+// Decorative
+<Img src="/decorative-border.svg" alt="" />
+
+// Informative
+<Img
+  src="/sales-chart.png"
+  alt="Sales chart showing 30% revenue growth in Q4 2024"
+  width={800}
+  height={400}
+/>
+
+// Hero (above the fold)
+<Img
+  src="/hero.jpg"
+  alt="Two engineers reviewing code on a laptop"
+  width={1200}
+  height={600}
+  loading="eager"
+  fetchpriority="high"
+/>
+
+// Responsive
+<Img
+  src="/photo.jpg"
+  srcSet="/photo-320w.jpg 320w, /photo-640w.jpg 640w, /photo-1024w.jpg 1024w"
+  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 800px"
+  alt="Mountain range at sunset"
+  width={1024}
+  height={768}
+/>
+
+// Custom fallback + error logging
+<Img
+  src="/avatar.jpg"
+  placeholder="/default-avatar.svg"
+  alt="User profile photo"
+  onError={(e) => analytics('image_error', { src: e.currentTarget.src })}
+/>
+```
+
+## Theming
+
+Override these CSS custom properties in your theme to restyle every image. Each has a fallback, so overriding is optional.
+
+| Variable           | Purpose                                          |
+| ------------------ | ------------------------------------------------ |
+| `--img-display`    | Display mode (default `block`).                  |
+| `--img-max-width`  | Max width (default `100%`).                      |
+| `--img-height`     | Height (default `auto`).                         |
+| `--img-object-fit` | Object-fit behavior (default `cover`).           |
+| `--img-radius`     | Corner radius (default `var(--radius-none, 0)`). |
+
+```css
+:root {
+  --img-radius: 0.75rem;
+  --img-object-fit: contain;
+}
+```
+
+Generate a full matching theme with `/theme-create` (see [Styles guide](/acss-plugins-docs/acss-kit/styles)).
+
+## Accessibility
+
+- `alt` is required by the type — pass `alt=""` for purely decorative images, or a descriptive `alt` that conveys purpose and content for informative ones.
+- Always pass explicit `width` and `height` so the browser reserves layout space and avoids Cumulative Layout Shift.
+- Pair `loading="eager"` with `fetchpriority="high"` for the LCP (hero) image; defaults are `lazy` + `low` for off-screen images.
+- On load error the component swaps in a generated SVG-gradient data-URI placeholder (no network request), guarding against an infinite error loop.
+- `max-width: 100%` via SCSS prevents horizontal scroll on small viewports (WCAG 1.4.10 Reflow).
+
+## Related
+
+- [Component index](/acss-plugins-docs/acss-kit/components)
+- [`component-img` skill](/acss-plugins-docs/acss-kit/skills/component-img) — AI generation workflow reference

@@ -1,0 +1,113 @@
+---
+title: Icon — Usage Guide
+description: Consumer guide for the acss-kit Icon component — lightweight inline-SVG icon with built-in set and accessible aria-hidden / aria-label pattern.
+---
+
+import ComponentPreview from "~/components/ComponentPreview.astro";
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+A lightweight inline-SVG icon component with a small built-in icon set. Each icon renders as an `<svg>` sized via the `size` prop, colored via `color` (default `currentColor`), and named for assistive tech via `aria-hidden` (decorative) or `aria-label` (standalone).
+
+<ComponentPreview
+  code={`<div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;font-size:0.9375rem;color:var(--color-text,#1e293b);">
+  <span title="info" style="display:inline-flex;color:var(--color-info,#0ea5e9);">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><circle cx="10" cy="10" r="8"/><line x1="10" y1="9" x2="10" y2="14"/><circle cx="10" cy="6.5" r="0.75" fill="currentColor" stroke="none"/></svg>
+  </span>
+  <span title="success" style="display:inline-flex;color:var(--color-success,#16a34a);">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><circle cx="10" cy="10" r="8"/><polyline points="6.5,10 9,12.5 13.5,7.5"/></svg>
+  </span>
+  <span title="warning" style="display:inline-flex;color:var(--color-warning,#d97706);">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M10 3L18 17H2L10 3z"/><line x1="10" y1="9" x2="10" y2="13"/><circle cx="10" cy="15.5" r="0.75" fill="currentColor" stroke="none"/></svg>
+  </span>
+  <span title="error" style="display:inline-flex;color:var(--color-danger,#dc2626);">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><circle cx="10" cy="10" r="8"/><line x1="7.5" y1="7.5" x2="12.5" y2="12.5"/><line x1="12.5" y1="7.5" x2="7.5" y2="12.5"/></svg>
+  </span>
+  <span style="color:var(--color-text-muted,#64748b);font-size:0.8125rem;">info · success · warning · error</span>
+</div>`}
+  label="Icon component preview — built-in icon set"
+/>
+
+## Add it to your project
+
+<Steps>
+
+1. Run `/setup` once per project — installs `sass`, writes `.acss-target.json`, and creates the `ui.tsx` foundation every component imports.
+
+2. Add the component: `/kit-add Icon` — copies `icon.tsx` into your components directory (default `src/components/fpkit/`). Or run `/kit-sync` to install all components at once.
+
+</Steps>
+
+Icon has no SCSS file — it styles entirely through props and `currentColor`. No `@fpkit/acss` install required.
+
+## Import
+
+```tsx
+import Icon from "./fpkit/icon/icon";
+```
+
+Adjust the path to match the `componentsDir` in your `.acss-target.json`. Icon ships no stylesheet, so there is nothing to import for CSS.
+
+## Props
+
+| Prop          | Type                                                                                                                        | Default        | Description                                                                          |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------ |
+| `name`        | `'info' \| 'success' \| 'warning' \| 'error' \| 'close' \| 'chevron-down' \| 'chevron-right' \| 'check' \| 'external-link'` | — (required)   | Icon from the built-in set.                                                          |
+| `size`        | `number`                                                                                                                    | `16`           | SVG width/height in pixels.                                                          |
+| `color`       | `string`                                                                                                                    | `currentColor` | Stroke / fill color.                                                                 |
+| `aria-hidden` | `boolean`                                                                                                                   | `true`         | Decorative — screen readers skip it.                                                 |
+| `aria-label`  | `string`                                                                                                                    | —              | Accessible name for standalone icons; swaps in `role="img"` and drops `aria-hidden`. |
+
+Plus any native `<svg>` attribute except `aria-hidden` / `aria-label` (handled above).
+
+## Examples
+
+```tsx
+// Decorative — screen readers skip
+<Icon name="info" aria-hidden size={16} />
+
+// Inside a label that already carries meaning
+<button type="button">
+  <Icon name="check" aria-hidden /> Save
+</button>
+
+// Standalone — needs accessible name on the button
+<button type="button" aria-label="Close dialog">
+  <Icon name="close" aria-hidden size={20} />
+</button>
+
+// Or label the icon directly when there's no surrounding interactive element
+<Icon name="warning" aria-label="Warning" size={24} color="var(--color-warning)" />
+
+// Inline with custom theme color
+<Icon name="external-link" aria-hidden size={12} color="var(--color-primary)" />
+```
+
+## Theming
+
+Icon has no dedicated SCSS file, so there are no `--icon-*` custom properties to override. Control appearance directly through props:
+
+| Lever              | How                                                                                     |
+| ------------------ | --------------------------------------------------------------------------------------- |
+| Color              | `color` prop, or let it inherit the parent's text color via the default `currentColor`. |
+| Size               | `size` prop, in pixels.                                                                 |
+| Theme-driven color | Pass a theme token: `color="var(--color-primary)"`.                                     |
+
+```tsx
+// Inherit surrounding text color (recommended)
+<span style={{ color: "var(--color-danger)" }}>
+  <Icon name="error" aria-hidden /> Something went wrong
+</span>
+```
+
+## Accessibility
+
+- Decorative by default (`aria-hidden="true"`) — use for icons that sit next to text that already conveys the meaning.
+- Pass `aria-label` for standalone icons that carry meaning alone; the component swaps `aria-hidden` for `role="img"` automatically. Never pass both.
+- Color must not be the only indicator of state (WCAG 1.4.1) — pair state icons with text or shape.
+- A 16 px icon is not a touch target. When the icon is the only clickable area, wrap it in [Icon Button](/acss-plugins-docs/acss-kit/components/icon-button) or [Button](/acss-plugins-docs/acss-kit/components/button) to meet the 44 px minimum (WCAG 2.5.8).
+
+## Related
+
+- [Component index](/acss-plugins-docs/acss-kit/components)
+- [Icon Button](/acss-plugins-docs/acss-kit/components/icon-button) — accessible icon-only button that hosts an Icon
+- [`component-icon` skill](/acss-plugins-docs/acss-kit/skills/component-icon) — AI generation workflow reference

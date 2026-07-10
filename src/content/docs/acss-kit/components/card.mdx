@@ -1,0 +1,138 @@
+---
+title: Card — Usage Guide
+description: Consumer guide for the acss-kit Card compound component — flexible content container with header, body, footer, and interactive variant.
+---
+
+import ComponentPreview from "~/components/ComponentPreview.astro";
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+A flexible container for grouping related content, built as a compound component: `Card`, `Card.Title`, `Card.Content`, and `Card.Footer`. Supports an interactive (whole-card clickable) variant with keyboard support.
+
+<ComponentPreview
+  code={`<article style="border:1px solid var(--color-border,#e2e8f0);border-radius:0.75rem;background:var(--color-surface,#fff);overflow:hidden;max-width:22rem;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+  <div style="padding:1.25rem 1.25rem 0;">
+    <h3 style="margin:0 0 0.5rem;font-size:1.125rem;font-weight:600;color:var(--color-text,#1e293b);">Product Name</h3>
+  </div>
+  <div style="padding:0.75rem 1.25rem;">
+    <p style="margin:0;color:var(--color-text-muted,#64748b);font-size:0.9375rem;">Product description here — a short summary of what this item offers.</p>
+  </div>
+  <div style="padding:0.75rem 1.25rem 1.25rem;display:flex;justify-content:flex-end;">
+    <button style="padding:0.4em 1em;border-radius:0.375rem;border:none;background:var(--color-primary,#6d28d9);color:#fff;font-weight:600;cursor:pointer;font-size:0.875rem;">Buy Now — $29.99</button>
+  </div>
+</article>`}
+  label="Card component preview"
+/>
+
+## Add it to your project
+
+<Steps>
+
+1. Run `/setup` once per project — installs `sass`, writes `.acss-target.json`, and creates the `ui.tsx` foundation every component imports.
+
+2. Add the component: `/kit-add Card` — copies `card.tsx` + `card.scss` into your components directory (default `src/components/fpkit/`). Or run `/kit-sync` to install all components at once.
+
+</Steps>
+
+The generated component is self-contained — no `@fpkit/acss` install required. All four sub-components ship in a single `card.tsx`.
+
+## Import
+
+```tsx
+import Card from "./fpkit/card/card";
+import "./fpkit/card/card.scss";
+```
+
+`Card.Title`, `Card.Content`, and `Card.Footer` are attached to the default export — no extra imports. Adjust the path to match the `componentsDir` in your `.acss-target.json`.
+
+## Props
+
+**`Card` (root)**
+
+| Prop          | Type                  | Default | Description                                          |
+| ------------- | --------------------- | ------- | ---------------------------------------------------- |
+| `as`          | `React.ElementType`   | `div`   | Element to render as (e.g. `article`, `section`).    |
+| `children`    | `React.ReactNode`     | —       | Card content, typically the sub-components.          |
+| `interactive` | `boolean`             | `false` | Makes the whole card clickable + keyboard-navigable. |
+| `onClick`     | `() => void`          | —       | Click handler (required when `interactive`).         |
+| `classes`     | `string`              | —       | CSS class names.                                     |
+| `styles`      | `React.CSSProperties` | —       | Inline styles.                                       |
+
+Sub-components — `Card.Title` (`as` default `h3`, plus `id`, `className`), `Card.Content` (`as` default `article`), `Card.Footer` (`as` default `div`). Each also accepts `children` and native attributes for its element.
+
+## Examples
+
+```tsx
+// Basic card
+<Card>
+  <Card.Title>Product Name</Card.Title>
+  <Card.Content>
+    <p>Product description here...</p>
+  </Card.Content>
+  <Card.Footer>
+    <button>Buy Now — $29.99</button>
+  </Card.Footer>
+</Card>
+
+// Accessible card with linked title
+<Card as="article" aria-labelledby="product-1">
+  <Card.Title id="product-1">Featured Widget</Card.Title>
+  <Card.Content>
+    <p>Best widget on the market.</p>
+  </Card.Content>
+</Card>
+
+// Interactive card (entire card is clickable)
+<Card
+  interactive
+  aria-label="View article: 5 Tips for Better Code"
+  onClick={() => navigate('/articles/1')}
+>
+  <Card.Title>5 Tips for Better Code</Card.Title>
+  <Card.Content>
+    <p>Learn how to write cleaner code...</p>
+  </Card.Content>
+</Card>
+
+// Custom heading level for document outline
+<Card as="section">
+  <Card.Title as="h2">Section Title</Card.Title>
+  <Card.Content>Content here...</Card.Content>
+</Card>
+```
+
+## Theming
+
+Override these CSS custom properties in your theme to restyle every card. Each has a fallback, so overriding is optional.
+
+| Variable                                                                 | Purpose                              |
+| ------------------------------------------------------------------------ | ------------------------------------ |
+| `--card-bg` / `--card-color`                                             | Card background/text.                |
+| `--card-radius`                                                          | Corner radius.                       |
+| `--card-border` / `--card-shadow`                                        | Border and drop shadow.              |
+| `--card-title-fs` / `--card-title-padding`                               | Title size and padding.              |
+| `--card-content-padding`                                                 | Content region padding.              |
+| `--card-footer-bg` / `--card-footer-padding`                             | Footer background and padding.       |
+| `--card-interactive-hover-shadow` / `--card-interactive-hover-transform` | Hover feedback on interactive cards. |
+| `--card-focus-outline`                                                   | Focus ring on interactive cards.     |
+
+```css
+:root {
+  --card-radius: 0.75rem;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+```
+
+Generate a full matching theme with `/theme-create` (see [Styles guide](/acss-plugins-docs/acss-kit/styles)).
+
+## Accessibility
+
+- Non-interactive cards carry no interactive semantics. For a semantic association with the title, use `as="article"` and link it with `aria-labelledby` pointing at `Card.Title`'s `id`.
+- Interactive cards get `role="button"`, `tabIndex={0}`, and Enter/Space activation. Always pass an `aria-label` describing what activating the card does.
+- Avoid nesting other interactive elements (links, buttons) inside an interactive card; prefer a non-interactive card with an explicit action instead.
+- `Card.Title` defaults to `<h3>`. Set `as="h2"` etc. to keep the document outline correct — never skip heading levels.
+- Interactive cards show a `:focus-visible` outline and easily exceed the 44 px target-size minimum.
+
+## Related
+
+- [Component index](/acss-plugins-docs/acss-kit/components)
+- [`component-card` skill](/acss-plugins-docs/acss-kit/skills/component-card) — AI generation workflow reference

@@ -1,0 +1,173 @@
+---
+title: Table — Usage Guide
+description: Consumer guide for the acss-kit Table compound component — semantic HTML table with Caption, Head, Body, Row, HeaderCell, and Cell sub-components.
+---
+
+import ComponentPreview from "~/components/ComponentPreview.astro";
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+A semantic HTML table wrapper with compound sub-components: `Table`, `Table.Caption`, `Table.Head`, `Table.Body`, `Table.Row`, `Table.HeaderCell`, and `Table.Cell`. It renders native `<table>`/`<caption>`/`<thead>`/`<tbody>`/`<tr>`/`<th>`/`<td>` elements and carries no opinion on sorting, filtering, or pagination — those are application concerns you layer on top.
+
+<ComponentPreview
+  code={`<div style="overflow-x:auto;">
+  <table style="width:100%;border-collapse:collapse;font-size:0.9375rem;color:var(--color-text,#1e293b);">
+    <caption style="text-align:left;font-weight:600;padding:0 0 0.5rem;color:var(--color-text,#1e293b);">Quarterly revenue, 2024</caption>
+    <thead>
+      <tr>
+        <th scope="col" style="text-align:left;padding:0.625rem 1rem;background:var(--color-surface,#f1f5f9);border-bottom:2px solid var(--color-border,#e2e8f0);font-weight:600;">Quarter</th>
+        <th scope="col" style="text-align:left;padding:0.625rem 1rem;background:var(--color-surface,#f1f5f9);border-bottom:2px solid var(--color-border,#e2e8f0);font-weight:600;">Revenue</th>
+        <th scope="col" style="text-align:left;padding:0.625rem 1rem;background:var(--color-surface,#f1f5f9);border-bottom:2px solid var(--color-border,#e2e8f0);font-weight:600;">YoY change</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--color-border,#e2e8f0);">
+        <th scope="row" style="padding:0.625rem 1rem;font-weight:600;">Q1</th>
+        <td style="padding:0.625rem 1rem;">$1.2M</td>
+        <td style="padding:0.625rem 1rem;color:var(--color-success,#16a34a);">+5%</td>
+      </tr>
+      <tr>
+        <th scope="row" style="padding:0.625rem 1rem;font-weight:600;">Q2</th>
+        <td style="padding:0.625rem 1rem;">$1.4M</td>
+        <td style="padding:0.625rem 1rem;color:var(--color-success,#16a34a);">+18%</td>
+      </tr>
+    </tbody>
+  </table>
+</div>`}
+  label="Table component preview"
+/>
+
+## Add it to your project
+
+<Steps>
+
+1. Run `/setup` once per project — installs `sass`, writes `.acss-target.json`, and creates the `ui.tsx` foundation every component imports.
+
+2. Add the component: `/kit-add Table` — copies `table.tsx` + `table.scss` into your components directory (default `src/components/fpkit/`). Or run `/kit-sync` to install all components at once.
+
+</Steps>
+
+No `@fpkit/acss` install required.
+
+## Import
+
+```tsx
+import Table from "./fpkit/table/table";
+import "./fpkit/table/table.scss";
+```
+
+`Table` is a compound component — the root and all six sub-parts ship in one file. Adjust the path to match the `componentsDir` in your `.acss-target.json`.
+
+## Props
+
+**`Table`**
+
+| Prop              | Type                  | Default | Description                                                   |
+| ----------------- | --------------------- | ------- | ------------------------------------------------------------- |
+| `aria-label`      | `string`              | —       | Accessible name — alternative to `<Table.Caption>`.           |
+| `aria-labelledby` | `string`              | —       | Accessible name reference — alternative to `<Table.Caption>`. |
+| `classes`         | `string`              | —       | CSS class(es).                                                |
+| `styles`          | `React.CSSProperties` | —       | Inline styles.                                                |
+| `children`        | `React.ReactNode`     | —       | Caption, head, and body sub-components.                       |
+
+Plus any native `<table>` attribute.
+
+**`Table.HeaderCell`**
+
+| Prop    | Type                                         | Default | Description                                                        |
+| ------- | -------------------------------------------- | ------- | ------------------------------------------------------------------ |
+| `scope` | `'col' \| 'row' \| 'colgroup' \| 'rowgroup'` | `col`   | Header scope; set `row` for row headers, spans for complex tables. |
+
+Plus any native `<th>` attribute.
+
+**`Table.Caption` / `.Head` / `.Body` / `.Row` / `.Cell`** each accept the native props of their element (`<caption>`, `<thead>`, `<tbody>`, `<tr>`, `<td>` respectively).
+
+## Examples
+
+```tsx
+// Basic data table with caption
+<Table>
+  <Table.Caption>Quarterly revenue, 2024</Table.Caption>
+  <Table.Head>
+    <Table.Row>
+      <Table.HeaderCell>Quarter</Table.HeaderCell>
+      <Table.HeaderCell>Revenue</Table.HeaderCell>
+      <Table.HeaderCell>YoY change</Table.HeaderCell>
+    </Table.Row>
+  </Table.Head>
+  <Table.Body>
+    <Table.Row>
+      <Table.HeaderCell scope="row">Q1</Table.HeaderCell>
+      <Table.Cell>$1.2M</Table.Cell>
+      <Table.Cell>+5%</Table.Cell>
+    </Table.Row>
+    <Table.Row>
+      <Table.HeaderCell scope="row">Q2</Table.HeaderCell>
+      <Table.Cell>$1.4M</Table.Cell>
+      <Table.Cell>+18%</Table.Cell>
+    </Table.Row>
+  </Table.Body>
+</Table>
+
+// Accessible name via aria-labelledby (when caption duplicates a nearby heading)
+<>
+  <h2 id="users-heading">Active users</h2>
+  <Table aria-labelledby="users-heading">
+    <Table.Head>
+      <Table.Row>
+        <Table.HeaderCell>Name</Table.HeaderCell>
+        <Table.HeaderCell>Email</Table.HeaderCell>
+      </Table.Row>
+    </Table.Head>
+    <Table.Body>
+      <Table.Row>
+        <Table.Cell>Alice</Table.Cell>
+        <Table.Cell>alice@example.com</Table.Cell>
+      </Table.Row>
+    </Table.Body>
+  </Table>
+</>
+
+// Wide table, scrollable wrapper
+<div style={{ overflowX: 'auto' }}>
+  <Table>
+    {/* ...many columns... */}
+  </Table>
+</div>
+```
+
+## Theming
+
+Override these CSS custom properties in your theme to restyle every table. Each has a fallback, so overriding is optional.
+
+| Variable                                    | Purpose                       |
+| ------------------------------------------- | ----------------------------- |
+| `--table-width`                             | Table width (default `100%`). |
+| `--table-caption-fw`                        | Caption font weight.          |
+| `--table-th-bg`                             | Header-cell background.       |
+| `--table-th-padding` / `--table-td-padding` | Header / body cell padding.   |
+| `--table-th-border-bottom`                  | Header separator border.      |
+| `--table-td-border-bottom`                  | Row separator border.         |
+| `--table-row-hover-bg`                      | Row hover background.         |
+
+```css
+:root {
+  --table-th-bg: #f0f0f5;
+  --table-row-hover-bg: #f5f3ff;
+}
+```
+
+Generate a full matching theme with `/theme-create` (see [Styles guide](/acss-plugins-docs/acss-kit/styles)).
+
+## Accessibility
+
+- Always give a data table an accessible name — a `<Table.Caption>` first child (richest, visible to all), `aria-label`, or `aria-labelledby` pointing at a nearby heading.
+- `<Table.HeaderCell>` defaults `scope="col"`; pass `scope="row"` for row headers, and `colgroup` / `rowgroup` (or `headers="…"` on cells) for spanning headers in complex tables.
+- Keep native table semantics — don't add `role="grid"` unless building a fully interactive grid, and never `role="presentation"` for layout (use CSS Grid/Flexbox instead).
+- For wide tables on narrow viewports, prefer a horizontal-scroll wrapper (`overflow-x: auto`) over collapsing rows — scrolling preserves the row-column relationship assistive technology users rely on.
+- Header text on `--table-th-bg`, body text, and `--table-row-hover-bg` must all keep text contrast at 4.5:1; row-separator borders used as the sole divider must meet 3:1 (WCAG 1.4.11).
+
+## Related
+
+- [Component index](/acss-plugins-docs/acss-kit/components)
+- [List](/acss-plugins-docs/acss-kit/components/list) — for non-tabular, single-dimension data
+- [`component-table` skill](/acss-plugins-docs/acss-kit/skills/component-table) — AI generation workflow reference
