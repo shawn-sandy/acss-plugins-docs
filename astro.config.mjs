@@ -364,6 +364,10 @@ export default defineConfig({
                 },
               ],
             },
+            {
+              label: "COMPONENT.md Specification",
+              slug: "style-agent/component-md-spec",
+            },
           ],
         },
         {
