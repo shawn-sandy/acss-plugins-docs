@@ -127,7 +127,7 @@ Generate a full matching theme with `/theme-create` (see [Styles guide](/acss-pl
 ## Accessibility
 
 - Non-interactive cards carry no interactive semantics. For a semantic association with the title, use `as="article"` and link it with `aria-labelledby` pointing at `Card.Title`'s `id`.
-- Interactive cards get `role="button"`, `tabIndex={0}`, and Enter/Space activation. Always pass an `aria-label` describing what activating the card does.
+- Interactive cards get `role="button"`, `tabIndex={0}`, and Enter/Space activation. Always pass an `aria-label` describing what activating the card does — the text content is not always a complete accessible name.
 - Avoid nesting other interactive elements (links, buttons) inside an interactive card; prefer a non-interactive card with an explicit action instead.
 - `Card.Title` defaults to `<h3>`. Set `as="h2"` etc. to keep the document outline correct — never skip heading levels.
 - Interactive cards show a `:focus-visible` outline and easily exceed the 44 px target-size minimum.
