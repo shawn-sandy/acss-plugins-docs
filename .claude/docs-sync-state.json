@@ -1,14 +1,18 @@
 {
   "lastUpstreamSha": "d94e0a4b3a3b8a5774ea174afb661241436799fc",
-  "lastSyncedAt": "2026-07-12T12:00:00Z",
+  "lastSyncedAt": "2026-07-13T00:00:00Z",
   "plugins": {
     "acss-kit": {
       "lastUpstreamSha": "d94e0a4b3a3b8a5774ea174afb661241436799fc",
-      "lastSyncedAt": "2026-07-12T12:00:00Z"
+      "lastSyncedAt": "2026-07-13T00:00:00Z"
+    },
+    "acss-utilities": {
+      "lastUpstreamSha": "39ad27ddb0f03c53f2de698ec4e4589f9200f49f",
+      "lastSyncedAt": "2026-06-09T10:08:26Z"
     },
     "style-agent": {
       "lastUpstreamSha": "d94e0a4b3a3b8a5774ea174afb661241436799fc",
-      "lastSyncedAt": "2026-07-12T12:00:00Z"
+      "lastSyncedAt": "2026-07-13T00:00:00Z"
     }
   }
 }
