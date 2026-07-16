@@ -6,7 +6,7 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 # Upstream layout cache
 
 - **verified-at-sha:** `d94e0a4`
-- **verified-at:** `2026-07-16T00:00:00Z`
+- **verified-at:** `2026-07-16T12:00:00Z`
 
 ## Plugin roots
 
@@ -32,4 +32,5 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 - New in `4dbad67` sync: acss-kit v1.11.0 — component token vocabulary unified to DESIGN.md/M3 names (internal to component.md front-matter; generated CSS unchanged); 14 component skill docs updated to reflect COMPONENT.md-first workflow (prefer `<name>.component.md`, fall back to `reference.md`). style-agent v0.5.1 — getting-started tutorial added upstream; docs already had `tutorial.mdx`.
 - Layout verified at `d94e0a4`: same two plugin roots (`plugins/acss-kit`, `plugins/style-agent`); layout unchanged.
 - New in `d94e0a4` sync: upstream PR #106 added consumer usage docs (`plugins/acss-kit/docs/components/*.md`, `plugins/acss-kit/docs/styles.md`, `plugins/acss-kit/docs/utilities.md`, `plugins/style-agent/docs/commands/*.md`). These new upstream docs mirror content already in this docs site with richer MDX formatting. One content drift fixed: `acss-kit/components/card.mdx` accessibility note for interactive cards now includes "— the text content is not always a complete accessible name" per upstream `card.md`. No new commands, skills, or plugins added upstream.
-- Audit run on 2026-07-16: upstream still at `d94e0a4`; no new commits, no content drift. Build passed (112 pages).
+- Audit run on 2026-07-16T00:00:00Z: upstream still at `d94e0a4`; no new commits, no content drift. Build passed (112 pages).
+- Audit run on 2026-07-16T12:00:00Z: upstream still at `d94e0a4`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). All 20 acss-kit commands, 22 acss-kit skills, and 3 style-agent commands/skills mapped. Build passed (112 pages).
