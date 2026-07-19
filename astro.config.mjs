@@ -59,6 +59,7 @@ export default defineConfig({
           label: "acss-kit",
           items: [
             { label: "Overview", slug: "acss-kit/overview" },
+            { label: "Core Concepts", slug: "acss-kit/concepts" },
             {
               label: "Commands",
               items: [
@@ -405,6 +406,10 @@ export default defineConfig({
             },
             { label: "Type Scale", slug: "reference/type-scale" },
             { label: "Troubleshooting", slug: "reference/troubleshooting" },
+            {
+              label: "COMPONENT.md Spec",
+              slug: "reference/component-md-spec",
+            },
           ],
         },
         {
