@@ -1,0 +1,163 @@
+---
+title: /css
+description: Author a raw CSS/SCSS rule or inline style attribute from a plain-language description, reusing the project's existing custom properties.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+Turn a plain-language description of visual intent into a raw CSS/SCSS rule or an inline `style` attribute. Values are mapped onto the project's existing CSS custom properties when they match, and modern-CSS features with known footguns (`@container`, `@layer`, `clamp()` fluid type, `@supports`, logical properties, modern selectors, state selectors, viewport units) are handled via bundled references rather than recalled from memory.
+
+<Aside type="tip">
+  Want a utility-class string (`flex items-center p-4`) instead of a raw CSS
+  rule? Use
+  [`/create-utilities`](/acss-plugins-docs/style-agent/commands/create-utilities)
+  for that.
+</Aside>
+
+## When to use
+
+- You know the effect you want ("a card that adapts to the width of its slot") but not the correct modern-CSS incantation.
+- You want a rule that reuses the design tokens your project already declares, rather than hard-coded literals.
+- You are reaching for `@container`, `@layer`, fluid type, logical properties, or state selectors and want the gotchas handled.
+- You want a raw CSS rule — not a utility-class string.
+
+## Syntax
+
+```text
+/css [description]
+```
+
+## Arguments
+
+| Argument      | Required | Description                                          |
+| ------------- | -------- | ---------------------------------------------------- |
+| `description` | Yes      | Plain-language visual intent (see Input forms below) |
+
+## Input forms
+
+| Input form          | Example                                               |
+| ------------------- | ----------------------------------------------------- |
+| Plain description   | `"a flex row aligned centered with a small gap"`      |
+| Inline request      | `"inline: a card with 1rem padding"`                  |
+| Modern-CSS intent   | `"a card that adapts to the width of its slot"`       |
+| Element with intent | `<button> <!-- primary button with a hover state -->` |
+
+## Workflow
+
+<Steps>
+
+1. **Clarify** — if the description is too vague, a size word maps to two adjacent scale steps, an interactive element is missing states, or adaptive sizing does not say container-versus-viewport, the command asks — every triggered question batched into a single round. A concrete, fully-specified description is emitted with no questions at all.
+
+2. **Parse description** — extract the concrete properties: layout, spacing, colour, typography, borders, shadows, states, and the element the rule is for.
+
+3. **Resolve tokens** — grep the project for custom-property declarations and map values in three tiers: exact-value match → use the variable; semantic-name match → use it and name the choice in the summary; no match → emit the literal. No new custom properties are created unless you explicitly ask.
+
+4. **Detect output mode** — class mode by default (rule is printed, appended to a stylesheet only when you name a target file); inline mode on request (refused when the description implies `:hover`, `@media`, `@container`, etc., since an inline style cannot carry those).
+
+5. **Focus-visible** — for interactive elements (button, link, input, select, custom widgets) emit a `:focus-visible` rule alongside the requested styling, or warn in the summary when the mode cannot carry it.
+
+6. **Baseline check** — every modern feature is classified by its [Baseline](https://web.dev/baseline) status before emit: Widely available → emit unconditionally; Newly available → write the fallback first, then wrap the enhancement in `@supports`; Limited availability → withhold it, emit the fallback alone, and state what was withheld and why.
+
+7. **Emit** — print the rule (or inline attribute). Append to a stylesheet only when you name a target file, and confirm the resolved path and class name with you first.
+
+8. **Summarise** — print output mode, proposed class name, tokens resolved, accessibility note, Baseline status of any modern features, and which references were consulted (required on every result — a silently-skipped footgun doc is the failure signal).
+
+</Steps>
+
+## Examples
+
+### Flex row
+
+```text
+/css a flex row aligned centered with a small gap
+```
+
+Emits a rule using whatever gap token your project declares (here `--space-2` matched `0.5rem`):
+
+```css
+.flex-row-center {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+}
+```
+
+### Centered container
+
+```text
+/css a centered content container capped at 65 characters wide with page padding
+```
+
+```css
+.container {
+  max-inline-size: 65ch;
+  margin-inline: auto;
+  padding-inline: var(--space-4, 1.5rem);
+}
+```
+
+Logical properties (`max-inline-size`, `margin-inline`) are used over `max-width`/`margin` so the rule survives a vertical or RTL writing mode.
+
+### Fluid-type text block
+
+```text
+/css a text block whose size scales from 1rem to 1.5rem with the viewport
+```
+
+```css
+.prose {
+  font-size: clamp(1rem, 0.85rem + 0.75vw, 1.5rem);
+  line-height: 1.5;
+  max-inline-size: 65ch;
+  text-wrap: pretty;
+}
+```
+
+The preferred term keeps a `rem` addend (`0.85rem + 0.75vw`) rather than a bare `vw` — a viewport-only value does not respond to browser zoom and fails WCAG 1.4.4.
+
+### Container-adaptive card
+
+```text
+/css a card that adapts to the width of its slot
+```
+
+Triggers the `container-queries.md` reference, which ensures `container-type` is placed on the **parent**, not the card itself (a container cannot query itself).
+
+## Output modes
+
+**Class mode (default):** The rule is printed to chat and appended to a stylesheet only when you name a target file. The resolved path and class name are confirmed before writing. On a same-name-different-value collision the class name gets a numeric suffix (`-2`, `-3`), reported in the summary. SCSS vs. plain CSS is inferred from your project's stylesheet extensions.
+
+**Inline mode:** Fires when you say `inline` or point at an element. Refused with a one-line reason — falling back to class mode — when the description implies `:hover`, `:focus-visible`, `@media`, `@container`, `@layer`, `@supports`, or a pseudo-element.
+
+## Baseline gate
+
+Every modern feature is emitted under one of three outcomes:
+
+| Status               | Outcome                                                           |
+| -------------------- | ----------------------------------------------------------------- |
+| Widely available     | Emit unconditionally — no narration                               |
+| Newly available      | Fallback first (above), then `@supports` wrapping the enhancement |
+| Limited availability | Withhold; emit fallback alone with a one-line reason              |
+
+An explicit user override (`"emit it anyway"`) moves an outcome by exactly one step: Limited → Newly available (wrapped), never to bare emit. Merely naming a feature in the request is not a waiver.
+
+<Aside type="note">
+  The **Baseline** summary line names each feature's status and the project's
+  detected browser target (from `package.json browserslist`, `.browserslistrc`,
+  or a plain `browserslist` file). A declared target can tighten an outcome but
+  never relax one — `last 2 versions` does not skip the `@supports` wrapper.
+</Aside>
+
+## Notes
+
+- **Tokens are reused, never invented.** An exact-value match uses the variable; a semantic-name match uses it and names the choice; no match emits the literal. No new custom property is created unless you explicitly ask.
+- **References consulted** is a required line in every summary — its absence is the visible signal that a footgun doc was silently skipped.
+- **`.sass` (indented syntax) is never an append target** — this command emits brace-and-semicolon blocks, which are invalid in indented Sass.
+
+## Related
+
+- [`/create-utilities`](/acss-plugins-docs/style-agent/commands/create-utilities) — the utility-class-string counterpart when your project uses a utility framework
+- [`/inline-style-to-class`](/acss-plugins-docs/style-agent/commands/inline-style-to-class) — promote a `/css inline` result into a named class
+- [`/css-to-class`](/acss-plugins-docs/style-agent/commands/css-to-class) — collapse an existing utility class list into one named class
+- [`css skill`](/acss-plugins-docs/style-agent/skills/css) — full skill reference
+- [style-agent Overview](/acss-plugins-docs/style-agent/overview)

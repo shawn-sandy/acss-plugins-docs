@@ -7,6 +7,23 @@ import { Aside, Steps } from "@astrojs/starlight/components";
 
 The `component-popover` skill generates a self-contained accessible Popover component directly into a developer's project. It is invoked via `/kit-add popover` or `/kit-create` (then ask for a popover).
 
+<Aside type="caution">
+  **Baseline status: Newly available — not yet Widely available.** The native
+  Popover API is interoperable across Chrome/Edge 125+, Safari 17.4+, and
+  Firefox 125+, but has not yet cleared the 30-month mark that Baseline uses for
+  "Widely available." A project whose `.browserslistrc` says `baseline widely
+  available` — what `/setup` writes — targets a bar this component does not yet
+  meet. Ship it anyway (the native API is the accessible one; JS alternatives
+  reimplement top-layer rendering, light dismiss, and focus handling and usually
+  get focus wrong), and feature-detect for older browsers: `@supports not
+  selector(:popover-open)` in CSS, or
+  `HTMLElement.prototype.hasOwnProperty('popover')` in JS. Without a fallback,
+  the content renders inline and always-visible on unsupporting browsers because
+  the `popover` attribute is silently ignored. Confirm current status at
+  [webstatus.dev](https://webstatus.dev) — this feature's date [was already
+  corrected once](https://web.dev/blog/popover-baseline).
+</Aside>
+
 <Aside type="note">
   This skill was added in acss-kit v1.2.0. It sets `disable-model-invocation:
   true` so it stays out of session auto-context. Invoke it explicitly via

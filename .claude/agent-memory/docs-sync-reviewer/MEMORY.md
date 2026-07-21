@@ -5,8 +5,8 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 
 # Upstream layout cache
 
-- **verified-at-sha:** `b8e54e4`
-- **verified-at:** `2026-07-20T10:05:00Z`
+- **verified-at-sha:** `a08ca58`
+- **verified-at:** `2026-07-21T10:09:00Z`
 
 ## Plugin roots
 
@@ -36,3 +36,5 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 - Audit run on 2026-07-16T12:00:00Z: upstream still at `d94e0a4`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). All 20 acss-kit commands, 22 acss-kit skills, and 3 style-agent commands/skills mapped. Build passed (112 pages).
 - Layout verified at `b8e54e4`: same two plugin roots (`plugins/acss-kit`, `plugins/style-agent`); layout unchanged.
 - New in `b8e54e4` sync: upstream PR #108 added planning docs only (`docs/plans/add-css-authoring-skill.md`, `docs/plans/add-css-authoring-skill.html`, `docs/prototypes/index.html`, `docs/prototypes/simulate-css-output-contract.html`). These are design-phase documents for a future `/css` skill in style-agent (status: todo in front-matter). No plugin source files changed; no new commands, skills, or plugins were implemented. No doc drift. Build passed (114 pages).
+- Layout verified at `a08ca58`: same two plugin roots (`plugins/acss-kit`, `plugins/style-agent`); layout unchanged.
+- New in `a08ca58` sync (commits 0ce1834–a08ca58, upstream PRs #109–#113): style-agent v0.7.0 — `/css` authoring skill added (`plugins/style-agent/commands/css.md` + `plugins/style-agent/skills/css/SKILL.md`) with Baseline gate for modern CSS features; create-utilities description updated to distinguish utility-class strings from raw CSS rules; acss-kit v1.12.0 — `/setup` Step 6.5 added (writes `.browserslistrc` with `baseline widely available`); `component-popover` both source docs updated with Baseline "Newly available" status note. Docs: created `style-agent/commands/css.mdx`, `style-agent/skills/css.mdx`; updated `style-agent/overview.mdx`, `style-agent/commands/create-utilities.mdx`, `acss-kit/skills/setup.mdx`, `acss-kit/skills/component-popover.mdx`, `acss-kit/components/popover.mdx`, `astro.config.mjs`. Build passed (116 pages).

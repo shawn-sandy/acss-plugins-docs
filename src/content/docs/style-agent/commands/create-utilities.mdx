@@ -7,6 +7,13 @@ import { Aside, Steps } from "@astrojs/starlight/components";
 
 Generate a ready-to-use utility class string from a plain-language description of visual intent. Detects which utility library your project uses and maps the description to specific class names via LLM reasoning. Chains naturally into `/css-to-class` when you want to consolidate the result into a named class.
 
+<Aside type="tip">
+  This command emits a **utility-class string** (`flex items-center p-4`) — not
+  a raw CSS rule. To author a raw CSS/SCSS rule from a plain-language
+  description, use [`/css`](/acss-plugins-docs/style-agent/commands/css)
+  instead.
+</Aside>
+
 ## Syntax
 
 ```text

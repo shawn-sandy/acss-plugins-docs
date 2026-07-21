@@ -13,6 +13,15 @@ A popover anchored to a trigger button, built on the native HTML Popover API (`p
   without Popover API support the panel renders inline as a normal `<div>` — plan
   for graceful degradation or feature-detect
   `'showPopover' in HTMLElement.prototype`.
+
+**Baseline status: Newly available — not yet Widely available.** If your
+project uses a `baseline widely available` browser target (what `/setup`
+writes), this component does not yet meet that bar. Feature-detect rather than
+dropping it: `@supports not selector(:popover-open)` in CSS is the recommended
+approach. Confirm current status at
+[webstatus.dev](https://webstatus.dev) — this feature's Baseline date [was
+corrected once after publication](https://web.dev/blog/popover-baseline).
+
 </Aside>
 
 <ComponentPreview
