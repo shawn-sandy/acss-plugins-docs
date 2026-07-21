@@ -16,20 +16,21 @@ The `setup` skill is the workflow behind the [`/setup`](/acss-plugins-docs/acss-
 
 ## Steps
 
-The skill executes ten steps (0–8, with an interstitial step 7.5), each guarded by an existence check so re-runs are safe. Step 0 unblocks the rest — every subsequent step shells out to a Python detector or writes a file, both of which plan mode would block.
+The skill executes eleven steps (0–8, with interstitial steps 6.5 and 7.5), each guarded by an existence check so re-runs are safe. Step 0 unblocks the rest — every subsequent step shells out to a Python detector or writes a file, both of which plan mode would block.
 
-| Step | Action                                                                      | Script / Asset                             |
-| ---- | --------------------------------------------------------------------------- | ------------------------------------------ |
-| 0    | Exit plan mode if the session is in plan mode                               | —                                          |
-| 1    | Verify React project and locate `projectRoot`                               | `detect_target.py`                         |
-| 2    | Detect React major version, warn on 19+                                     | reads `package.json`                       |
-| 3    | Detect package manager (npm, pnpm, yarn, bun)                               | `detect_package_manager.py`                |
-| 4    | Print Sass install command if missing (does not execute)                    | reads `package.json`                       |
-| 5    | Set components target via prompt or `.acss-target.json`                     | `detect_target.py`                         |
-| 6    | Copy `ui.tsx` from plugin assets                                            | `assets/foundation/ui.tsx`                 |
-| 7    | Seed `light.css` and `dark.css` from a hex seed (skipped with `--no-theme`) | `generate_palette.py` + `tokens_to_css.py` |
-| 7.5  | Wire theme imports into the project's CSS/SCSS entry point                  | `detect_css_entry.py`                      |
-| 8    | Print summary (`created[]` vs `kept[]`)                                     | —                                          |
+| Step | Action                                                                                          | Script / Asset                             |
+| ---- | ----------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| 0    | Exit plan mode if the session is in plan mode                                                   | —                                          |
+| 1    | Verify React project and locate `projectRoot`                                                   | `detect_target.py`                         |
+| 2    | Detect React major version, warn on 19+                                                         | reads `package.json`                       |
+| 3    | Detect package manager (npm, pnpm, yarn, bun)                                                   | `detect_package_manager.py`                |
+| 4    | Print Sass install command if missing (does not execute)                                        | reads `package.json`                       |
+| 5    | Set components target via prompt or `.acss-target.json`                                         | `detect_target.py`                         |
+| 6    | Copy `ui.tsx` from plugin assets                                                                | `assets/foundation/ui.tsx`                 |
+| 6.5  | Write `.browserslistrc` with `baseline widely available` (skipped when a browser target exists) | —                                          |
+| 7    | Seed `light.css` and `dark.css` from a hex seed (skipped with `--no-theme`)                     | `generate_palette.py` + `tokens_to_css.py` |
+| 7.5  | Wire theme imports into the project's CSS/SCSS entry point                                      | `detect_css_entry.py`                      |
+| 8    | Print summary (`created[]` vs `kept[]`)                                                         | —                                          |
 
 After the ten checks complete, the skill prints a summary listing `created[]` vs `kept[]` so you can see exactly which files were written and which were left untouched.
 
@@ -40,10 +41,13 @@ After a successful run:
 ```
 .acss-target.json                # records the components dir
 src/components/fpkit/ui.tsx      # foundation file (or your --target)
+.browserslistrc                  # baseline widely available (omit when Step 6.5 skipped; goes under kept[] instead)
 src/styles/theme/light.css       # if --no-theme not set
 src/styles/theme/dark.css        # if --no-theme not set
-<detected CSS/SCSS entry>      # @import statements added idempotently
+<detected CSS/SCSS entry>        # @import statements added idempotently
 ```
+
+Step 6.5 checks all three places Browserslist reads — a `browserslist` key in `package.json`, a `.browserslistrc`, and a plain `browserslist` file — and skips if any is present. The `baseline widely available` query is [supported natively by Browserslist](https://web.dev/blog/browserslist-supports-baseline) and propagates to every tool already reading it: autoprefixer, Lightning CSS, esbuild targets, `stylelint-browser-compat`. Note that the native Popover API (used by the Popover component) is Newly available rather than Widely available — see [Popover](/acss-plugins-docs/acss-kit/components/popover) for the recommended feature-detect fallback.
 
 ## Failure handling
 

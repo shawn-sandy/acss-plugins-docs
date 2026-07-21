@@ -1,0 +1,130 @@
+---
+title: css skill
+description: Full skill reference for the css skill — turns a plain-language description into a raw CSS/SCSS rule or inline style, reusing project custom properties and applying the Baseline gate to modern features.
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The `css` skill drives the [`/css`](/acss-plugins-docs/style-agent/commands/css) command. It owns clarification gating, description parsing, output-mode branching, token resolution, focus-visible defaults, reference consultation, the Baseline gate, emission, and summary formatting.
+
+|                   |                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------ |
+| **Triggered by**  | `/css`                                                                                     |
+| **Allowed tools** | `Read`, `Glob`, `Grep`, `Bash`, `Edit`, `Write`, `AskUserQuestion`                         |
+| **Output**        | A CSS/SCSS rule (or inline attribute) printed to chat; appended to a stylesheet on request |
+
+## Input forms
+
+| Form                | Example                                                       |
+| ------------------- | ------------------------------------------------------------- |
+| Plain description   | `"a flex row aligned centered with a small gap"`              |
+| Description + mode  | `/css inline "a red 1rem-padded box"`                         |
+| Description + file  | `"a card with a soft shadow — put it in src/styles/main.css"` |
+| Element with intent | `<button> <!-- primary button with a hover state -->`         |
+
+## Clarification gate
+
+Runs before anything is emitted. Every triggered question goes into a **single batched `AskUserQuestion` call** — never a second interrogation round.
+
+Four triggers:
+
+- **(a) Unmappable description** — e.g. `"make it look nice"`. Ask what layout, what colour role, what spacing scale.
+- **(b) Scale tie** — a relative size word maps equally to two adjacent scale steps. Ask which step; never coin-flip a design system.
+- **(c) Interactive element with unspecified states** — the description implies a button/link/input but does not say which states. Ask which of `hover`, `focus`, `active`, and `disabled` to emit. When the description already names its states, emit exactly those and ask nothing.
+- **(d) Adaptive sizing with no stated basis** — the description implies adaptive sizing without saying whether to respond to container or viewport. Ask. When the description already says ("adapts to its container", "stacks below 768px"), take it at its word.
+
+When no trigger fires, emit directly — a well-specified request must not be interrogated.
+
+## Output-mode branch
+
+### Class mode (default)
+
+The rule is printed to chat. It is appended to a stylesheet **only when the user names a target file**, and only after explicitly confirming the resolved target path and class name. Class names are derived from the description (kebab-case, max 20 chars); a same-name-different-value collision gets a numeric suffix (`-2`, `-3`), reported in the summary. SCSS vs. plain CSS is inferred from the project's dominant stylesheet extension. `.sass` (indented syntax) is never an append target — the skill emits brace-and-semicolon blocks, which are invalid in indented Sass.
+
+### Inline mode
+
+Fires when the user says `inline` or points at an element. **Refused** (with a one-line reason, falling back to class mode) when the description implies any of: `:hover`, `:focus-visible`, `@media`, `@container`, `@layer`, `@supports`, a pseudo-element. An inline `style` attribute cannot carry any of these.
+
+## Token resolution
+
+The skill greps the project for custom-property declarations (`^\s*(--[A-Za-z0-9_-]+)\s*:\s*([^;\n]+);?`) across all stylesheet files (excluding `node_modules`, `.git`, `dist`, `build`), reads the whole scale before mapping a relative word like "small" (it is a position, not a value), then applies three tiers:
+
+| Tier                    | Condition                                                        | Action                                    |
+| ----------------------- | ---------------------------------------------------------------- | ----------------------------------------- |
+| 1 — Exact-value match   | A custom property already holds the resolved value               | Use the variable                          |
+| 2 — Semantic-name match | No exact value, but the property name matches the described role | Use it and name the choice in the summary |
+| 3 — No match            | Neither                                                          | Emit the literal value                    |
+
+No new custom properties are created unless the user explicitly asks — the deliberate inverse of `/inline-style-to-class`, which creates variables freely because there the value is already committed to markup.
+
+## Focus-visible
+
+Between token resolution and emit: when the parsed description implies an interactive element (button, link, input, select, custom widget), emit a `:focus-visible` rule alongside the requested styling. When the output mode cannot carry a state (inline mode), warn about its absence in the summary. Parity with `/create-utilities` Step 4 — without it, a generated button rule ships with no focus indicator and fails WCAG 2.4.7.
+
+## Baseline gate
+
+Sits between the references and emit. Fires only for modern features — `@container`, `:has()`, `@layer`, `popover`, `field-sizing`, `text-wrap: balance`, `@starting-style`, subgrid, anchor positioning, and their kin. Long-settled CSS (`flexbox`, `border-radius`, custom properties) is not narrated.
+
+The skill checks, in Browserslist's own lookup order, for a `browserslist` key in `package.json`, a `.browserslistrc`, or a plain `browserslist` file. The detected target is named in the summary but **never relaxes an outcome** — it can only tighten one.
+
+Three outcomes:
+
+| Status                   | Action                                                                                                                                                                                                                                  |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Widely available**     | Emit unconditionally. Say nothing beyond the summary line.                                                                                                                                                                              |
+| **Newly available**      | Write the fallback **first**, then the `@supports` block with the modern declaration. Name the fallback in the summary. Order is load-bearing: a fallback below the `@supports` block overrides the enhancement in supporting browsers. |
+| **Limited availability** | Do not emit it. Emit the fallback alone; state in one line what was withheld and why.                                                                                                                                                   |
+
+An explicit user override (`"emit it anyway"`) moves an outcome by exactly one step: Limited → Newly available (wrapped). Nothing reaches bare emit from Limited. Naming a feature in the request is not an override.
+
+<Aside type="caution">
+  Baseline dates get revised — the Popover API's date was corrected by nine
+  months after publication. The skill states the status level, not the landing
+  month. For current status, see{" "}
+  <a href="https://webstatus.dev">webstatus.dev</a>.
+</Aside>
+
+## References
+
+Loaded by model judgment when the parsed intent touches their topic — not via a keyword trigger table, since no keyword table anticipates every phrasing. The summary must name which were consulted.
+
+| Reference                               | Covers                                                                                                                                 |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `references/container-queries.md`       | `container-type` on the parent; a container cannot query itself; `cqi`/`cqb` units; `container-name`                                   |
+| `references/cascade-layers.md`          | Unlayered styles outrank layered ones; `@layer` order declared first; third-party CSS; `!important` inversion                          |
+| `references/responsive-text.md`         | `clamp()` with a `rem` addend; pure-vw failing WCAG 1.4.4 at 200% zoom; slope formula; `text-wrap`                                     |
+| `references/progressive-enhancement.md` | Baseline statuses and the emit-bare/wrap/withhold rule; `@supports` detection direction; `prefers-reduced-motion`; `prefers-contrast`  |
+| `references/logical-properties.md`      | `inline-size`, `block-size`, `margin-inline`, `padding-block`, `inset`; writing-mode rationale                                         |
+| `references/modern-selectors.md`        | `:has()` restrictions; `:is()`/`:where()`/`:not()` specificity; `:nth-child(An+B of S)`; native nesting vs SCSS `&`                    |
+| `references/state-selectors.md`         | `:user-invalid` over `:invalid`; `[aria-disabled="true"]` over `:disabled`; `:focus-visible` rationale; `:empty`; `:placeholder-shown` |
+| `references/viewport-units.md`          | `dvh`/`svh`/`lvh` vs. `vh` under mobile browser chrome; `100vw` overflow with a scrollbar                                              |
+
+## Summary spec
+
+Every result prints one concise block:
+
+- **Output mode** — class (printed, or appended to `<path>`) or inline, plus the one-line reason if inline mode was refused
+- **Class name proposed** — the derived name and any `-2`/`-3` collision suffix
+- **Tokens resolved** — each `value → var(--name)` reuse, naming any tier-2 semantic-name choice, and any literal emitted because nothing matched; states that no new custom property was created
+- **Accessibility** — the `:focus-visible` rule emitted, or a warning the mode cannot carry one
+- **Baseline** — for each modern feature: its status and what it produced (bare, wrapped in `@supports`, or withheld); the project's detected browser target or "none declared" — **required even when no modern features were used** (state "no modern features — gate did not fire")
+- **References consulted** — every reference file that was loaded, or "none" — **required on every result**
+- **Clarifications resolved** — any answers taken from the batched gate
+
+## Refinement offer
+
+Every result closes with two or three concrete next moves drawn from what was actually emitted:
+
+- `Tighten the gap to var(--space-1)?`
+- `Add a hover state?`
+- `Switch to an inline style attribute?`
+- `Promote it to a named class in your stylesheet — run /inline-style-to-class.`
+
+Never offer a move the emitted rule does not support.
+
+## Related
+
+- [`/css` command](/acss-plugins-docs/style-agent/commands/css)
+- [`/create-utilities`](/acss-plugins-docs/style-agent/commands/create-utilities) — utility-class-string alternative
+- [`/inline-style-to-class`](/acss-plugins-docs/style-agent/commands/inline-style-to-class) — promote an inline result into a named class
+- [style-agent Overview](/acss-plugins-docs/style-agent/overview)

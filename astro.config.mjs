@@ -335,6 +335,10 @@ export default defineConfig({
               label: "Commands",
               items: [
                 {
+                  label: "/css",
+                  slug: "style-agent/commands/css",
+                },
+                {
                   label: "/css-to-class",
                   slug: "style-agent/commands/css-to-class",
                 },
@@ -351,6 +355,10 @@ export default defineConfig({
             {
               label: "Skills",
               items: [
+                {
+                  label: "css skill",
+                  slug: "style-agent/skills/css",
+                },
                 {
                   label: "css-to-class skill",
                   slug: "style-agent/skills/css-to-class",

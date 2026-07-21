@@ -19,6 +19,9 @@ Works with plain CSS, compiled SCSS output, Tailwind, or any utility-first workf
 ## Commands
 
 <CardGrid>
+  <Card title="/css" icon="seti:css">
+    Author a raw CSS/SCSS rule or inline style from a plain-language description. Reuses the project's existing custom properties and applies the Baseline gate to modern features — `@container`, `@layer`, fluid `clamp()`, logical properties, and more.
+  </Card>
   <Card title="/css-to-class" icon="seti:css">
     Extract a list of CSS utility classes from an HTML element or class string into a single, semantically named CSS class. Resolves declarations by grepping your project's own CSS files.
   </Card>
@@ -26,15 +29,16 @@ Works with plain CSS, compiled SCSS output, Tailwind, or any utility-first workf
     Convert an inline `style` attribute, JSX `style` object, or `<style>` block into a single named CSS class and append it to the project stylesheet. IDE selection supported — select an element in VS Code or JetBrains and the skill edits the source file in-place.
   </Card>
   <Card title="/create-utilities" icon="add-document">
-    Generate a utility class string from a plain-language visual description. Detects acss-kit, Tailwind, Bootstrap, or falls back to Tailwind-compatible naming.
+    Generate a utility-class string (`flex items-center p-4`) from a plain-language visual description. Detects acss-kit, Tailwind, Bootstrap, or falls back to Tailwind-compatible naming. For a raw CSS rule instead, use `/css`.
   </Card>
 </CardGrid>
 
 | Command                                                                                          | What it does                                                             |
 | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| [`/css [description]`](/acss-plugins-docs/style-agent/commands/css)                              | Author a raw CSS/SCSS rule or inline style from plain-language intent    |
 | [`/css-to-class [name]`](/acss-plugins-docs/style-agent/commands/css-to-class)                   | Collapse a multi-class element or class string into one semantic class   |
 | [`/inline-style-to-class [name]`](/acss-plugins-docs/style-agent/commands/inline-style-to-class) | Migrate inline styles to a named class in your stylesheet                |
-| [`/create-utilities [description]`](/acss-plugins-docs/style-agent/commands/create-utilities)    | Generate a utility class string from a plain-language visual description |
+| [`/create-utilities [description]`](/acss-plugins-docs/style-agent/commands/create-utilities)    | Generate a utility-class string from a plain-language visual description |
 
 ## Skills
 
@@ -42,6 +46,7 @@ Each command delegates all its behavior to a corresponding skill file. The skill
 
 | Skill                                                                                  | Driven by                |
 | -------------------------------------------------------------------------------------- | ------------------------ |
+| [`css`](/acss-plugins-docs/style-agent/skills/css)                                     | `/css`                   |
 | [`css-to-class`](/acss-plugins-docs/style-agent/skills/css-to-class)                   | `/css-to-class`          |
 | [`inline-style-to-class`](/acss-plugins-docs/style-agent/skills/inline-style-to-class) | `/inline-style-to-class` |
 | [`create-utilities`](/acss-plugins-docs/style-agent/skills/create-utilities)           | `/create-utilities`      |
@@ -54,15 +59,17 @@ Each command delegates all its behavior to a corresponding skill file. The skill
 
 **Name rules are consistent.** `/css-to-class` and `/inline-style-to-class` apply the same kebab-case sanitisation pipeline (max 20 characters) to any supplied name, and offer the same auto-generation algorithm when no name is given.
 
-**The commands complement each other.** `/css-to-class` collapses many classes into one. `/inline-style-to-class` lifts inline declarations out into a class. `/create-utilities` generates a class string from intent. Together they cover the most common style-authoring and migration tasks.
+**The commands complement each other.** `/css` authors a raw rule from intent. `/css-to-class` collapses many classes into one. `/inline-style-to-class` lifts inline declarations out into a class. `/create-utilities` generates a utility-class string from intent. Together they cover the most common style-authoring and migration tasks.
 
 ## Version history
 
-| Version | Changes                                                                                                                                                      |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 0.5.1   | Added getting-started tutorial — see [Tutorial: Your First Class](/acss-plugins-docs/style-agent/tutorial/)                                                  |
-| 0.5.0   | Added [COMPONENT.md spec](/acss-plugins-docs/reference/component-md-spec) — framework-neutral component format shipped with spec, example, and advisory rule |
-| 0.4.0   | `/inline-style-to-class` now tokenizes all hard-coded values to CSS variables; IDE selection support added                                                   |
-| 0.3.0   | Added `/create-utilities`                                                                                                                                    |
-| 0.2.0   | Added `/inline-style-to-class`                                                                                                                               |
-| 0.1.0   | Initial release with `/css-to-class`                                                                                                                         |
+| Version | Changes                                                                                                                                                                                                           |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.7.0   | `/css` Baseline gate added — Widely available features emit unconditionally, Newly available features are wrapped in `@supports` with a fallback, Limited availability features are withheld with a stated reason |
+| 0.6.0   | Added [`/css`](/acss-plugins-docs/style-agent/commands/css) — author a raw CSS/SCSS rule or inline style from plain-language intent, with token resolution and bundled references for modern-CSS footguns         |
+| 0.5.1   | Added getting-started tutorial — see [Tutorial: Your First Class](/acss-plugins-docs/style-agent/tutorial/)                                                                                                       |
+| 0.5.0   | Added [COMPONENT.md spec](/acss-plugins-docs/reference/component-md-spec) — framework-neutral component format shipped with spec, example, and advisory rule                                                      |
+| 0.4.0   | `/inline-style-to-class` now tokenizes all hard-coded values to CSS variables; IDE selection support added                                                                                                        |
+| 0.3.0   | Added `/create-utilities`                                                                                                                                                                                         |
+| 0.2.0   | Added `/inline-style-to-class`                                                                                                                                                                                    |
+| 0.1.0   | Initial release with `/css-to-class`                                                                                                                                                                              |
