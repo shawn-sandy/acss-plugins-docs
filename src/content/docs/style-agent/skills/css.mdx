@@ -107,7 +107,7 @@ Every result prints one concise block:
 - **Class name proposed** — the derived name and any `-2`/`-3` collision suffix
 - **Tokens resolved** — each `value → var(--name)` reuse, naming any tier-2 semantic-name choice, and any literal emitted because nothing matched; states that no new custom property was created
 - **Accessibility** — the `:focus-visible` rule emitted, or a warning the mode cannot carry one
-- **Baseline** — for each modern feature: its status and what it produced (bare, wrapped in `@supports`, or withheld); the project's detected browser target or "none declared" — **required even when no modern features were used** (state "no modern features — gate did not fire")
+- **Baseline** — for each modern feature used: its status and what it produced (bare, wrapped in `@supports`, or withheld); the project's detected browser target or "none declared". **Omitted entirely when the rule uses no modern features** — long-settled CSS is not narrated.
 - **References consulted** — every reference file that was loaded, or "none" — **required on every result**
 - **Clarifications resolved** — any answers taken from the batched gate
 

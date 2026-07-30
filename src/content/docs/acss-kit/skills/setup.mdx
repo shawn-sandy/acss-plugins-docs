@@ -32,7 +32,7 @@ The skill executes eleven steps (0–8, with interstitial steps 6.5 and 7.5), ea
 | 7.5  | Wire theme imports into the project's CSS/SCSS entry point                                      | `detect_css_entry.py`                      |
 | 8    | Print summary (`created[]` vs `kept[]`)                                                         | —                                          |
 
-After the ten checks complete, the skill prints a summary listing `created[]` vs `kept[]` so you can see exactly which files were written and which were left untouched.
+After all steps complete, the skill prints a summary listing `created[]` vs `kept[]` so you can see exactly which files were written and which were left untouched.
 
 ## Output contract
 
@@ -51,12 +51,12 @@ Step 6.5 checks all three places Browserslist reads — a `browserslist` key in 
 
 ## Failure handling
 
-| Failure                      | Behaviour                                                     |
-| ---------------------------- | ------------------------------------------------------------- |
-| React or TypeScript missing  | Halt with copy-paste install command                          |
-| Sass missing                 | Halt with `pnpm add -D sass` (or pkg-manager equivalent)      |
-| Theme generation fails WCAG  | Roll back theme files; bootstrap continues without seed theme |
-| Target dir already populated | Keep existing files; record in `kept[]`                       |
+| Failure                      | Behaviour                                                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| React or TypeScript missing  | Halt with copy-paste install command                                                                          |
+| Sass missing                 | Halt with `pnpm add -D sass` (or pkg-manager equivalent)                                                      |
+| Theme generation fails WCAG  | Keep generated files with a `(contrast warning)` flag; print failure message and continue to the summary step |
+| Target dir already populated | Keep existing files; record in `kept[]`                                                                       |
 
 <Aside type="note">
   The skill never deletes files. If a previous bootstrap left partial state, a

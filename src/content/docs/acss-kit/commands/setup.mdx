@@ -24,7 +24,7 @@ Run it once after installing the plugin in a new (or existing) React + TypeScrip
 
 ## What it does
 
-The skill executes eight sequential steps. Every step is **idempotent** — re-running `/setup` is safe and never overwrites existing files.
+The skill executes nine sequential steps. Every step is **idempotent** — re-running `/setup` is safe and never overwrites existing files.
 
 <Steps>
 
@@ -34,8 +34,9 @@ The skill executes eight sequential steps. Every step is **idempotent** — re-r
 4. **Verify Sass** — Halts with copy-paste install instructions if neither `sass` nor `sass-embedded` is present.
 5. **Set the components target** — Prompts for the directory or reuses `.acss-target.json` if it exists.
 6. **Copy `ui.tsx`** — Writes the foundation file from plugin assets to the target.
-7. **Seed a starter theme** — Generates `light.css` and `dark.css` from a hex seed (skipped with `--no-theme`).
-8. **Wire theme imports** — Detects the CSS/SCSS entry point and adds idempotent `@import` statements.
+7. **Write `.browserslistrc`** — Writes `baseline widely available` (skipped when the project already declares a browser target in `package.json`, `.browserslistrc`, or a plain `browserslist` file).
+8. **Seed a starter theme** — Generates `light.css` and `dark.css` from a hex seed (skipped with `--no-theme`).
+9. **Wire theme imports** — Detects the CSS/SCSS entry point and adds idempotent `@import` statements.
 
 </Steps>
 
