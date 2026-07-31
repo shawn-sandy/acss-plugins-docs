@@ -4,6 +4,7 @@ description: Author a raw CSS/SCSS rule or inline style attribute from a plain-l
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 Turn a plain-language description of visual intent into a raw CSS/SCSS rule or an inline `style` attribute. Values are mapped onto the project's existing CSS custom properties when they match, and modern-CSS features with known footguns (`@container`, `@layer`, `clamp()` fluid type, `@supports`, logical properties, modern selectors, state selectors, viewport units) are handled via bundled references rather than recalled from memory.
 
@@ -82,6 +83,54 @@ Emits a rule using whatever gap token your project declares (here `--space-2` ma
 }
 ```
 
+### Flex column
+
+```text
+/css a flex column with a medium gap that stretches its children
+```
+
+```css
+.flex-col {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3, 1rem);
+}
+```
+
+### Grid with named areas
+
+```text
+/css a page grid with a sidebar and main area, stacking on narrow screens
+```
+
+```css
+.page-grid {
+  display: grid;
+  grid-template-areas:
+    "sidebar"
+    "main";
+  gap: var(--space-4, 1.5rem);
+}
+
+.page-grid > .sidebar {
+  grid-area: sidebar;
+}
+
+.page-grid > .main {
+  grid-area: main;
+}
+
+@media (min-width: 48rem) {
+  .page-grid {
+    grid-template-columns: 16rem 1fr;
+    grid-template-areas: "sidebar main";
+  }
+}
+```
+
+Named areas are declared mobile-first, then re-declared inside the `@media` block — the area names stay identical so only the arrangement changes.
+
 ### Centered container
 
 ```text
@@ -114,6 +163,26 @@ Logical properties (`max-inline-size`, `margin-inline`) are used over `max-width
 ```
 
 The preferred term keeps a `rem` addend (`0.85rem + 0.75vw`) rather than a bare `vw` — a viewport-only value does not respond to browser zoom and fails WCAG 1.4.4.
+
+### Colour pair
+
+```text
+/css a surface and text colour pair for a callout, with a matching border
+```
+
+<ComponentPreview
+  code={`<div class="callout" style="background-color:var(--color-surface,oklch(97% 0.01 250));color:var(--color-text,oklch(25% 0.02 250));border:1px solid var(--color-border,oklch(88% 0.01 250));padding:1rem 1.25rem;border-radius:0.375rem;">Callout with surface/text/border colour pair</div>`}
+/>
+
+```css
+.callout {
+  background-color: var(--color-surface, oklch(97% 0.01 250));
+  color: var(--color-text, oklch(25% 0.02 250));
+  border: 1px solid var(--color-border, oklch(88% 0.01 250));
+}
+```
+
+Foreground and background are always emitted together — `color` can inherit, while an omitted `background-color` is transparent and can reveal the underlying background. Contrast is checked against the pair, not against an assumed white page.
 
 ### Container-adaptive card
 
