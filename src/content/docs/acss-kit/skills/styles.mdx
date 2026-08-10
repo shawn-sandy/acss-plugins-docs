@@ -45,10 +45,9 @@ Given seed hex `#4f46e5`:
 4. **Text:**
 
    ```
-   --color-text:          L 16%  (near-black, finds highest L with 4.5:1 vs background)
-   --color-text-inverse:  L 99%  (same as background — white on colored surfaces)
-   --color-text-muted:    L 48%  (AA against background: 4.5:1)
-   --color-text-disabled: L 68%  (slightly below AA threshold — intentional for disabled)
+   --color-text:        L 10%  (near-black)
+   --color-text-inverse:#ffffff (white — text on colored surfaces)
+   --color-text-muted:  lightest L with 4.5:1 vs background (≈ L 38–48%)
    ```
 
 5. **Borders:**
@@ -102,12 +101,11 @@ Given seed hex `#4f46e5`:
 
 ### Text roles
 
-| Role                    | Light L | Dark L | Usage                       |
-| ----------------------- | ------- | ------ | --------------------------- |
-| `--color-text`          | 16%     | 94%    | Body text                   |
-| `--color-text-inverse`  | 99%     | 12%    | Text on colored backgrounds |
-| `--color-text-muted`    | 48%     | 68%    | Secondary / captions        |
-| `--color-text-disabled` | 68%     | 45%    | Disabled state              |
+| Role                   | Light L | Dark L | Usage                       |
+| ---------------------- | ------- | ------ | --------------------------- |
+| `--color-text`         | 10%     | 96%    | Body text                   |
+| `--color-text-inverse` | white   | 12%    | Text on colored backgrounds |
+| `--color-text-muted`   | ~38–48% | 78%    | Secondary / captions        |
 
 ### Brand roles
 
@@ -128,30 +126,34 @@ Given seed hex `#4f46e5`:
 
 <ColorSwatch roles={["danger", "warning", "info", "success"]} />
 
-### Optional roles (generated when hue range allows)
+### Optional roles (set via DESIGN.md import or manual authoring)
 
-| Role                   | H°        | Usage                    |
-| ---------------------- | --------- | ------------------------ |
-| `--color-accent`       | seed +30° | Secondary brand accent   |
-| `--color-accent-hover` | seed +30° | Hover on accent          |
-| `--color-brand-accent` | seed -30° | Decorative brand element |
+These three roles are recognized by the token pipeline (`_tokens.py` `ROLE_GROUPS`) but are not emitted by the palette generator — they must be set from a DESIGN.md import (`/theme-from-design`, `/theme-from-figma`) or added manually to `light.css` / `dark.css`.
+
+| Role                     | Usage                                              |
+| ------------------------ | -------------------------------------------------- |
+| `--color-surface-subtle` | Table-stripe / hover surface (optional background) |
+| `--color-text-subtle`    | Tertiary text — timestamps, footnotes              |
+| `--color-brand-accent`   | Secondary brand color override                     |
 
 ## WCAG 2.2 AA contrast validation
 
-The skill validates 10 contrast pairs against 4.5:1 (text) or 3.0:1 (non-text):
+The skill validates 12 contrast pairs (`validate_theme.py:PAIRS`). Pairs where either role is absent in the file are silently skipped (relevant for optional roles).
 
-| Pair                        | Minimum | Category           |
-| --------------------------- | ------- | ------------------ |
-| `text` / `background`       | 4.5:1   | Text               |
-| `primary` / `background`    | 4.5:1   | Text / interactive |
-| `text-inverse` / `primary`  | 4.5:1   | Text on brand      |
-| `danger` / `background`     | 4.5:1   | Text               |
-| `success` / `background`    | 4.5:1   | Text               |
-| `warning` / `background`    | 3.0:1   | Non-text indicator |
-| `info` / `background`       | 4.5:1   | Text               |
-| `text-muted` / `background` | 4.5:1   | Text               |
-| `border` / `background`     | 3.0:1   | Non-text indicator |
-| `text` / `surface`          | 4.5:1   | Text on card       |
+| Pair                            | Minimum | Category                      |
+| ------------------------------- | ------- | ----------------------------- |
+| `text` / `background`           | 4.5:1   | Text                          |
+| `primary` / `background`        | 3.0:1   | Non-text (interactive target) |
+| `text-inverse` / `primary`      | 4.5:1   | Text on brand                 |
+| `text-muted` / `background`     | 4.5:1   | Text                          |
+| `text` / `surface`              | 4.5:1   | Text on card                  |
+| `success` / `background`        | 3.0:1   | Non-text indicator            |
+| `warning` / `background`        | 3.0:1   | Non-text indicator            |
+| `danger` / `background`         | 3.0:1   | Non-text indicator            |
+| `info` / `background`           | 3.0:1   | Non-text indicator            |
+| `focus-ring` / `background`     | 3.0:1   | WCAG 1.4.11 focus indicator   |
+| `focus-ring` / `surface`        | 3.0:1   | WCAG 1.4.11 focus indicator   |
+| `focus-ring` / `surface-raised` | 3.0:1   | WCAG 1.4.11 focus indicator   |
 
 If a pair fails, the skill adjusts the foreground lightness by ±2% and retries, up to 8 iterations. If it still can't pass, it reports the failure and the closest achievable ratio.
 
@@ -169,10 +171,9 @@ If a pair fails, the skill adjusts the foreground lightness by ±2% and retries,
   --color-border-strong: oklch(72% 0.018 270);
 
   /* ── Text ─────────────────────────────── */
-  --color-text: oklch(16% 0.012 270);
-  --color-text-inverse: oklch(99% 0.004 270);
+  --color-text: oklch(10% 0.012 270);
+  --color-text-inverse: #ffffff;
   --color-text-muted: oklch(48% 0.014 270);
-  --color-text-disabled: oklch(68% 0.01 270);
 
   /* ── Brand ────────────────────────────── */
   --color-primary: oklch(55% 0.22 270);
