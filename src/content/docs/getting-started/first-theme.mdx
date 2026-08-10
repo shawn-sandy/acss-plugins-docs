@@ -24,7 +24,6 @@ The generated palette covers all 18 semantic roles:
     "text",
     "text-muted",
     "text-inverse",
-    "text-disabled",
     "primary",
     "primary-hover",
     "focus-ring",
@@ -32,7 +31,8 @@ The generated palette covers all 18 semantic roles:
     "warning",
     "info",
     "success",
-    "accent",
+    "surface-subtle",
+    "text-subtle",
     "brand-accent",
   ]}
   table={false}
@@ -70,17 +70,17 @@ The output is two plain CSS files:
      ✓ text-inverse / primary      4.7 : 1  (AA ✓)
      ✓ danger / background         5.1 : 1  (AA ✓)
      ✓ success / background        4.6 : 1  (AA ✓)
-     ... (10 pairs total)
+     ... (12 pairs total)
 
    Dark mode — contrast checks:
      ✓ text / background          12.8 : 1  (AA ✓)
-     ... (10 pairs total)
+     ... (12 pairs total)
 
    Writing src/styles/theme/light.css  ✓
    Writing src/styles/theme/dark.css   ✓
    ```
 
-3. If any contrast pair fails, Claude adjusts the lightness value in OKLCH space and retries. The files are only written once all 10 pairs pass.
+3. If any contrast pair fails, Claude adjusts the lightness value in OKLCH space and retries. The files are only written once all 12 pairs pass.
 
 </Steps>
 
@@ -103,7 +103,6 @@ The output is two plain CSS files:
   --color-text: oklch(16% 0.012 270);
   --color-text-inverse: oklch(99% 0.004 270);
   --color-text-muted: oklch(48% 0.014 270);
-  --color-text-disabled: oklch(68% 0.01 270);
 
   /* Brand */
   --color-primary: oklch(55% 0.22 270);
@@ -116,9 +115,9 @@ The output is two plain CSS files:
   --color-info: oklch(55% 0.18 240);
   --color-success: oklch(48% 0.18 155);
 
-  /* Optional — generated when the seed hue has sufficient chroma range */
-  --color-accent: oklch(58% 0.2 300);
-  --color-accent-hover: oklch(51% 0.2 300);
+  /* Optional — set via DESIGN.md import or manual authoring */
+  --color-surface-subtle: oklch(96% 0.006 270);
+  --color-text-subtle: oklch(58% 0.012 270);
   --color-brand-accent: oklch(62% 0.18 210);
 }
 ```

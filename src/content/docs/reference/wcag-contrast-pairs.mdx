@@ -5,7 +5,7 @@ description: The 12 contrast pairs validated by acss-kit, their required ratios,
 
 import ColorSwatch from "~/components/ColorSwatch.astro";
 
-acss-kit validates 12 contrast pairs (`validate_theme.py:PAIRS`) against WCAG 2.2 AA requirements. All pairs must pass before theme files are written. Pairs where either role is absent are silently skipped.
+acss-kit validates 12 contrast pairs (`validate_theme.py:PAIRS`) against WCAG 2.2 AA requirements. All applicable pairs must pass before theme files are written; pairs where either role is absent in the theme file are silently skipped.
 
 ## The 12 pairs
 
