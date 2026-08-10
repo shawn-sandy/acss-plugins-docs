@@ -3,7 +3,7 @@ title: /theme-brand
 description: Scaffold a brand-specific theme override file that layers on top of your base light/dark theme.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 Create a named brand override file that selectively overrides specific color roles from your base theme. Brand files inherit all roles they don't override — you only specify what changes.
 
@@ -15,10 +15,10 @@ Create a named brand override file that selectively overrides specific color rol
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `name` | Yes | Brand name slug (e.g., `forest`, `ocean`, `coral`). Used as the filename: `brand-<name>.css` |
-| `--from` | No | Optional seed hex color. If provided, derives brand-specific primary and accent values. |
+| Argument | Required | Description                                                                                  |
+| -------- | -------- | -------------------------------------------------------------------------------------------- |
+| `name`   | Yes      | Brand name slug (e.g., `forest`, `ocean`, `coral`). Used as the filename: `brand-<name>.css` |
+| `--from` | No       | Optional seed hex color. If provided, derives brand-specific primary values.                 |
 
 ## Examples
 
@@ -47,18 +47,18 @@ A single file is written to `src/styles/theme/brand-<name>.css`:
 
 /* Light mode overrides */
 :root {
-  --color-primary:       oklch(48% 0.20 155);   /* forest green */
-  --color-primary-hover: oklch(42% 0.20 155);
-  --color-focus-ring:    oklch(58% 0.18 155);
-  --color-accent:        oklch(55% 0.16 80);     /* warm amber accent */
+  --color-primary: oklch(48% 0.2 155); /* forest green */
+  --color-primary-hover: oklch(42% 0.2 155);
+  --color-focus-ring: oklch(58% 0.18 155);
+  --color-brand-accent: oklch(55% 0.16 80); /* warm amber accent */
 }
 
 /* Dark mode overrides */
 [data-theme="dark"] {
-  --color-primary:       oklch(68% 0.18 155);
+  --color-primary: oklch(68% 0.18 155);
   --color-primary-hover: oklch(72% 0.18 155);
-  --color-focus-ring:    oklch(75% 0.16 155);
-  --color-accent:        oklch(72% 0.14 80);
+  --color-focus-ring: oklch(75% 0.16 155);
+  --color-brand-accent: oklch(72% 0.14 80);
 }
 ```
 
@@ -68,18 +68,20 @@ Brand files must be imported **after** your base theme files:
 
 ```tsx
 // src/main.tsx
-import './styles/theme/light.css';    // base light roles
-import './styles/theme/dark.css';     // base dark roles
-import './styles/theme/brand-forest.css';  // brand overrides ← last
+import "./styles/theme/light.css"; // base light roles
+import "./styles/theme/dark.css"; // base dark roles
+import "./styles/theme/brand-forest.css"; // brand overrides ← last
 ```
 
 <Aside type="caution">
-If you import the brand file before `light.css` or `dark.css`, the brand overrides will be overwritten by the base theme values.
+  If you import the brand file before `light.css` or `dark.css`, the brand
+  overrides will be overwritten by the base theme values.
 </Aside>
 
 ## When to use brand files
 
 Brand files are the right tool when:
+
 - You have **multiple brand themes** in one app (e.g., a multi-tenant SaaS with per-customer branding)
 - You want to **experiment with palette changes** without touching the base files
 - A specific section of your app uses a **different color identity** (e.g., marketing pages vs. app pages)
@@ -88,9 +90,10 @@ For modifying a single color role in your main theme, use [`/theme-update`](/acs
 
 ## WCAG validation
 
-Brand files are WCAG-validated after generation. The same 10 contrast pairs checked by `/theme-create` are re-evaluated with the overridden roles substituted in.
+Brand files are WCAG-validated after generation. The same 12 contrast pairs checked by `/theme-create` are re-evaluated with the overridden roles substituted in.
 
 If a brand override creates a contrast failure:
+
 1. Claude reports the failing pair and ratio
 2. Proposes an adjusted value that passes
 3. Asks whether to use the adjusted value or keep the original (with a warning)
@@ -100,8 +103,8 @@ If a brand override creates a contrast failure:
 You can stack multiple brand files for layered overrides:
 
 ```tsx
-import './styles/theme/light.css';
-import './styles/theme/dark.css';
-import './styles/theme/brand-forest.css';  // base brand
-import './styles/theme/brand-seasonal.css'; // seasonal overlay (imports last, wins)
+import "./styles/theme/light.css";
+import "./styles/theme/dark.css";
+import "./styles/theme/brand-forest.css"; // base brand
+import "./styles/theme/brand-seasonal.css"; // seasonal overlay (imports last, wins)
 ```

@@ -1,13 +1,13 @@
 ---
 title: WCAG Contrast Pairs
-description: The 10 contrast pairs validated by acss-kit, their required ratios, and what they mean.
+description: The 12 contrast pairs validated by acss-kit, their required ratios, and what they mean.
 ---
 
 import ColorSwatch from "~/components/ColorSwatch.astro";
 
-acss-kit validates 10 contrast pairs against WCAG 2.2 AA requirements. All pairs must pass before theme files are written.
+acss-kit validates 12 contrast pairs (`validate_theme.py:PAIRS`) against WCAG 2.2 AA requirements. All applicable pairs must pass before theme files are written; pairs where either role is absent in the theme file are silently skipped.
 
-## The 10 pairs
+## The 12 pairs
 
 ### Text roles
 
@@ -24,9 +24,12 @@ acss-kit validates 10 contrast pairs against WCAG 2.2 AA requirements. All pairs
 
 <ColorSwatch roles={["primary", "focus-ring"]} />
 
-| Foreground        | Background           | Minimum | Category    |
-| ----------------- | -------------------- | ------- | ----------- |
-| `--color-primary` | `--color-background` | 4.5:1   | Interactive |
+| Foreground           | Background               | Minimum | Category                    |
+| -------------------- | ------------------------ | ------- | --------------------------- |
+| `--color-primary`    | `--color-background`     | 3.0:1   | Non-text interactive target |
+| `--color-focus-ring` | `--color-background`     | 3.0:1   | WCAG 1.4.11 focus indicator |
+| `--color-focus-ring` | `--color-surface`        | 3.0:1   | WCAG 1.4.11 focus indicator |
+| `--color-focus-ring` | `--color-surface-raised` | 3.0:1   | WCAG 1.4.11 focus indicator |
 
 ### Semantic states
 
@@ -34,23 +37,15 @@ acss-kit validates 10 contrast pairs against WCAG 2.2 AA requirements. All pairs
 
 | Foreground        | Background           | Minimum | Category           |
 | ----------------- | -------------------- | ------- | ------------------ |
-| `--color-danger`  | `--color-background` | 4.5:1   | Semantic text      |
-| `--color-success` | `--color-background` | 4.5:1   | Semantic text      |
-| `--color-info`    | `--color-background` | 4.5:1   | Semantic text      |
+| `--color-danger`  | `--color-background` | 3.0:1   | Non-text indicator |
+| `--color-success` | `--color-background` | 3.0:1   | Non-text indicator |
+| `--color-info`    | `--color-background` | 3.0:1   | Non-text indicator |
 | `--color-warning` | `--color-background` | 3.0:1   | Non-text indicator |
-
-### Layout
-
-<ColorSwatch roles={["border", "surface", "background"]} />
-
-| Foreground       | Background           | Minimum | Category           |
-| ---------------- | -------------------- | ------- | ------------------ |
-| `--color-border` | `--color-background` | 3.0:1   | Non-text indicator |
 
 ## WCAG thresholds
 
 - **4.5:1** — normal text (< 18pt or < 14pt bold). Required for text, links, and UI labels.
-- **3.0:1** — large text (≥ 18pt or ≥ 14pt bold) or non-text UI components. Used for borders and warning indicators.
+- **3.0:1** — large text (≥ 18pt or ≥ 14pt bold) or non-text UI components. Used for interactive elements, focus indicators, and semantic state indicators.
 
 ## Testing manually
 

@@ -28,14 +28,13 @@ All roles are CSS custom properties on `:root` (light) and `[data-theme="dark"]`
 
 ## Text roles
 
-<ColorSwatch roles={["text", "text-inverse", "text-muted", "text-disabled"]} />
+<ColorSwatch roles={["text", "text-inverse", "text-muted"]} />
 
-| Role                    | Usage                       | Minimum contrast       |
-| ----------------------- | --------------------------- | ---------------------- |
-| `--color-text`          | Body text                   | 4.5:1 vs background    |
-| `--color-text-inverse`  | Text on colored backgrounds | 4.5:1 vs primary       |
-| `--color-text-muted`    | Secondary / captions        | 4.5:1 vs background    |
-| `--color-text-disabled` | Disabled state              | Below AA (intentional) |
+| Role                   | Usage                       | Minimum contrast    |
+| ---------------------- | --------------------------- | ------------------- |
+| `--color-text`         | Body text                   | 4.5:1 vs background |
+| `--color-text-inverse` | Text on colored backgrounds | 4.5:1 vs primary    |
+| `--color-text-muted`   | Secondary / captions        | 4.5:1 vs background |
 
 ## Brand roles
 
@@ -60,10 +59,12 @@ All roles are CSS custom properties on `:root` (light) and `[data-theme="dark"]`
 
 ## Optional roles
 
-<ColorSwatch roles={["accent", "accent-hover", "brand-accent"]} />
+These roles are recognized by the token pipeline but are not emitted by the
+palette generator. They must be set from a DESIGN.md import (`/theme-from-design`,
+`/theme-from-figma`) or added manually to `light.css` / `dark.css`.
 
-| Role                   | Generated when                       |
-| ---------------------- | ------------------------------------ |
-| `--color-accent`       | Seed hue has sufficient chroma range |
-| `--color-accent-hover` | With `--color-accent`                |
-| `--color-brand-accent` | Seed hue has sufficient spread       |
+| Role                     | Usage                                              |
+| ------------------------ | -------------------------------------------------- |
+| `--color-surface-subtle` | Table-stripe / hover surface (optional background) |
+| `--color-text-subtle`    | Tertiary text — timestamps, footnotes              |
+| `--color-brand-accent`   | Secondary brand color override                     |

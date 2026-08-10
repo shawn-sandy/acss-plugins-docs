@@ -3,7 +3,7 @@ title: Extract a Theme from Figma
 description: Use /theme-extract to pull brand colors from a Figma design and generate a full WCAG-validated theme.
 ---
 
-import { Steps, Aside } from '@astrojs/starlight/components';
+import { Steps, Aside } from "@astrojs/starlight/components";
 
 This recipe walks through extracting brand colors from a Figma file and generating a production-ready theme.
 
@@ -49,8 +49,8 @@ Generating theme from #4f46e5...
 ## Step 3 — Review validation output
 
 ```
-Light mode — 10 contrast pairs:  ✓ all pass
-Dark mode  — 10 contrast pairs:  ✓ all pass
+Light mode — 12 contrast pairs:  ✓ all pass
+Dark mode  — 12 contrast pairs:  ✓ all pass
 
 Writing src/styles/theme/light.css  ✓
 Writing src/styles/theme/dark.css   ✓
@@ -67,9 +67,9 @@ The secondary Figma color (amber `#f59e0b`) can be added as a brand overlay:
 Then import it after the base theme:
 
 ```tsx
-import './styles/theme/light.css';
-import './styles/theme/dark.css';
-import './styles/theme/brand-figma-brand.css';
+import "./styles/theme/light.css";
+import "./styles/theme/dark.css";
+import "./styles/theme/brand-figma-brand.css";
 ```
 
 ## Step 5 — Fine-tune specific roles
@@ -81,7 +81,10 @@ If the extracted palette doesn't match the Figma design exactly in certain roles
 ```
 
 <Aside type="tip">
-For a closer match to Figma's exact colors, use `/theme-update` to override specific roles after extraction rather than re-running `/theme-extract`. Extraction picks the "best contrast-passing" version of your Figma color — which may differ slightly from the source value.
+  For a closer match to Figma's exact colors, use `/theme-update` to override
+  specific roles after extraction rather than re-running `/theme-extract`.
+  Extraction picks the "best contrast-passing" version of your Figma color —
+  which may differ slightly from the source value.
 </Aside>
 
 ## When extraction picks the wrong color

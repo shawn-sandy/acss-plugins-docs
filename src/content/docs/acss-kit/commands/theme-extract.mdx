@@ -3,7 +3,7 @@ title: /theme-extract
 description: Extract brand colors from an image or Figma design URL and generate a full OKLCH theme.
 ---
 
-import { Aside, Steps } from '@astrojs/starlight/components';
+import { Aside, Steps } from "@astrojs/starlight/components";
 
 Extract dominant brand colors from a local image file or a Figma design, then generate a full WCAG-validated theme using those colors as the seed palette.
 
@@ -15,10 +15,10 @@ Extract dominant brand colors from a local image file or a Figma design, then ge
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `image-path` | One of these | Path to a local image file (PNG, JPG, WebP, SVG) |
-| `figma-url` | One of these | URL to a Figma file or frame (`figma.com/file/...` or `figma.com/design/...`) |
+| Argument     | Required     | Description                                                                   |
+| ------------ | ------------ | ----------------------------------------------------------------------------- |
+| `image-path` | One of these | Path to a local image file (PNG, JPG, WebP, SVG)                              |
+| `figma-url`  | One of these | URL to a Figma file or frame (`figma.com/file/...` or `figma.com/design/...`) |
 
 ## Examples
 
@@ -50,7 +50,7 @@ Extract from a Figma design:
 
 4. **Generate palette** — runs the same OKLCH algorithm as `/theme-create` using the extracted seed.
 
-5. **WCAG validate** — checks all 10 contrast pairs.
+5. **WCAG validate** — checks all 12 contrast pairs.
 
 6. **Write files** — writes `light.css` and `dark.css` to `src/styles/theme/`.
 
@@ -59,11 +59,14 @@ Extract from a Figma design:
 ## Figma requirements
 
 For Figma extraction, you need:
+
 - A Figma personal access token configured in your Claude Code MCP settings
 - The Figma file must be accessible with your token (public file or member access)
 
 <Aside type="note">
-Figma extraction reads color styles, component fills, and local variables — not pixel data. This means it works reliably even on complex designs with many layers.
+  Figma extraction reads color styles, component fills, and local variables —
+  not pixel data. This means it works reliably even on complex designs with many
+  layers.
 </Aside>
 
 ## Output
@@ -101,5 +104,7 @@ Or create a brand file for additional overrides:
 ```
 
 <Aside type="tip">
-If the extracted color produces poor contrast ratios (e.g., a very light brand color against a white background), Claude will suggest an adjusted seed that preserves the hue while boosting contrast.
+  If the extracted color produces poor contrast ratios (e.g., a very light brand
+  color against a white background), Claude will suggest an adjusted seed that
+  preserves the hue while boosting contrast.
 </Aside>
