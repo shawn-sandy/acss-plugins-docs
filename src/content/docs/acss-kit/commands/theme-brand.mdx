@@ -18,7 +18,7 @@ Create a named brand override file that selectively overrides specific color rol
 | Argument | Required | Description                                                                                  |
 | -------- | -------- | -------------------------------------------------------------------------------------------- |
 | `name`   | Yes      | Brand name slug (e.g., `forest`, `ocean`, `coral`). Used as the filename: `brand-<name>.css` |
-| `--from` | No       | Optional seed hex color. If provided, derives brand-specific primary and accent values.      |
+| `--from` | No       | Optional seed hex color. If provided, derives brand-specific primary values.                 |
 
 ## Examples
 
@@ -50,7 +50,7 @@ A single file is written to `src/styles/theme/brand-<name>.css`:
   --color-primary: oklch(48% 0.2 155); /* forest green */
   --color-primary-hover: oklch(42% 0.2 155);
   --color-focus-ring: oklch(58% 0.18 155);
-  --color-accent: oklch(55% 0.16 80); /* warm amber accent */
+  --color-brand-accent: oklch(55% 0.16 80); /* warm amber accent */
 }
 
 /* Dark mode overrides */
@@ -58,7 +58,7 @@ A single file is written to `src/styles/theme/brand-<name>.css`:
   --color-primary: oklch(68% 0.18 155);
   --color-primary-hover: oklch(72% 0.18 155);
   --color-focus-ring: oklch(75% 0.16 155);
-  --color-accent: oklch(72% 0.14 80);
+  --color-brand-accent: oklch(72% 0.14 80);
 }
 ```
 

@@ -4,6 +4,7 @@ description: Generate a complete WCAG AA–validated light and dark theme from a
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
+import ColorSwatch from "~/components/ColorSwatch.astro";
 
 Generate a full 18-role semantic color palette in OKLCH color space from a single hex color. Every role is WCAG 2.2 AA contrast-validated before the files are written.
 
@@ -56,6 +57,27 @@ Generate only the dark theme:
 
 ### Required (15)
 
+<ColorSwatch
+  roles={[
+    "background",
+    "surface",
+    "surface-raised",
+    "border",
+    "border-strong",
+    "text",
+    "text-inverse",
+    "text-muted",
+    "primary",
+    "primary-hover",
+    "focus-ring",
+    "danger",
+    "warning",
+    "info",
+    "success",
+  ]}
+  table={false}
+/>
+
 | Role                     | Purpose                              |
 | ------------------------ | ------------------------------------ |
 | `--color-background`     | Page background                      |
@@ -66,7 +88,6 @@ Generate only the dark theme:
 | `--color-text`           | Body text                            |
 | `--color-text-inverse`   | Text on colored backgrounds          |
 | `--color-text-muted`     | Secondary/caption text               |
-| `--color-text-disabled`  | Disabled state text                  |
 | `--color-primary`        | Primary brand action                 |
 | `--color-primary-hover`  | Primary hover state                  |
 | `--color-focus-ring`     | Keyboard focus outline               |
@@ -75,13 +96,13 @@ Generate only the dark theme:
 | `--color-info`           | Informational state                  |
 | `--color-success`        | Success / positive state             |
 
-### Optional (3, generated when hue allows)
+### Optional (3, set via DESIGN.md import or manual authoring)
 
-| Role                   | Purpose                |
-| ---------------------- | ---------------------- |
-| `--color-accent`       | Secondary brand accent |
-| `--color-accent-hover` | Accent hover state     |
-| `--color-brand-accent` | Decorative brand color |
+| Role                     | Purpose                               |
+| ------------------------ | ------------------------------------- |
+| `--color-surface-subtle` | Table-stripe / hover surface          |
+| `--color-text-subtle`    | Tertiary text — timestamps, footnotes |
+| `--color-brand-accent`   | Secondary brand color override        |
 
 ## OKLCH palette algorithm
 

@@ -49,7 +49,6 @@ Some roles are paired — they must stay in sync when one changes. `/theme-updat
 | Updated role      | Automatically paired with |
 | ----------------- | ------------------------- |
 | `--color-primary` | `--color-primary-hover`   |
-| `--color-accent`  | `--color-accent-hover`    |
 
 If you update `--color-primary`, the existing `--color-primary-hover` value is validated against the new primary. If hover fails contrast, Claude proposes an adjusted hover value.
 
@@ -89,7 +88,7 @@ On failure:
 Pre-validation failed. No changes written.
 
   --color-danger: #ff6b6b
-    Contrast (danger / background): 2.8:1  ✗  (minimum 4.5:1)
+    Contrast (danger / background): 2.8:1  ✗  (minimum 3.0:1)
 
 Suggested value: #dc2626  (contrast: 5.1:1)
 Run again with --color-danger=#dc2626, or adjust manually.

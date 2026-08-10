@@ -78,7 +78,6 @@ export function useDarkMode(): [ColorScheme, () => void] {
 
   useEffect(() => {
     document.documentElement.dataset.theme = scheme === "dark" ? "dark" : "";
-    localStorage.setItem("color-scheme", scheme);
   }, [scheme]);
 
   // Also respond to OS-level changes while the app is open
@@ -94,7 +93,12 @@ export function useDarkMode(): [ColorScheme, () => void] {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  const toggle = () => setScheme((s) => (s === "dark" ? "light" : "dark"));
+  const toggle = () =>
+    setScheme((s) => {
+      const next = s === "dark" ? "light" : "dark";
+      localStorage.setItem("color-scheme", next);
+      return next;
+    });
 
   return [scheme, toggle];
 }
@@ -127,7 +131,7 @@ export function ThemeToggle() {
 
 <Aside type="note">
   `aria-pressed` on the toggle button communicates the current state to screen
-  readers. "Button, dark mode, pressed" in light mode; "Button, dark mode, not
+  readers. "Button, dark mode, not pressed" in light mode; "Button, dark mode,
   pressed" in dark mode.
 </Aside>
 
