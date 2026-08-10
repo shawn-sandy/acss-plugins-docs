@@ -3,7 +3,7 @@ title: /theme-update
 description: Edit specific color roles in an existing theme file with atomic WCAG re-validation.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
+import { Aside } from "@astrojs/starlight/components";
 
 Atomically update one or more color roles in an existing theme file. Every change is WCAG-validated before being written. If any role fails its contrast check, the entire batch rolls back.
 
@@ -15,9 +15,9 @@ Atomically update one or more color roles in an existing theme file. Every chang
 
 ## Arguments
 
-| Argument | Required | Description |
-|---|---|---|
-| `file` | Yes | Path to the theme CSS file to update (e.g., `src/styles/theme/light.css`) |
+| Argument             | Required           | Description                                                                             |
+| -------------------- | ------------------ | --------------------------------------------------------------------------------------- |
+| `file`               | Yes                | Path to the theme CSS file to update (e.g., `src/styles/theme/light.css`)               |
 | `--color-role=<hex>` | Yes (at least one) | Role-value pair. The role name must match an existing `--color-*` property in the file. |
 
 ## Examples
@@ -46,10 +46,10 @@ Update the dark theme:
 
 Some roles are paired — they must stay in sync when one changes. `/theme-update` automatically includes the paired role in the WCAG validation even if you only specify one of them.
 
-| Updated role | Automatically paired with |
-|---|---|
-| `--color-primary` | `--color-primary-hover` |
-| `--color-accent` | `--color-accent-hover` |
+| Updated role      | Automatically paired with |
+| ----------------- | ------------------------- |
+| `--color-primary` | `--color-primary-hover`   |
+| `--color-accent`  | `--color-accent-hover`    |
 
 If you update `--color-primary`, the existing `--color-primary-hover` value is validated against the new primary. If hover fails contrast, Claude proposes an adjusted hover value.
 
@@ -59,14 +59,15 @@ If you update `--color-primary`, the existing `--color-primary-hover` value is v
 
 1. Load the current theme file
 2. Apply all requested changes in a **temporary copy**
-3. Run WCAG validation on the temp copy against all 10 contrast pairs
+3. Run WCAG validation on the temp copy against all 12 contrast pairs
 4. If **all pass** → write the temp copy to the actual file
 5. If **any fail** → discard the temp copy, report the failures, suggest adjusted values
 
 This means your theme file is never left in a partially-updated state.
 
 <Aside type="caution">
-If you're updating both `light.css` and `dark.css`, run two separate `/theme-update` commands. Each file is validated independently.
+  If you're updating both `light.css` and `dark.css`, run two separate
+  `/theme-update` commands. Each file is validated independently.
 </Aside>
 
 ## Output
@@ -96,13 +97,15 @@ Run again with --color-danger=#dc2626, or adjust manually.
 
 ## When to use `/theme-update` vs. other commands
 
-| Situation | Command |
-|---|---|
-| Fine-tune a single role | `/theme-update` |
-| Regenerate the entire palette from a new seed | `/theme-create` |
-| Override roles for a specific brand | `/theme-brand` |
-| Natural language: "make the primary warmer" | Handled by the `style-tune` skill |
+| Situation                                     | Command                           |
+| --------------------------------------------- | --------------------------------- |
+| Fine-tune a single role                       | `/theme-update`                   |
+| Regenerate the entire palette from a new seed | `/theme-create`                   |
+| Override roles for a specific brand           | `/theme-brand`                    |
+| Natural language: "make the primary warmer"   | Handled by the `style-tune` skill |
 
 <Aside type="tip">
-To see all current role values in a theme file before updating, view the file directly. The CSS custom properties are human-readable and sorted by semantic category.
+  To see all current role values in a theme file before updating, view the file
+  directly. The CSS custom properties are human-readable and sorted by semantic
+  category.
 </Aside>
