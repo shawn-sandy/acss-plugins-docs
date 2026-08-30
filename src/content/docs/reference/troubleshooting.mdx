@@ -1,6 +1,6 @@
 ---
 title: Troubleshooting
-description: Concrete fixes for the most common failures when using acss-kit and style-agent.
+description: Concrete fixes for the most common failures when using acss-kit, acss-utilities, and style-agent.
 ---
 
 import { Aside } from "@astrojs/starlight/components";
@@ -194,7 +194,7 @@ Answer the question(s) concretely: name a layout, pick a scale step, list the st
 
 ### `/css` withholds a modern CSS feature
 
-When a feature has **Limited availability** in [Baseline](https://web.dev/baseline), `/css` does not emit it. Instead it emits a plain fallback and a one-line explanation. To allow the feature, say `"emit it anyway"` — this moves the outcome one step to Newly available (wrapped in `@supports` with a fallback), but never to bare emit.
+When a feature has **Limited availability** in [Baseline](https://web.dev/baseline), `/css` does not emit it. Instead it emits a plain fallback and a one-line explanation. To allow the feature, say `"emit it anyway"` — this moves the outcome one step to **Newly available** (wrapped in `@supports` with a fallback), but never to bare emit.
 
 For a feature with **Newly available** status, `/css` always writes the fallback first, then wraps the enhancement in `@supports`. This is intentional: the fallback must precede the `@supports` block so supporting browsers do not re-apply the fallback after the enhancement.
 
