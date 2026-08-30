@@ -6,7 +6,7 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 # Upstream layout cache
 
 - **verified-at-sha:** `a08ca58`
-- **verified-at:** `2026-07-21T10:09:00Z`
+- **verified-at:** `2026-07-30T10:09:27Z`
 
 ## Plugin roots
 
@@ -38,3 +38,4 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 - New in `b8e54e4` sync: upstream PR #108 added planning docs only (`docs/plans/add-css-authoring-skill.md`, `docs/plans/add-css-authoring-skill.html`, `docs/prototypes/index.html`, `docs/prototypes/simulate-css-output-contract.html`). These are design-phase documents for a future `/css` skill in style-agent (status: todo in front-matter). No plugin source files changed; no new commands, skills, or plugins were implemented. No doc drift. Build passed (114 pages).
 - Layout verified at `a08ca58`: same two plugin roots (`plugins/acss-kit`, `plugins/style-agent`); layout unchanged.
 - New in `a08ca58` sync (commits 0ce1834–a08ca58, upstream PRs #109–#113): style-agent v0.7.0 — `/css` authoring skill added (`plugins/style-agent/commands/css.md` + `plugins/style-agent/skills/css/SKILL.md`) with Baseline gate for modern CSS features; create-utilities description updated to distinguish utility-class strings from raw CSS rules; acss-kit v1.12.0 — `/setup` Step 6.5 added (writes `.browserslistrc` with `baseline widely available`); `component-popover` both source docs updated with Baseline "Newly available" status note. Docs: created `style-agent/commands/css.mdx`, `style-agent/skills/css.mdx`; updated `style-agent/overview.mdx`, `style-agent/commands/create-utilities.mdx`, `acss-kit/skills/setup.mdx`, `acss-kit/skills/component-popover.mdx`, `acss-kit/components/popover.mdx`, `astro.config.mjs`. Build passed (116 pages).
+- Audit run on 2026-07-30T10:09:27Z: upstream still at `a08ca58`; no new commits. Content drift found and fixed: (1) `acss-kit/overview.mdx` — added v1.12.0 row to release milestones table. (2) `acss-kit/commands/setup.mdx` — added Step 6.5 (`.browserslistrc` write) to the Steps list; corrected step count from "eight" to "nine". (3) `acss-kit/skills/setup.mdx` — corrected failure table: "Roll back theme files" replaced with accurate behavior (keep files with contrast warning flag, continue to summary); fixed "ten checks" to "all steps". (4) `style-agent/skills/css.mdx` — corrected Baseline summary spec: was "required even when no modern features were used"; now matches SKILL.md "Omit entirely when no modern features". Build passed (116 pages).
