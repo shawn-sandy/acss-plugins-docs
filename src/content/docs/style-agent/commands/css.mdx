@@ -51,13 +51,13 @@ Turn a plain-language description of visual intent into a raw CSS/SCSS rule or a
 
 2. **Parse description** — extract the concrete properties: layout, spacing, colour, typography, borders, shadows, states, and the element the rule is for.
 
-3. **Detect output mode** — class mode by default (rule is printed, appended to a stylesheet only when you name a target file); inline mode on request (refused when the description implies `:hover`, `@media`, `@container`, etc., since an inline style cannot carry those).
+3. **Detect output mode** — class mode by default (rule is printed, appended to a stylesheet only when you name a target file); inline mode on request (falls back to class mode — not a full refusal — when the description implies `:hover`, `@media`, `@container`, `:focus-visible`, or other constructs an inline style cannot carry).
 
 4. **Resolve tokens** — grep the project for custom-property declarations and map values in three tiers: exact-value match → use the variable; semantic-name match → use it and name the choice in the summary; no match → emit the literal. No new custom properties are created unless you explicitly ask.
 
 5. **Focus-visible** — for interactive elements (button, link, input, select, custom widgets) emit a `:focus-visible` rule alongside the requested styling, or warn in the summary when the mode cannot carry it.
 
-6. **Consult references** — load any bundled reference whose topic the parsed intent touches (container queries, cascade layers, responsive text, progressive enhancement, logical properties, modern selectors, state selectors, viewport units). Loaded by model judgment — no keyword trigger table, since no table anticipates every phrasing. The summary must name which were consulted.
+6. **Consult references** — load any bundled reference whose topic the parsed intent touches (container queries, cascade layers, responsive text, progressive enhancement, logical properties, modern selectors, state selectors, viewport units). Loaded by model judgment — no keyword trigger table, since no table anticipates every phrasing. The summary must name which were consulted, or state "none" when no bundled reference is relevant.
 
 7. **Baseline check** — every modern feature is classified by its [Baseline](https://web.dev/baseline) status before emit: Widely available → emit unconditionally; Newly available → write the fallback first, then wrap the enhancement in `@supports`; Limited availability → withhold it, emit the fallback alone, and state what was withheld and why.
 
