@@ -51,17 +51,21 @@ Turn a plain-language description of visual intent into a raw CSS/SCSS rule or a
 
 2. **Parse description** — extract the concrete properties: layout, spacing, colour, typography, borders, shadows, states, and the element the rule is for.
 
-3. **Resolve tokens** — grep the project for custom-property declarations and map values in three tiers: exact-value match → use the variable; semantic-name match → use it and name the choice in the summary; no match → emit the literal. No new custom properties are created unless you explicitly ask.
+3. **Detect output mode** — class mode by default (rule is printed, appended to a stylesheet only when you name a target file); inline mode on request (refused when the description implies `:hover`, `@media`, `@container`, etc., since an inline style cannot carry those).
 
-4. **Detect output mode** — class mode by default (rule is printed, appended to a stylesheet only when you name a target file); inline mode on request (refused when the description implies `:hover`, `@media`, `@container`, etc., since an inline style cannot carry those).
+4. **Resolve tokens** — grep the project for custom-property declarations and map values in three tiers: exact-value match → use the variable; semantic-name match → use it and name the choice in the summary; no match → emit the literal. No new custom properties are created unless you explicitly ask.
 
 5. **Focus-visible** — for interactive elements (button, link, input, select, custom widgets) emit a `:focus-visible` rule alongside the requested styling, or warn in the summary when the mode cannot carry it.
 
-6. **Baseline check** — every modern feature is classified by its [Baseline](https://web.dev/baseline) status before emit: Widely available → emit unconditionally; Newly available → write the fallback first, then wrap the enhancement in `@supports`; Limited availability → withhold it, emit the fallback alone, and state what was withheld and why.
+6. **Consult references** — load any bundled reference whose topic the parsed intent touches (container queries, cascade layers, responsive text, progressive enhancement, logical properties, modern selectors, state selectors, viewport units). Loaded by model judgment — no keyword trigger table, since no table anticipates every phrasing. The summary must name which were consulted.
 
-7. **Emit** — print the rule (or inline attribute). Append to a stylesheet only when you name a target file, and confirm the resolved path and class name with you first.
+7. **Baseline check** — every modern feature is classified by its [Baseline](https://web.dev/baseline) status before emit: Widely available → emit unconditionally; Newly available → write the fallback first, then wrap the enhancement in `@supports`; Limited availability → withhold it, emit the fallback alone, and state what was withheld and why.
 
-8. **Summarise** — print output mode, proposed class name, tokens resolved, accessibility note, Baseline status of any modern features, and which references were consulted (required on every result — a silently-skipped footgun doc is the failure signal).
+8. **Emit** — print the rule (or inline attribute). Append to a stylesheet only when you name a target file, and confirm the resolved path and class name with you first.
+
+9. **Summarise** — print output mode, proposed class name, tokens resolved, accessibility note, Baseline status of any modern features, references consulted (required on every result — a silently-skipped footgun doc is the failure signal), and any clarifications resolved from the gate.
+
+10. **Offer refinements** — close with two or three concrete next moves drawn from what was actually emitted (e.g. "Tighten the gap to var(--space-1)?", "Add a hover state?", "Promote it to a named class — run /inline-style-to-class."). Never offer a move the emitted rule does not support.
 
 </Steps>
 
