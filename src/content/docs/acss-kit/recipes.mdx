@@ -278,10 +278,9 @@ An opt-in, static-HTML smoke check that exercises the compiled CSS and `data-*` 
 **Fallback (no Node / no hot reload):**
 
 ```sh
+cd tests/sandbox
 # Compile SCSS to CSS first (required — the template loads a .css file)
 npx sass src/components/fpkit/<name>/<name>.scss src/components/fpkit/<name>/<name>.css
-
-cd tests/sandbox
 python3 -m http.server 7743 &
 # Open http://localhost:7743/<name>-preview.html
 kill %1
