@@ -61,6 +61,12 @@ export default defineConfig({
             { label: "Overview", slug: "acss-kit/overview" },
             { label: "Core Concepts", slug: "acss-kit/concepts" },
             {
+              label: "Tutorial: Your First Component",
+              slug: "acss-kit/tutorial",
+            },
+            { label: "Recipes", slug: "acss-kit/recipes" },
+            { label: "Visual Guide", slug: "acss-kit/visual-guide" },
+            {
               label: "Commands",
               items: [
                 { label: "/setup", slug: "acss-kit/commands/setup" },
