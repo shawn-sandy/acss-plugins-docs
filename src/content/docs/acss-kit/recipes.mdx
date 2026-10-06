@@ -1,0 +1,332 @@
+---
+title: acss-kit Recipes
+description: Common acss-kit tasks, step by step — first run, generating components with dependencies, regenerating after upstream changes, browser preview, and more.
+---
+
+import { Steps, Aside, Code } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
+
+Common tasks, step by step. Each recipe assumes `acss-kit` is installed and you are inside a Claude Code session in your project directory.
+
+## First run: initializing a project
+
+The first `/kit-add` run in any project triggers a one-time setup sequence.
+
+**Prerequisites:**
+
+- React + TypeScript project with a `package.json`
+- `sass` or `sass-embedded` in `devDependencies`
+
+If Sass is not installed:
+
+```bash
+npm install -D sass
+```
+
+**Run:**
+
+```text
+/kit-add badge
+```
+
+<Steps>
+
+1. The plugin verifies `sass` is present in `devDependencies`. If not, it aborts with an install message.
+
+2. It asks where to place generated components:
+
+   ```text
+   Where should components be generated? (default: src/components/fpkit/)
+   ```
+
+   Press Enter to accept the default, or type a custom path.
+
+3. Writes `.acss-target.json` at the project root with the chosen directory.
+
+4. Copies `ui.tsx` (the polymorphic foundation component) to `<target>/ui.tsx`.
+
+5. Generates the Badge component files.
+
+</Steps>
+
+Commit `.acss-target.json` to git so subsequent `/kit-add` runs use the same path.
+
+---
+
+## Generate a single leaf component
+
+```text
+/kit-add badge
+```
+
+Badge has no dependencies. The plugin reads its Generation Contract, shows a preview (`badge/badge.tsx + badge/badge.scss`), waits for confirmation, then writes both files.
+
+<ComponentPreview
+  code={`<div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+  <span style="display:inline-flex;align-items:center;padding:0.2em 0.65em;border-radius:9999px;font-size:0.75rem;font-weight:600;background:var(--color-primary,#6d28d9);color:#fff;">Default</span>
+  <span style="display:inline-flex;align-items:center;padding:0.2em 0.65em;border-radius:9999px;font-size:0.75rem;font-weight:600;background:var(--color-danger,#dc2626);color:#fff;">Danger</span>
+  <span style="display:inline-flex;align-items:center;padding:0.2em 0.65em;border-radius:9999px;font-size:0.75rem;font-weight:600;background:var(--color-success,#16a34a);color:#fff;">Success</span>
+</div>`}
+  label="Badge component — color variants preview"
+/>
+
+Import in your project:
+
+```tsx
+import Badge from "./components/fpkit/badge/badge";
+import "./components/fpkit/badge/badge.scss";
+```
+
+---
+
+## Generate a component with dependencies
+
+```text
+/kit-add dialog
+```
+
+Dialog depends on Button. The plugin resolves the full tree and generates bottom-up:
+
+```text
+Preview:
+  ui.tsx                  (already exists — skipped)
+  button/button.tsx       (new)
+  button/button.scss      (new)
+  dialog/dialog.tsx       (new)
+  dialog/dialog.scss      (new)
+```
+
+Confirm, and all files are written in the correct order. If `button/button.tsx` already exists, it is skipped and Dialog still imports from the existing path.
+
+---
+
+## Generate multiple components in one pass
+
+```text
+/kit-add badge button alert
+```
+
+Dependencies are resolved across all requested components. Shared dependencies are deduplicated — Button is generated once even if multiple requested components need it.
+
+---
+
+## Regenerate a component after upstream changes
+
+To update a component to the latest reference without losing your edits to other components:
+
+<Steps>
+
+1. Delete only the files you want to regenerate:
+
+   ```bash
+   rm src/components/fpkit/badge/badge.tsx src/components/fpkit/badge/badge.scss
+   ```
+
+2. Re-run:
+
+   ```text
+   /kit-add badge
+   ```
+
+</Steps>
+
+Files that still exist are skipped. Deleted files are regenerated from the current reference.
+
+<Aside type="tip">
+  Store your customizations in CSS variable overrides on `:root` or theme
+  classes rather than directly editing the generated files. That way, even if
+  you regenerate a component, your overrides survive because they live outside
+  the component file.
+</Aside>
+
+---
+
+## Customize a generated component
+
+Generated files are yours. Edit them freely:
+
+```tsx
+// button/button.tsx — add a custom isLoading prop
+
+// 1. Extend the generated props interface (add before the component definition)
+interface ExtendedButtonProps extends ButtonProps {
+  isLoading?: boolean;
+}
+
+// 2. Update the component to use the extended interface
+const Button = React.forwardRef<HTMLButtonElement, ExtendedButtonProps>(
+  ({ children, isLoading, ...props }, ref) => {
+    return (
+      <UI
+        as="button"
+        data-btn={isLoading ? "loading" : undefined}
+        ref={ref}
+        {...props}
+      >
+        {isLoading ? (
+          <span aria-hidden="true" style={{ opacity: 0.7 }}>
+            Loading…
+          </span>
+        ) : (
+          children
+        )}
+      </UI>
+    );
+  },
+);
+```
+
+The skip-existing rule means re-running `/kit-add button` will not overwrite your edits. To get a fresh copy, delete the file first (see "Regenerate" above).
+
+---
+
+## Override a CSS variable
+
+Components use CSS custom properties with hardcoded fallbacks. Override at any scope without touching the generated file:
+
+```css
+/* Global — applies everywhere */
+:root {
+  --btn-primary-bg: #7c3aed;
+  --btn-radius: 2rem;
+}
+
+/* Scoped to a theme class */
+.dark-theme {
+  --card-bg: #2d2d2d;
+  --card-border: 1px solid #404040;
+}
+
+/* Context-specific */
+.hero-section .btn {
+  --btn-padding-inline: 2.5rem;
+}
+```
+
+See [CSS Variables Reference](/acss-plugins-docs/acss-kit/css-variables) for the full naming convention and per-component variable sets.
+
+---
+
+## Change the target directory
+
+Edit `.acss-target.json` at the project root:
+
+```json
+{
+  "componentsDir": "src/ui/fpkit"
+}
+```
+
+All future `/kit-add` runs will generate files into the new directory. Existing generated files in the old directory are not moved — do that manually if needed, and update your imports.
+
+---
+
+## Inspect a component before generating
+
+Use `/kit-list` to see props, CSS variables, dependencies, and a usage snippet **without writing any files**:
+
+```text
+/kit-list dialog
+```
+
+Output includes the Generation Contract (dependency tree), the props interface, all CSS variables with their fallback values, and a basic JSX usage snippet.
+
+---
+
+## List all available components
+
+```text
+/kit-list
+```
+
+Prints all components organized by category (Simple / Interactive / Layout / Complex) with a one-line description of each.
+
+---
+
+## Preview a generated component in a browser
+
+An opt-in, static-HTML smoke check that exercises the compiled CSS and `data-*` selectors of a generated component — no React runtime required. Use it to eyeball variant coverage after generating a new component, not to test event handlers or dynamic behavior.
+
+**Prerequisites:**
+
+- `tests/sandbox/` exists — run `tests/setup.sh` if not
+- The target component has been generated via `/kit-add <name>` into the sandbox
+- Node 20+ and `npm --prefix tests ci` (for `tests/serve.sh` live reload), or Python 3 for the fallback static server
+
+<Steps>
+
+1. Write `tests/sandbox/<name>-preview.html` using the template below. Render one `<div class="row">` per variant axis the component supports (`data-color`, `data-style`, `data-<name>`, `aria-disabled`). Omit any axis the component does not use.
+
+2. Start the live-reload server from the repo root:
+
+   ```sh
+   tests/serve.sh
+   ```
+
+   This watches SCSS and HTML files, recompiles CSS on save, and auto-reloads the browser.
+
+3. Open the preview URL printed by `tests/serve.sh` (defaults to port `7743`):
+
+   ```text
+   http://localhost:7743/<name>-preview.html
+   ```
+
+4. Stop the server when done (`Ctrl+C`).
+
+</Steps>
+
+**Fallback (no Node / no hot reload):**
+
+```sh
+cd tests/sandbox
+# Compile SCSS to CSS first (required — the template loads a .css file)
+npx sass src/components/fpkit/<name>/<name>.scss src/components/fpkit/<name>/<name>.css
+python3 -m http.server 7743 &
+# Open http://localhost:7743/<name>-preview.html
+kill %1
+```
+
+**HTML template:**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><Name> Preview — acss-kit</title>
+  <link rel="stylesheet" href="src/components/fpkit/<name>/<name>.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #f8f9fa; padding: 2rem; }
+    h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin: 2rem 0 0.75rem; }
+    .row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+  <h1><Name> — acss-kit preview</h1>
+  <h2>Default</h2>
+  <div class="row">
+    <!-- Replace with your component element and any default variant attributes -->
+    <button type="button" data-btn>Default</button>
+  </div>
+  <h2>Colors</h2>
+  <div class="row">
+    <!-- Add one element per data-color value the component supports -->
+    <button type="button" data-btn data-color="primary">Primary</button>
+    <button type="button" data-btn data-color="danger">Danger</button>
+  </div>
+  <h2>Disabled</h2>
+  <div class="row">
+    <!-- Use aria-disabled="true" — acss-kit components stay keyboard-reachable -->
+    <button type="button" data-btn aria-disabled="true">Disabled</button>
+  </div>
+</body>
+</html>
+```
+
+<Aside type="note">
+  Preview files (`*-preview.html`) are scratch artifacts — delete them after
+  use. The sandbox is gitignored under `.claude/worktrees/`, so preview files
+  typically live only in that session.
+</Aside>
