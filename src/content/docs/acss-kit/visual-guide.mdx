@@ -4,6 +4,7 @@ description: Diagrams and ASCII trees showing how acss-kit commands work — com
 ---
 
 import { Aside } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 Visual companion to the prose docs. Diagrams orient; the canonical docs go deep. For a step-by-step linear walkthrough, read the [Tutorial](/acss-plugins-docs/acss-kit/tutorial). For task-oriented snippets, read [Recipes](/acss-plugins-docs/acss-kit/recipes). For the mental model, read [Core Concepts](/acss-plugins-docs/acss-kit/concepts).
 
@@ -44,6 +45,15 @@ Read the prose: [Core Concepts](/acss-plugins-docs/acss-kit/concepts) for the fu
 ## Your first component (USER — simple)
 
 The simplest example. Button has no component dependencies — only the shared `ui.tsx` foundation gets pulled in — so a single command produces a working component.
+
+<ComponentPreview
+  code={`<div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+  <button type="button" style="padding:0.5em 1.25em;border-radius:0.375rem;border:none;background:var(--color-primary,#6d28d9);color:#fff;font-weight:600;cursor:pointer;">Primary</button>
+  <button type="button" style="padding:0.5em 1.25em;border-radius:0.375rem;border:1px solid #94a3b8;background:transparent;font-weight:600;cursor:pointer;color:var(--color-text,#1e293b);">Outlined</button>
+  <button type="button" aria-disabled="true" style="padding:0.5em 1.25em;border-radius:0.375rem;border:none;background:var(--color-primary,#6d28d9);color:#fff;font-weight:600;cursor:not-allowed;opacity:0.5;">Disabled</button>
+</div>`}
+  label="Generated Button component — default, outlined, and disabled variants"
+/>
 
 ### The lifecycle
 

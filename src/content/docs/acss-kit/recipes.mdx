@@ -4,6 +4,7 @@ description: Common acss-kit tasks, step by step — first run, generating compo
 ---
 
 import { Steps, Aside, Code } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 Common tasks, step by step. Each recipe assumes `acss-kit` is installed and you are inside a Claude Code session in your project directory.
 
@@ -59,6 +60,15 @@ Commit `.acss-target.json` to git so subsequent `/kit-add` runs use the same pat
 ```
 
 Badge has no dependencies. The plugin reads its Generation Contract, shows a preview (`badge/badge.tsx + badge/badge.scss`), waits for confirmation, then writes both files.
+
+<ComponentPreview
+  code={`<div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+  <span style="display:inline-flex;align-items:center;padding:0.2em 0.65em;border-radius:9999px;font-size:0.75rem;font-weight:600;background:var(--color-primary,#6d28d9);color:#fff;">Default</span>
+  <span style="display:inline-flex;align-items:center;padding:0.2em 0.65em;border-radius:9999px;font-size:0.75rem;font-weight:600;background:var(--color-danger,#dc2626);color:#fff;">Danger</span>
+  <span style="display:inline-flex;align-items:center;padding:0.2em 0.65em;border-radius:9999px;font-size:0.75rem;font-weight:600;background:var(--color-success,#16a34a);color:#fff;">Success</span>
+</div>`}
+  label="Badge component — color variants preview"
+/>
 
 Import in your project:
 
@@ -137,7 +147,14 @@ Generated files are yours. Edit them freely:
 
 ```tsx
 // button/button.tsx — add a custom isLoading prop
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+
+// 1. Extend the generated props interface (add before the component definition)
+interface ExtendedButtonProps extends ButtonProps {
+  isLoading?: boolean;
+}
+
+// 2. Update the component to use the extended interface
+const Button = React.forwardRef<HTMLButtonElement, ExtendedButtonProps>(
   ({ children, isLoading, ...props }, ref) => {
     return (
       <UI
@@ -146,7 +163,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
       >
-        {isLoading ? <Spinner /> : children}
+        {isLoading ? (
+          <span aria-hidden="true" style={{ opacity: 0.7 }}>
+            Loading…
+          </span>
+        ) : (
+          children
+        )}
       </UI>
     );
   },
@@ -255,6 +278,9 @@ An opt-in, static-HTML smoke check that exercises the compiled CSS and `data-*` 
 **Fallback (no Node / no hot reload):**
 
 ```sh
+# Compile SCSS to CSS first (required — the template loads a .css file)
+npx sass src/components/fpkit/<name>/<name>.scss src/components/fpkit/<name>/<name>.css
+
 cd tests/sandbox
 python3 -m http.server 7743 &
 # Open http://localhost:7743/<name>-preview.html
@@ -281,11 +307,21 @@ kill %1
 <body>
   <h1><Name> — acss-kit preview</h1>
   <h2>Default</h2>
-  <div class="row"><!-- default (no variant attributes) --></div>
+  <div class="row">
+    <!-- Replace with your component element and any default variant attributes -->
+    <button type="button" data-btn>Default</button>
+  </div>
   <h2>Colors</h2>
-  <div class="row"><!-- data-color="primary", "danger", etc. --></div>
+  <div class="row">
+    <!-- Add one element per data-color value the component supports -->
+    <button type="button" data-btn data-color="primary">Primary</button>
+    <button type="button" data-btn data-color="danger">Danger</button>
+  </div>
   <h2>Disabled</h2>
-  <div class="row"><!-- aria-disabled="true" --></div>
+  <div class="row">
+    <!-- Use aria-disabled="true" — acss-kit components stay keyboard-reachable -->
+    <button type="button" data-btn aria-disabled="true">Disabled</button>
+  </div>
 </body>
 </html>
 ```

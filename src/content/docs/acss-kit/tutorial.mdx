@@ -4,6 +4,7 @@ description: Generate, import, and customise a Button in under five minutes — 
 ---
 
 import { Steps, Aside } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 Generate, import, and customize a Button in under five minutes. By the end you will have a working, themeable Button component you own outright — no `@fpkit/acss` npm dependency, no boilerplate.
 
@@ -125,6 +126,15 @@ export default function App() {
   );
 }
 ```
+
+<ComponentPreview
+  code={`<div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+  <button type="button" style="padding:0.5em 1.25em;border-radius:0.375rem;border:none;background:var(--color-primary,#6d28d9);color:#fff;font-weight:600;cursor:pointer;">Primary</button>
+  <button type="button" style="padding:0.5em 1.25em;border-radius:0.375rem;border:1px solid #94a3b8;background:transparent;font-weight:600;cursor:pointer;color:var(--color-text,#1e293b);">Outlined</button>
+  <button type="button" aria-disabled="true" style="padding:0.5em 1.25em;border-radius:0.375rem;border:none;background:var(--color-primary,#6d28d9);color:#fff;font-weight:600;cursor:not-allowed;opacity:0.5;">Disabled</button>
+</div>`}
+  label="Button component — primary, outlined, and disabled variants"
+/>
 
 Two things to notice:
 
