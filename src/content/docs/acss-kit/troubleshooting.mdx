@@ -4,6 +4,7 @@ description: Concrete fixes for the most common failures specific to acss-kit �
 ---
 
 import { Aside } from "@astrojs/starlight/components";
+import ComponentPreview from "~/components/ComponentPreview.astro";
 
 ## "sass or sass-embedded not found in devDependencies"
 
@@ -48,7 +49,7 @@ Then make sure that file is itself imported from your app entrypoint (typically 
 import "./styles/index.scss";
 ```
 
-Run `python3 plugins/acss-kit/scripts/verify_integration.py <project-root>` to confirm — it accepts theme imports living in either `stack.entrypointFile` (TSX) or `stack.cssEntryFile` (SCSS/CSS).
+Run `python3 plugins/acss-kit/scripts/verify_integration.py <project-root>` as a partial check — it passes when any existing theme CSS file is imported in either `stack.entrypointFile` (TSX) or `stack.cssEntryFile` (SCSS/CSS), but does not verify that _both_ `light.css` and `dark.css` are imported or that `stack.cssEntryFile` is itself imported by your app entrypoint. Confirm those two points manually after the script passes.
 
 ---
 
@@ -93,6 +94,10 @@ Future `/kit-add` runs will use the new path. Existing generated files in the ol
 **Symptom:** `/kit-add frobniz` fails or produces an empty preview.
 
 **Fix:** Run `/kit-list` to see the full list of available component names. Names are lowercase and exact — `dialog`, not `Dialog` or `modal`. The available components are: badge, tag, heading, text, link, list, details, progress, icon, button, alert, card, nav, dialog, form.
+
+Once a component is recognized and generated, it renders a native HTML element styled by the acss-kit theme. For example, `/kit-add button` produces a Button component that renders:
+
+<ComponentPreview code={`<button type="button">Click me</button>`} />
 
 If you need a component that is not listed, it does not yet have a bundled reference doc. Use `/kit-list` to check for aliases, or author a new component reference following the contributor recipe in the README.
 
