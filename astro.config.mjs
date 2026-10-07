@@ -66,6 +66,7 @@ export default defineConfig({
             },
             { label: "Recipes", slug: "acss-kit/recipes" },
             { label: "Visual Guide", slug: "acss-kit/visual-guide" },
+            { label: "Troubleshooting", slug: "acss-kit/troubleshooting" },
             {
               label: "Commands",
               items: [
