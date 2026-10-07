@@ -36,7 +36,7 @@ Either package satisfies the check.
 
 **Fix — re-run the wiring:** Either re-run `/setup` (idempotent — it picks up where it left off), or open `.acss-target.json` at the project root and inspect `stack.cssEntryFile`. If the field is missing, `/setup` did not wire any entry; if it points to a file, confirm that file imports `light.css` and `dark.css`.
 
-To wire by hand, append these lines to your main CSS/SCSS entry (e.g. `src/styles/index.scss`):
+To wire by hand, add these lines near the top of your main CSS/SCSS entry (e.g. `src/styles/index.scss`), before any existing style rules (CSS `@import` must precede all other declarations):
 
 ```scss
 @import "./theme/light.css";
