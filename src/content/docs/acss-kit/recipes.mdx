@@ -100,16 +100,6 @@ Confirm, and all files are written in the correct order. If `button/button.tsx` 
 
 ---
 
-## Generate multiple components in one pass
-
-```text
-/kit-add badge button alert
-```
-
-Dependencies are resolved across all requested components. Shared dependencies are deduplicated — Button is generated once even if multiple requested components need it.
-
----
-
 ## Regenerate a component after upstream changes
 
 To update a component to the latest reference without losing your edits to other components:
@@ -138,6 +128,16 @@ Files that still exist are skipped. Deleted files are regenerated from the curre
   you regenerate a component, your overrides survive because they live outside
   the component file.
 </Aside>
+
+---
+
+## Generate multiple components in one pass
+
+```text
+/kit-add badge button alert
+```
+
+Dependencies are resolved across all requested components. Shared dependencies are deduplicated — Button is generated once even if multiple requested components need it.
 
 ---
 
