@@ -6,7 +6,7 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 # Upstream layout cache
 
 - **verified-at-sha:** `a08ca58`
-- **verified-at:** `2026-10-08T10:20:00Z`
+- **verified-at:** `2026-10-10T10:10:43Z`
 
 ## Plugin roots
 
@@ -48,4 +48,4 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 - Audit run on 2026-10-06T10:13:22Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Content drift found and fixed: three upstream `acss-kit/docs/` files lacked corresponding MDX pages — `tutorial.md`, `recipes.md`, and `visual-guide.md`. Created `acss-kit/tutorial.mdx`, `acss-kit/recipes.mdx`, `acss-kit/visual-guide.mdx`; added sidebar entries for all three. Build passed (119 pages).
 - Audit run on 2026-10-07T10:15:00Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Content drift found and fixed: `plugins/acss-kit/docs/troubleshooting.md` lacked a corresponding MDX page (missed in previous audit). Created `acss-kit/troubleshooting.mdx` with all 11 sections from upstream (sass setup, theme wiring, component directory, name resolution, ui.tsx conflict, generation order, skip-existing, import renaming, pilot skill failure modes); added sidebar entry. Build passed (120 pages).
 - Audit run on 2026-10-08T10:20:00Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Content drift found and fixed: `acss-kit/recipes.mdx` section ordering mismatch — upstream places "Regenerate a component after upstream changes" before "Generate multiple components in one pass"; docs had them reversed. Reordered to match upstream. All 20 acss-kit commands, 22 acss-kit skills, and 4 style-agent commands/skills verified present and content-checked. Build passed (120 pages).
-- Audit run on 2026-10-09T10:09:09Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). All 20 acss-kit commands, acss-kit skills, and 4 style-agent commands/skills mapped and confirmed present. Build passed (120 pages). No content drift detected. No doc changes required.
+- Audit run on 2026-10-10T10:10:43Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Full enumeration check: all 20 acss-kit commands, 22 acss-kit skills, 4 style-agent commands, and 4 style-agent skills present in docs. Content spot-checks on recipes section order, css SKILL Baseline summary spec, setup command browserslistrc step, and create-utilities command all passed. Build passed (120 pages). No content drift detected. No doc changes required.
