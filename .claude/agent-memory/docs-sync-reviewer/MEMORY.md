@@ -6,7 +6,7 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 # Upstream layout cache
 
 - **verified-at-sha:** `a08ca58`
-- **verified-at:** `2026-10-13T10:07:00Z`
+- **verified-at:** `2026-10-17T10:08:00Z`
 
 ## Plugin roots
 
@@ -50,3 +50,4 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 - Audit run on 2026-10-08T10:20:00Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Content drift found and fixed: `acss-kit/recipes.mdx` section ordering mismatch — upstream places "Regenerate a component after upstream changes" before "Generate multiple components in one pass"; docs had them reversed. Reordered to match upstream. All 20 acss-kit commands, 22 acss-kit skills, and 4 style-agent commands/skills verified present and content-checked. Build passed (120 pages).
 - Audit run on 2026-10-12T10:12:31Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Full content audit performed: all 20 acss-kit commands, 22 acss-kit skills, 4 style-agent commands/skills mapped and spot-checked (setup step sequence, css common patterns, create-utilities utility-class vs raw CSS distinction, framework-agnostic-design-systems page). Build passed (120 pages). No content drift detected. No doc changes required.
 - Audit run on 2026-10-13T10:07:00Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Build check passed (120 pages). All 20 acss-kit commands, 22 acss-kit skills, and 4 style-agent commands/skills confirmed present. No content drift detected. No doc changes required.
+- Audit run on 2026-10-17T10:08:00Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Full mapping audit: all 20 acss-kit commands, 22 acss-kit skills, 4 style-agent commands, 4 style-agent skills confirmed present in docs. Build passed (120 pages). No content drift detected. No doc changes required.
