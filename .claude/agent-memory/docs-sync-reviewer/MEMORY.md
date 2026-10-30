@@ -6,7 +6,7 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 # Upstream layout cache
 
 - **verified-at-sha:** `a08ca58`
-- **verified-at:** `2026-10-18T10:08:22Z`
+- **verified-at:** `2026-10-30T10:10:00Z`
 
 ## Plugin roots
 
@@ -62,4 +62,4 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 - Audit run on 2026-10-24T10:11:00Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Full mapping audit: all 20 acss-kit commands (color-scale, design-export, kit-add, kit-create, kit-list, kit-sync, kit-update, prompt-book, setup, style-tune, theme-brand, theme-create, theme-extract, theme-from-design, theme-from-figma, theme-update, utility-add, utility-bridge, utility-list, utility-tune), 22 acss-kit skills, 4 style-agent commands, 4 style-agent skills confirmed present in docs. Build passed (120 pages). Upstream inconsistency noted: `plugins/acss-kit/commands/setup.md` omits Step 6.5, while `plugins/acss-kit/skills/setup/SKILL.md` and the local docs include it. No documentation changes made pending source-of-truth resolution.
 - Audit run on 2026-10-26T10:10:00Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Build check passed (120 pages). No content drift detected. No doc changes required. Upstream inconsistency carry-over: `plugins/acss-kit/commands/setup.md` omits Step 6.5, while `plugins/acss-kit/skills/setup/SKILL.md` and the local docs include it; no documentation changes made pending source-of-truth resolution.
 - Audit run on 2026-10-27T10:09:00Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Build check passed (120 pages). No content drift detected. No doc changes required.
-- Audit run on 2026-10-28T10:15:00Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). All 20 acss-kit commands, 22 acss-kit skills, and 4 style-agent commands/skills confirmed present. Key content spot-checks passed: setup Step 6.5 present in both SKILL.md and docs; css command Baseline gate in sync; popover Baseline "Newly available" note present; concepts.mdx in sync with upstream. No content drift detected. No doc changes required.
+- Audit run on 2026-10-30T10:10:00Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Full mapping confirmed: all 20 acss-kit commands, 22 acss-kit skills, 4 style-agent commands, 4 style-agent skills documented. Build passed (120 pages). No content drift detected. No doc changes required.
