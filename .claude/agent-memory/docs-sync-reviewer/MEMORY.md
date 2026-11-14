@@ -6,7 +6,7 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 # Upstream layout cache
 
 - **verified-at-sha:** `a08ca58`
-- **verified-at:** `2026-10-31T10:30:00Z`
+- **verified-at:** `2026-11-14T10:09:58Z`
 
 ## Plugin roots
 
@@ -67,3 +67,4 @@ description: Cached upstream agentic-acss-plugins layout. Agent uses this to ski
 - Audit run on 2026-11-05T10:09:05Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Full mapping audit: all 20 acss-kit commands, 22 acss-kit skills (including 15 component skills, kit-core, kit-sync, prompt-book, setup, style-tune, styles, utilities), 4 style-agent commands (css, css-to-class, inline-style-to-class, create-utilities), 4 style-agent skills confirmed present and content-checked. Build passed (120 pages). No content drift detected. No doc changes required.
 - Audit run on 2026-11-07T10:08:00Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Full mapping audit: all 20 acss-kit commands, 22 acss-kit skills, 4 style-agent commands (css, css-to-class, inline-style-to-class, create-utilities), 4 style-agent skills confirmed present and content-checked. Build passed (120 pages). No content drift detected. No doc changes required.
 - Audit run on 2026-11-13T10:11:00Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Build passed (120 pages). No content drift detected. No doc changes required.
+- Audit run on 2026-11-14T10:09:58Z: upstream still at `a08ca58`; no new commits since last run. Cached plugin roots verified (plugins/acss-kit, plugins/style-agent). Full mapping audit: all 20 acss-kit commands (color-scale, design-export, kit-add, kit-create, kit-list, kit-sync, kit-update, prompt-book, setup, style-tune, theme-brand, theme-create, theme-extract, theme-from-design, theme-from-figma, theme-update, utility-add, utility-bridge, utility-list, utility-tune), 22 acss-kit skills, 4 style-agent commands (css, css-to-class, inline-style-to-class, create-utilities), 4 style-agent skills confirmed present and content-checked. reference/component-md-spec.mdx verified against upstream style-agent/docs/component-md/spec.md (content match). Build passed (120 pages). No content drift detected. No doc changes required.
